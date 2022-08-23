@@ -70,7 +70,7 @@
                     `;                    
                 }
                 document.getElementsByClassName( "message-content" )[ 0 ].innerHTML += html;
-                document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
+                document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
                 document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
                 document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
                 document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestamp", event_time );
@@ -201,62 +201,91 @@
                 document.getElementsByClassName( "channel" )[ i ].classList.remove( "active" );
             }
             document.getElementsByClassName( channel.getAttribute( "data-id" ) )[ 0 ].classList.add( "active" );
-            console.log( channel.getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestring" ) );
             var html = `
-                        <div class="message-header">
-                            <div class="user-info">
-                                <img src="${channel.getElementsByTagName( "img" )[ 0 ].src}" alt="">
-                                <div class="user">
-                                    <div class="name">${channel.getElementsByClassName( "name" )[ 0 ].innerText}</div>
-                                    <div data-timestamp="${channel.getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestamp" )}" class="time">${channel.getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestring" )}</div>
-                                </div>
-                            </div>
-                            <div class="actions">
-                                <ul>
-                                    <li>
-                                        <a href="#">
-                                            <i class="fa fa-info-circle"></i>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <i class="fa fa-ellipsis-v"></i>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
+                <div class="message-header">
+                    <div class="channel-info">
+                        <img src="${channel.getElementsByTagName( "img" )[ 0 ].src}" alt="">
+                        <div class="channel-wrapper">
+                            <div class="name">${channel.getElementsByClassName( "name" )[ 0 ].innerText}</div>
+                            <div data-timestamp="${channel.getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestamp" )}" class="time">${channel.getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestring" )}</div>
                         </div>
-                        <div class="message-content">
-                        </div>
-                        <div class="message-form">
-                            <ul>
-                                <li class="emoji-btn">
-                                    <a href="#">
-                                        <i class="fa fa-laugh"></i>
-                                    </a>
-                                </li>
-                                <li class="input">
-                                    <input type="text" placeholder="Say something">
-                                </li>
-                                <li class="send-btn">
-                                    <a href="#">
-                                        <i class="fa fa-paper-plane"></i>
-                                    </a>
-                                </li>
-                                <li class="sound-btn">
-                                    <a href="#">
-                                        <i class="fa fa-microphone"></i>
-                                    </a>
-                                </li>
-                                <li class="image-btn">
-                                    <a href="#">
-                                        <i class="fa fa-image"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                    </div>
+                    <div class="actions">
+                        <ul>
+                            <li>
+                                <a href="#">
+                                    <i class="fa fa-info-circle"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <i class="fa fa-ellipsis-v"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="message-content">
+                </div>
+                <div class="message-form">
+                    <ul>
+                        <li class="emoji-btn">
+                            <a href="#">
+                                <i class="fa fa-laugh"></i>
+                            </a>
+                        </li>
+                        <li class="input">
+                            <input type="text" placeholder="Say something">
+                        </li>
+                        <li class="send-btn">
+                            <a href="#">
+                                <i class="fa fa-paper-plane"></i>
+                            </a>
+                        </li>
+                        <li class="sound-btn">
+                            <a href="#">
+                                <i class="fa fa-microphone"></i>
+                            </a>
+                        </li>
+                        <li class="image-btn">
+                            <a href="#">
+                                <i class="fa fa-image"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             `;
             document.getElementsByClassName( "content" )[ 0 ].innerHTML = html;
+            if ( window.innerWidth < 601 ) {
+                var html2 = `
+                    <span class="sidebar_arrow">&rsaquo;</span>
+                    <div class="channel-info">
+                        <img src="${channel.getElementsByTagName( "img" )[ 0 ].src}" alt="">
+                        <div class="channel-wrapper">
+                            <div class="name">${channel.getElementsByClassName( "name" )[ 0 ].innerText}</div>
+                            <div data-timestamp="${channel.getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestamp" )}" class="time">${channel.getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestring" )}</div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <ul>
+                            <li>
+                                <a href="#">
+                                    <i class="fa fa-info-circle"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <i class="fa fa-ellipsis-v"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                `;
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].innerHTML = html2;
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "flex";
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].style.width = window.innerWidth - 38 + "px";
+            }
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', function ( e ) {
                 if ( e.key === 'Enter' ) {
                   sendNote();
@@ -266,6 +295,16 @@
                 sendNote();
             });
             addMessages( channel.getAttribute( "data-id" ) );
+            if ( window.innerWidth < 601 ) {
+                document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
+                document.getElementsByClassName( "content" )[ 0 ].style.display = "block";
+                document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
+            }
+            document.getElementsByClassName( "sidebar_arrow" )[ 0 ].addEventListener( "click", function() {
+                document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "block";
+                document.getElementsByClassName( "content" )[ 0 ].style.display = "none";
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "none";
+            })
         }
     </script>
     <script>
@@ -346,7 +385,6 @@
     </script>
     <script>
         function updateTimes() {
-            console.log( "times updated" );
             var i; for ( i=0; i<document.getElementsByClassName( "time" ).length; i++ ) {
                 var now = Math.floor( Date.now() / 1000 )
                 var event_time = document.getElementsByClassName( "time" )[ i ].getAttribute( "data-timestamp" )
@@ -360,6 +398,7 @@
     <div class="chat">
         <div class="sidebar">
             <div class="search">
+                <div class="sidebar_deactivator">☰</div>
                 <input type="text" placeholder="Search...">
                 <i class="fa fa-search"></i>
             </div>
@@ -369,8 +408,21 @@
             </div>
         </div>
         <div class="content">
-            Please select a chatroom at the left
+            <div class="message-content">
+                <div class="startup-message">
+                    Please select a chatroom at the left
+                </div>
+            </div>
         </div>
+    </div>
+    <script>
+        document.getElementsByClassName( "sidebar_deactivator" )[ 0 ].addEventListener( "click", function() {
+            document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
+            document.getElementsByClassName( "content" )[ 0 ].style.display = "block";
+            document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
+        })
+    </script>
+    <div class="message-header-alt">
     </div>
 
 </body>
