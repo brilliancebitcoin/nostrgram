@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css" />
+    <title>Nostr Chat</title>
+    <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
+    <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
+    <script src="https://bundle.run/browserify-cipher@1.0.1"></script>
+</head>
+
+<body>
+    <!-- based on this: https://github.com/YunusEmreNalbant/css-chat-interface -->
+    <script>
+        var { getSharedSecret, schnorr, utils } = nobleSecp256k1
+        var crypto  = window.crypto 
+        var getRand = size => crypto.getRandomValues(new Uint8Array(size))
+        var sha256  = bitcoinjs.crypto.sha256
+        var keypair = bitcoinjs.ECPair.makeRandom()
+        var privKey = keypair.privateKey.toString( "hex" )
+        var pubKey  = keypair.publicKey.toString( "hex" )
+        pubKey      = pubKey.substring( 2 )
+        var relay = "wss://relay.damus.io";
+        var socket = new WebSocket( relay );
+        socket.addEventListener('message', async function( message ) {
+            var [ type, subId, event ] = JSON.parse( message.data );
+            var { kind, content } = event || {}
+            if (!event || kind == 40 && content.includes( '"msgtype":"offer"' ) ) return
+            if (kind == 40 && !content.includes( '"msgtype":"offer"' ) ) {
+                document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += ( displayChannel( JSON.parse( content )[ "picture" ], JSON.parse( content )[ "name" ], "Test test test", event.id ) );
+            }
+            if (
+                kind == 42
+                && subId == "add-messages"
+                ) {
+                if ( content.includes( "{" ) ) return;
+                var isMine = ( event.pubkey == pubKey );
+                var msgclass = ( isMine ) ? '':'class="message"'
+                if ( isMine ) {
+                    var html = `
+                        <div data-author="${event.pubkey}" class="message me">
+                            <div class="bubble">
+                                ${content}
+                            </div>
+                            <div class="time">1 dk önce</div>
+                        </div>
+                    `;
+                } else {
+                    var html = `
+                        <div class="message">
+                            <div class="bubble">
+                                <div class="author">
+                                    ${event.pubkey.substring( 0, 15 ) + "..."}
+                                </div>
+                                ${content}
+                            </div>
+                            <div class="time">1 dk önce</div>
+                        </div>
+                    `;                    
+                }
+                document.getElementsByClassName( "message-content" )[ 0 ].innerHTML += html;
+                document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
+            }
+            if (kind === 4) {
+                content = await decrypt(privKey, pubKey, content)
+            }
+            //console.log('content:', content)
+            //console.log('event:', event)
+        })
+        var subId   = bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" )
+        var filter  = { "ids": [ "f06a690997a1b7d8283c90a7224eb8b7fe96b7c3d3d8cc7b2e7f743532c02b42", "7c16977e3591be5e6d847c5e50697768fa8ecd4a06ea1acc18468b8d30962f50" ] }
+
+        socket.addEventListener('open', async function( e ) {
+            console.log( "connected to " + relay )
+              
+            var subscription = [ "REQ", subId, filter ]
+
+            socket.send(JSON.stringify( subscription ));
+            var event = {
+                "content"    : "this workshop is awesome!",
+                "created_at" : Math.floor( Date.now() / 1000 ),
+                "kind"       : 1,
+                "tags"       : [],
+                "pubkey"     : pubKey,
+            }
+            var signedEvent = await getSignedEvent(event, privKey)
+            //socket.send(JSON.stringify([ "EVENT", signedEvent ]))
+            var message   = "this message is super secret!"
+            var encrypted = encrypt( privKey, pubKey, message )
+            var event2 = {
+                "content"    : encrypted,
+                "created_at" : Math.floor( Date.now() / 1000 ),
+                "kind"       : 4,
+                "tags"       : [ [ 'p', pubKey ] ],
+                "pubkey"     : pubKey,
+            }
+            var signedEvent2 = await getSignedEvent(event2, privKey)
+            //socket.send(JSON.stringify([ "EVENT", signedEvent2 ]))
+        })
+        async function getSignedEvent(event, privateKey) {
+            var eventData = JSON.stringify([
+                0,                    // Reserved for future use
+                event['pubkey'],        // The sender's public key
+                event['created_at'],    // Unix timestamp
+                event['kind'],        // Message “kind” or type
+                event['tags'],        // Tags identify replies/recipients
+                event['content']        // Your note contents
+            ])
+            event.id  = sha256( eventData ).toString( 'hex' )
+            event.sig = await schnorr.sign( event.id, privateKey ) 
+            return event
+        }
+        function hexToBytes( hex ) {
+            return Uint8Array.from( hex.match( /.{1,2}/g ).map( ( byte ) => parseInt( byte, 16 ) ) );
+        }
+
+        function bytesToHex( bytes ) {
+            return bytes.reduce( ( str, byte ) => str + byte.toString( 16 ).padStart( 2, '0' ), '' );
+        }
+        function base64ToHex( str ) {
+            var raw = atob( str );
+            var result = '';
+            var i; for ( i=0; i<raw.length; i++ ) {
+                var hex = raw.charCodeAt( i ).toString( 16 );
+                result += ( hex.length === 2 ? hex : '0' + hex );
+            }
+            return result;
+        }
+        function encrypt( privkey, pubkey, text ) {
+            var key = nobleSecp256k1.getSharedSecret( privkey, '02' + pubkey, true ).substring( 2 );
+            var iv = window.crypto.getRandomValues(new Uint8Array(16));
+            var cipher = browserifyCipher.createCipheriv( 'aes-256-cbc', hexToBytes( key ), iv );
+            var encryptedMessage = cipher.update(text,"utf8","base64");
+            emsg = encryptedMessage + cipher.final( "base64" );
+            var uint8View = new Uint8Array( iv.buffer );
+            var decoder = new TextDecoder();
+            return emsg + "?iv=" + btoa( String.fromCharCode.apply( null, uint8View ) );
+        }
+        function decrypt( privkey, pubkey, ciphertext ) {
+            var [ emsg, iv ] = ciphertext.split( "?iv=" );
+            var key = nobleSecp256k1.getSharedSecret( privkey, '02' + pubkey, true ).substring( 2 );
+            var decipher = browserifyCipher.createDecipheriv(
+                'aes-256-cbc',
+                hexToBytes( key ),
+                hexToBytes( base64ToHex( iv ) )
+            );
+            var decryptedMessage = decipher.update( emsg, "base64" );
+            dmsg = decryptedMessage + decipher.final( "utf8" );
+            return dmsg;
+        }
+    </script>
+    <script>
+        function displayChannel( image, name, message, id ) {
+            var html = `
+                        <li class="channel ${id}" data-id="${id}" onclick="selectChannel( this );">
+                            <a href="#">
+                                <img src="${image}" alt="">
+                                <div class="channel">
+                                    <div class="name">${name}</div>
+                                    <div class="message">${message}</div>
+                                </div>
+                            </a>
+                        </li>
+            `;
+            return html;
+        }
+    </script>
+    <script>
+        function selectChannel( channel ) {
+            var i; for ( i=0; i<document.getElementsByClassName( "channel" ).length; i++ ) {
+                document.getElementsByClassName( "channel" )[ i ].classList.remove( "active" );
+            }
+            document.getElementsByClassName( channel.getAttribute( "data-id" ) )[ 0 ].classList.add( "active" );
+            document.getElementsByClassName( channel.getAttribute( "data-id" ) )[ 0 ].classList.add( "active" );
+            var html = `
+                        <div class="message-header">
+                            <div class="user-info">
+                                <img src="${channel.getElementsByTagName( "img" )[ 0 ].src}" alt="">
+                                <div class="user">
+                                    <div class="name">${channel.getElementsByClassName( "name" )[ 0 ].innerText}</div>
+                                    <div class="time">10 minutes ago</div>
+                                </div>
+                            </div>
+                            <div class="actions">
+                                <ul>
+                                    <li>
+                                        <a href="#">
+                                            <i class="fa fa-info-circle"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <i class="fa fa-ellipsis-v"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="message-content">
+                        </div>
+                        <div class="message-form">
+                            <ul>
+                                <li class="emoji-btn">
+                                    <a href="#">
+                                        <i class="fa fa-laugh"></i>
+                                    </a>
+                                </li>
+                                <li class="input">
+                                    <input type="text" placeholder="Say something">
+                                </li>
+                                <li class="send-btn">
+                                    <a href="#">
+                                        <i class="fa fa-paper-plane"></i>
+                                    </a>
+                                </li>
+                                <li class="sound-btn">
+                                    <a href="#">
+                                        <i class="fa fa-microphone"></i>
+                                    </a>
+                                </li>
+                                <li class="image-btn">
+                                    <a href="#">
+                                        <i class="fa fa-image"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+            `;
+            document.getElementsByClassName( "content" )[ 0 ].innerHTML = html;
+            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', function ( e ) {
+                if ( e.key === 'Enter' ) {
+                  sendNote();
+                }
+            });
+            document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', function ( e ) {
+                sendNote();
+            });
+            addMessages( channel.getAttribute( "data-id" ) );
+        }
+    </script>
+    <script>
+        function addMessages( id ) {
+            var subId   = "add-messages";
+            var filter  = {
+                "kinds": [ 42 ],
+                "#e": [id]
+            }
+            var subscription = [ "REQ", subId, filter ]
+            socket.send(JSON.stringify( subscription ));
+        }
+    </script>
+    <script>
+        async function sendNote() {
+            var note = document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value;
+            if ( !note || note == "" ) return;
+            var id = document.getElementsByClassName( "channel active" )[ 0 ].getAttribute( "data-id" );
+            var event = {
+                "content"    : note,
+                "created_at" : Math.floor( Date.now() / 1000 ),
+                "kind"       : 42,
+                "tags"       : [["e", id]],
+                "pubkey"     : pubKey,
+            }
+            var signedEvent = await getSignedEvent(event, privKey);
+            socket.send(JSON.stringify([ "EVENT", signedEvent ]))
+            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
+        }
+    </script>
+    <div class="chat">
+        <div class="sidebar">
+            <div class="search">
+                <input type="text" placeholder="Search...">
+                <i class="fa fa-search"></i>
+            </div>
+            <div class="channels">
+                <ul>
+                </ul>
+            </div>
+        </div>
+        <div class="content">
+            Please select a chatroom at the left
+        </div>
+    </div>
+
+</body>
+
+</html>
