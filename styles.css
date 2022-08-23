@@ -363,12 +363,36 @@ body {
     font-weight: bold;
 }
 
-.chat .content .message-content .message .bubble .blue {
-    color: #4287f5;
+.chat .content .message-content .message .bubble .red {
+    color: red;
+}
+
+.chat .content .message-content .message .bubble .pink {
+    color: #fc91a3;
 }
 
 .chat .content .message-content .message .bubble .orange {
     color: orange;
+}
+
+.chat .content .message-content .message .bubble .yellow {
+    color: #dfdf42;
+}
+
+.chat .content .message-content .message .bubble .green {
+    color: green;
+}
+
+.chat .content .message-content .message .bubble .lightblue {
+    color: lightblue;
+}
+
+.chat .content .message-content .message .bubble .blue {
+    color: #4287f5;
+}
+
+.chat .content .message-content .message .bubble .purple {
+    color: purple;
 }
 
 .chat .content .message-content .message .time {
