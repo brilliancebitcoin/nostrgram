@@ -380,6 +380,10 @@ body {
         width: 100%;
     }
 
+    .chat .sidebar_deactivator {
+        display: none;
+    }
+
     .chat .content {
         display: none;
     }
