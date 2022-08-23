@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=1" />
     <title>Nostr Chat</title>
     <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
@@ -23,19 +23,44 @@
         var privKey = keypair.privateKey.toString( "hex" )
         var pubKey  = keypair.publicKey.toString( "hex" )
         pubKey      = pubKey.substring( 2 )
+        var subscribed_channels = [ "f06a690997a1b7d8283c90a7224eb8b7fe96b7c3d3d8cc7b2e7f743532c02b42", "7c16977e3591be5e6d847c5e50697768fa8ecd4a06ea1acc18468b8d30962f50" ];
         var relay = "wss://relay.damus.io";
         var socket = new WebSocket( relay );
         socket.addEventListener('message', async function( message ) {
             var [ type, subId, event ] = JSON.parse( message.data );
             var { kind, content } = event || {}
+            if ( kind && subId.startsWith( "00000000" ) ) {
+                if ( kind != 40 ) {
+                    alert("unknown error, could not add this channel -- please contact a developer for help");
+                }
+                var isError = checkForChannelSubscriptionErrors( content );
+                if ( isError ) {
+                    alert("unknown error, could not add this channel -- please contact a developer for help");
+                } else {
+                    document.getElementsByClassName( "removable-channels" )[ 0 ].innerHTML += `
+                            <div class="removable-channel ${event.id}">
+                                <span class="x-circle" onclick="removeChannel( '${event.id}' )">&times;</span>
+                                <span class="img-circle" style="background-image: url(${JSON.parse( content )[ "picture" ]})"></span>
+                                <span class="removable-channel-name">${JSON.parse( content )[ "name" ]}</span>
+                                <div style="clear: both"></div>
+                            </div>
+                    `;
+                }
+            }
             if (kind == 40 ) {
-                document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += ( displayChannel( JSON.parse( content )[ "picture" ], JSON.parse( content )[ "name" ], "", event.id, event.created_at ) );
-                getLatestMessage( event.id );
+                var isError = checkForChannelSubscriptionErrors( content );
+                if ( isError ) {
+                    alert("unknown error, could not add this channel -- please contact a developer for help");
+                } else {
+                    document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += ( displayChannel( JSON.parse( content )[ "picture" ], JSON.parse( content )[ "name" ], "", event.id, event.created_at ) );
+                    getLatestMessage( event.id );
+                }
             }
             if (
                 kind == 42
                 && subId.includes( "add-messages" )
                 ) {
+                if ( document.getElementsByClassName( event.id )[ 0 ] ) return
                 var isMine = ( event.pubkey == pubKey );
                 var msgclass = ( isMine ) ? '':'class="message"'
                 var now = Math.floor( Date.now() / 1000 )
@@ -43,13 +68,14 @@
                 var how_long_ago = convertHMS( now - event_time )
                 var parent = "";
                 var i; for ( i=0; i<event.tags.length; i++ ) {
-                    if ( event[ "tags" ][ i ][ 0 ] == "e" ) {
+                    if ( event[ "tags" ][ i ][ 0 ] == "e" && ( !parent || parent == "" ) ) {
                         parent = event[ "tags" ][ i ][ 1 ];
                     }
                 }
+                var blue_or_orange = ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 8 ) ? "blue":"orange";
                 if ( isMine ) {
                     var html = `
-                        <div data-author="${event.pubkey}" class="message me">
+                        <div data-author="${event.pubkey}" class="message me ${event.id}">
                             <div class="bubble">
                                 ${content}
                             </div>
@@ -58,22 +84,24 @@
                     `;
                 } else {
                     var html = `
-                        <div class="message">
+                        <div class="message ${event.id}">
                             <div class="bubble">
-                                <div class="author">
+                                <div class="author ${blue_or_orange}">
                                     ${event.pubkey.substring( 0, 15 ) + "..."}
                                 </div>
                                 ${content}
                             </div>
                             <div data-timestamp="${event_time}" class="time">${how_long_ago}</div>
                         </div>
-                    `;                    
+                    `;
                 }
                 document.getElementsByClassName( "message-content" )[ 0 ].innerHTML += html;
                 document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
                 document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
-                document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
-                document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
+                if ( document.getElementsByClassName( "message-header" )[ 0 ] ) {
+                    document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
+                    document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
+                }
                 if ( window.innerWidth < 601 ) {
                     document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
                     document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
@@ -103,7 +131,7 @@
             }
         })
         var subId   = bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" )
-        var filter  = { "ids": [ "f06a690997a1b7d8283c90a7224eb8b7fe96b7c3d3d8cc7b2e7f743532c02b42", "7c16977e3591be5e6d847c5e50697768fa8ecd4a06ea1acc18468b8d30962f50" ] }
+        var filter  = { "ids": subscribed_channels }
 
         socket.addEventListener('open', async function( e ) {
             console.log( "connected to " + relay )
@@ -187,10 +215,10 @@
     <script>
         function displayChannel( image, name, message, id, timestamp ) {
             var html = `
-                        <li class="channel ${id}" data-id="${id}" onclick="selectChannel( this );">
+                        <li class="channel-outer ${id}" data-id="${id}" data-img="${image}" onclick="selectChannel( this );">
                             <a href="#">
-                                <img src="${image}" alt="">
-                                <div class="channel">
+                                <span style="background-image: url(${image})"></span>
+                                <div class="channel-inner">
                                     <div class="name">${name}</div>
                                     <div data-timestamp="${timestamp}" class="message">${message}</div>
                                 </div>
@@ -202,14 +230,14 @@
     </script>
     <script>
         function selectChannel( channel ) {
-            var i; for ( i=0; i<document.getElementsByClassName( "channel" ).length; i++ ) {
-                document.getElementsByClassName( "channel" )[ i ].classList.remove( "active" );
+            var i; for ( i=0; i<document.getElementsByClassName( "channel-outer" ).length; i++ ) {
+                document.getElementsByClassName( "channel-outer" )[ i ].classList.remove( "active" );
             }
             document.getElementsByClassName( channel.getAttribute( "data-id" ) )[ 0 ].classList.add( "active" );
             var html = `
                 <div class="message-header">
                     <div class="channel-info">
-                        <img src="${channel.getElementsByTagName( "img" )[ 0 ].src}" alt="">
+                        <span style="background-image: url(${channel.getAttribute( "data-img" )})"></span>
                         <div class="channel-wrapper">
                             <div class="name">${channel.getElementsByClassName( "name" )[ 0 ].innerText}</div>
                             <div data-timestamp="${channel.getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestamp" )}" class="time">${channel.getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestring" )}</div>
@@ -217,7 +245,7 @@
                     </div>
                     <div class="actions">
                         <ul>
-                            <li>
+                            <li class="info-circle">
                                 <a href="#">
                                     <i class="fa fa-info-circle"></i>
                                 </a>
@@ -229,6 +257,10 @@
                             </li>
                         </ul>
                     </div>
+                </div>
+                <div class="infobox">
+                    <span class="infobox-text">Channel id: ${channel.getAttribute( "data-id" )}</span>
+                    <span class="infobox-x">&times;</span>
                 </div>
                 <div class="message-content">
                 </div>
@@ -265,7 +297,7 @@
                 var html2 = `
                     <span class="sidebar_arrow">&rsaquo;</span>
                     <div class="channel-info">
-                        <img src="${channel.getElementsByTagName( "img" )[ 0 ].src}" alt="">
+                        <span style="background-image: url(${channel.getAttribute( "data-img" )})"></span>
                         <div class="channel-wrapper">
                             <div class="name">${channel.getElementsByClassName( "name" )[ 0 ].innerText}</div>
                             <div data-timestamp="${channel.getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestamp" )}" class="time">${channel.getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestring" )}</div>
@@ -273,7 +305,7 @@
                     </div>
                     <div class="actions">
                         <ul>
-                            <li>
+                            <li class="info-circle">
                                 <a href="#">
                                     <i class="fa fa-info-circle"></i>
                                 </a>
@@ -286,11 +318,38 @@
                         </ul>
                     </div>
                 </div>
+                <div class="infobox">
+                    Channel id: ${channel.getAttribute( "data-id" )}
+                    <span class="infobox-x">&times;</span>
+                </div>
                 `;
                 document.getElementsByClassName( "message-header-alt" )[ 0 ].innerHTML = html2;
+                document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.width = "100%";
+                document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.display = "flex";
                 document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "flex";
-                document.getElementsByClassName( "message-header-alt" )[ 0 ].style.width = window.innerWidth - 19 + "px";
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].style.width = window.innerWidth - 38 + "px";
             }
+            if ( window.innerWidth < 601 ) {
+                document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
+                document.getElementsByClassName( "content" )[ 0 ].style.display = "block";
+                document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
+                document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
+                document.getElementsByClassName( "message-header" )[ 0 ].remove();
+            }
+            if ( document.getElementsByClassName( "sidebar_arrow" )[ 0 ] ) {
+                document.getElementsByClassName( "sidebar_arrow" )[ 0 ].addEventListener( "click", function() {
+                    document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "block";
+                    document.getElementsByClassName( "content" )[ 0 ].style.display = "none";
+                    document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.display = "none";
+                    document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "none";
+                })
+            }
+            document.getElementsByClassName( "info-circle" )[ 0 ].addEventListener( "click", function() {
+                document.getElementsByClassName( "infobox" )[ 0 ].style.display = "flex";
+                document.getElementsByClassName( "infobox-x" )[ 0 ].addEventListener( "click", function() {
+                    document.getElementsByClassName( "infobox" )[ 0 ].style.display = "none";
+                })
+            });            
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', function ( e ) {
                 if ( e.key === 'Enter' ) {
                   sendNote();
@@ -300,17 +359,6 @@
                 sendNote();
             });
             addMessages( channel.getAttribute( "data-id" ) );
-            if ( window.innerWidth < 601 ) {
-                document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
-                document.getElementsByClassName( "content" )[ 0 ].style.display = "block";
-                document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
-            }
-            document.getElementsByClassName( "sidebar_arrow" )[ 0 ].addEventListener( "click", function() {
-                document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "block";
-                document.getElementsByClassName( "content" )[ 0 ].style.display = "none";
-                document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "none";
-            })
         }
     </script>
     <script>
@@ -340,7 +388,7 @@
         async function sendNote() {
             var note = document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value;
             if ( !note || note == "" ) return;
-            var id = document.getElementsByClassName( "channel active" )[ 0 ].getAttribute( "data-id" );
+            var id = document.getElementsByClassName( "channel-outer active" )[ 0 ].getAttribute( "data-id" );
             var event = {
                 "content"    : note,
                 "created_at" : Math.floor( Date.now() / 1000 ),
@@ -401,34 +449,195 @@
         }
         updateTimes();
     </script>
+    <script>
+        function manageChannels() {
+            var i; for ( i=0; i<document.getElementsByClassName( "channel-outer" ).length; i++ ) {
+                document.getElementsByClassName( "channel-outer" )[ i ].classList.remove( "active" );
+            }
+            document.getElementsByClassName( "manage-channels-outer" )[ 0 ].classList.add( "active" );
+            var channels_info = [];
+            var i; for ( i=0; i<document.getElementsByClassName( "channel-outer" ).length; i++ ) {
+                var obj = {}
+                obj[ "id" ] = document.getElementsByClassName( "channel-outer" )[ i ].getAttribute( "data-id" );
+                obj[ "img" ] = document.getElementsByClassName( "channel-outer" )[ i ].getAttribute( "data-img" );
+                obj[ "name" ] = document.getElementsByClassName( "channel-outer" )[ i ].getElementsByClassName( "name" )[ 0 ].innerText;
+                channels_info.push( obj );
+            }
+            var html = `
+                <div class="message-header">
+                    <div class="channel-info">
+                        <span class="plus-circle fa fa-list-check"></span>
+                        <div class="channel-wrapper">
+                            <div class="name">Manage channels</div>
+                            <div class="message">Find/create/remove channels</div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <ul>
+                            <li>
+                                <a href="#">
+                                    <i class="fa fa-info-circle"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <i class="fa fa-ellipsis-v"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="message-content">
+                    <h2>Add by channel id</h2>
+                    <input class="add-channel-input" type="text" placeholder="channel id" />
+                    <button class="add-channel-btn">Submit</button>
+                    <h2 style="margin-top: 20px;">Remove a channel</h2>
+                    <div class="removable-channels"></div>
+                    <h2 style="margin-top: 20px;">Create a channel</h2>
+                    <input class="create-channel-name" type="text" placeholder="channel name" />
+                    <input class="create-channel-image" type="text" placeholder="channel image" />
+                    <button class="create-channel-btn">Submit</button>
+                </div>
+            `;
+            document.getElementsByClassName( "content" )[ 0 ].innerHTML = html;
+            channels_info.forEach( function( item ) {
+                document.getElementsByClassName( "removable-channels" )[ 0 ].innerHTML += `
+                        <div class="removable-channel ${item.id}">
+                            <span class="x-circle" onclick="removeChannel( '${item.id}' )">&times;</span>
+                            <span class="img-circle" style="background-image: url(${item.img})"></span>
+                            <span class="removable-channel-name">${item.name}</span>
+                            <div style="clear: both"></div>
+                        </div>
+                `;
+            })
+            document.getElementsByClassName( "message-content" )[ 0 ].style.display = "block";
+            document.getElementsByClassName( "message-content" )[ 0 ].style.flexDirection = "initial";
+            if ( window.innerWidth < 601 ) {
+                var html2 = `
+                    <span class="sidebar_arrow">&rsaquo;</span>
+                    <div class="channel-info">
+                        <span class="plus-circle fa fa-list-check"></span>
+                        <div class="channel-wrapper">
+                            <div class="name">Manage channels</div>
+                            <div class="message">Find/create/remove channels</div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <ul>
+                            <li>
+                                <a href="#">
+                                    <i class="fa fa-info-circle"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <i class="fa fa-ellipsis-v"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                `;
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].innerHTML = html2;
+                document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.width = "100%";
+                document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.display = "flex";
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "flex";
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].style.width = window.innerWidth - 38 + "px";
+            }
+            if ( window.innerWidth < 601 ) {
+                document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
+                document.getElementsByClassName( "content" )[ 0 ].style.display = "flex";
+            }
+            if ( document.getElementsByClassName( "sidebar_arrow" )[ 0 ] ) {
+                document.getElementsByClassName( "sidebar_arrow" )[ 0 ].addEventListener( "click", function() {
+                    document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "block";
+                    document.getElementsByClassName( "content" )[ 0 ].style.display = "none";
+                    document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.display = "none";
+                    document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "none";
+                })
+            }
+            document.getElementsByClassName( "add-channel-btn" )[ 0 ].addEventListener( 'click', function ( e ) {
+                var channel_id = document.getElementsByClassName( "add-channel-input" )[ 0 ].value;
+                if ( channel_id && channel_id != "" ) {addChannel( channel_id );}
+            });
+            document.getElementsByClassName( "add-channel-input" )[ 0 ].addEventListener( 'keypress', function ( e ) {
+                if ( e.key === 'Enter' ) {
+                    var channel_id = document.getElementsByClassName( "add-channel-input" )[ 0 ].value;
+                    if ( channel_id && channel_id != "" ) {addChannel( channel_id );}
+                }
+            });
+        }
+    </script>
+    <script>
+        function addChannel( id ) {
+            document.getElementsByClassName( "add-channel-input" )[ 0 ].value = "";
+            if ( document.getElementsByClassName( id )[ 0 ] ) return
+            subscribed_channels.push( id );
+            var newsubId   = "00000000" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 )
+            var newfilter  = { "ids": [ id ] }
+            var newsubscription = [ "REQ", newsubId, newfilter ]
+            socket.send(JSON.stringify( newsubscription ));
+        }
+    </script>
+    <script>
+        function removeChannel( id ) {
+            var i; for ( i=0; i<document.getElementsByClassName( id ).length; i++ ) {
+                document.getElementsByClassName( id )[ i ].remove();
+                i = i - 1;
+            }
+            var i; for ( i=0; i<subscribed_channels.length; i++ ) {
+                if ( subscribed_channels[ i ] == id ) {
+                    subscribed_channels.pop( i );
+                }
+            }
+        }
+    </script>
+    <script>
+        function checkForChannelSubscriptionErrors( content ) {
+            try {  
+                var json = JSON.parse( content );
+                if ( !( "picture" in json ) ) {
+                    return true;
+                }  
+                if ( !( "name" in json ) ) {
+                    return true;
+                }  
+            } catch ( e ) {  
+                return true;  
+            }
+            return false;
+        }
+    </script>
     <div class="chat">
         <div class="sidebar">
             <div class="search">
-                <div class="sidebar_deactivator">☰</div>
                 <input type="text" placeholder="Search...">
                 <i class="fa fa-search"></i>
             </div>
             <div class="channels">
                 <ul>
+                        <li class="manage-channels-outer" onclick="manageChannels();">
+                            <a href="#">
+                                <span class="plus-circle fa fa-list-check"></span>
+                                <div class="manage-channels-inner">
+                                    <div class="name">Manage channels</div>
+                                    <div class="message">Find/create/remove channels</div>
+                                </div>
+                            </a>
+                        </li>
                 </ul>
             </div>
         </div>
         <div class="content">
             <div class="message-content">
                 <div class="startup-message">
-                    Please select a chatroom at the left
+                    Please select a channel on the left
                 </div>
             </div>
         </div>
     </div>
-    <script>
-        document.getElementsByClassName( "sidebar_deactivator" )[ 0 ].addEventListener( "click", function() {
-            document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
-            document.getElementsByClassName( "content" )[ 0 ].style.display = "block";
-            document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-            document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
-        })
-    </script>
+    <div class="message-header-hinder">
+    </div>
     <div class="message-header-alt">
     </div>
 
