@@ -33,11 +33,6 @@ body {
     flex-direction: column;
 }
 
-.chat .sidebar_deactivator {
-    margin-right: 10px;
-    cursor: pointer;
-}
-
 .chat .sidebar .search {
     height: 50px;
     min-height: 50px;
@@ -73,6 +68,67 @@ body {
     overflow: auto;
 }
 
+.chat .sidebar .plus-circle {
+    display: inline-block;
+    border: 1px solid #999;
+    height: 40px;
+    width: 40px;
+    border-radius: 40px;
+    cursor: pointer;
+    text-align: center;
+    line-height: 40px;
+    font-size: 20px;
+    margin-right: 10px;
+    color: #999;
+}
+
+.chat .content .message-header .channel-info .plus-circle {
+    display: inline-block;
+    border: 1px solid #999;
+    height: 40px;
+    width: 40px;
+    border-radius: 40px;
+    cursor: pointer;
+    text-align: center;
+    line-height: 40px;
+    font-size: 20px;
+    margin-right: 10px;
+    color: #999;
+}
+
+.message-header-alt .channel-info .plus-circle {
+    display: inline-block;
+    border: 1px solid #999;
+    height: 40px;
+    width: 40px;
+    border-radius: 40px;
+    cursor: pointer;
+    text-align: center;
+    line-height: 40px;
+    font-size: 20px;
+    margin-right: 10px;
+    color: #999;
+}
+
+.chat .sidebar .channels ul li a {
+    display: flex;
+    height: 60px;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.chat .sidebar .channels ul li a .manage-channels-inner .name {
+    font-size: 15px;
+    color: #333;
+    font-weight: 500;
+    margin-bottom: 3px;
+}
+
+.chat .sidebar .channels ul li a .manage-channels-inner .message {
+    font-size: 13px;
+    color: #999;
+}
+
 .chat .sidebar .channels ul li a {
     display: flex;
     height: 60px;
@@ -85,21 +141,24 @@ body {
     background: #fff;
 }
 
-.chat .sidebar .channels ul li a img {
+.chat .sidebar .channels ul li a span {
     width: 40px;
     height: 40px;
     border-radius: 40px;
     margin-right: 10px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
-.chat .sidebar .channels ul li a .channel .name {
+.chat .sidebar .channels ul li a .channel-inner .name {
     font-size: 15px;
     color: #333;
     font-weight: 500;
     margin-bottom: 3px;
 }
 
-.chat .sidebar .channels ul li a .channel .message {
+.chat .sidebar .channels ul li a .channel-inner .message {
     font-size: 13px;
     color: #999;
 }
@@ -147,11 +206,14 @@ body {
 }
 
 
-.chat .content .message-header .channel-info img {
+.chat .content .message-header .channel-info span {
     width: 40px;
     height: 40px;
     border-radius: 50%;
     margin-right: 10px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .chat .content .message-header .channel-info .channel-wrapper .name {
@@ -185,13 +247,23 @@ body {
     color: #222;
 }
 
+.message-header-hinder {
+    position: fixed;
+    top: 0px;
+    height: 50px;
+    min-height: 50px;
+    border-bottom: 1px solid #ddd;
+    padding: 0 15px;
+    background-color: white;
+    display: none;
+}
+
 .message-header-alt {
     position: fixed;
     top: 0px;
     height: 50px;
     min-height: 50px;
     border-bottom: 1px solid #ddd;
-    display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 15px;
@@ -288,8 +360,15 @@ body {
 }
 
 .chat .content .message-content .message .bubble .author {
-    color: #4287f5;
     font-weight: bold;
+}
+
+.chat .content .message-content .message .bubble .blue {
+    color: #4287f5;
+}
+
+.chat .content .message-content .message .bubble .orange {
+    color: orange;
 }
 
 .chat .content .message-content .message .time {
@@ -373,15 +452,145 @@ body {
     background: #4caf50;
 }
 
+.add-channel-input {
+    margin-top: 20px;
+    display: inline-block;
+    width: 80%;
+    box-sizing: border-box;
+    height: 36px;
+    border: 1px solid #ddd;
+    border-radius: 36px;
+    font-size: 14px;
+    padding: 0 15px
+}
+
+.add-channel-btn {
+    display: inline-block;
+    width: 100px;
+    box-sizing: border-box;
+    height: 36px;
+    border: 1px solid #ddd;
+    border-radius: 36px;
+    font-size: 14px;
+    padding: 0 15px;
+    background-color: #ddd;
+    cursor: pointer;
+}
+
+.removable-channel {
+    position: relative;
+    background-color: white;
+    border-radius: 40px;
+    margin: 10px;
+}
+
+.x-circle {
+    float: right;
+    display: inline-block;
+    border: 1px solid #999;
+    vertical-align: middle;
+    height: 40px;
+    width: 40px;
+    border-radius: 40px;
+    cursor: pointer;
+    text-align: center;
+    line-height: 40px;
+    font-size: 20px;
+    color: #999;
+}
+
+.img-circle {
+    display: inline-block;
+    border: 1px solid #999;
+    vertical-align: middle;
+    height: 40px;
+    width: 40px;
+    border-radius: 40px;
+    text-align: center;
+    line-height: 40px;
+    font-size: 20px;
+    margin-right: 10px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.removable-channel-name {
+    vertical-align: middle;
+}
+
+.create-channel-name {
+    margin-top: 20px;
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+    height: 36px;
+    border: 1px solid #ddd;
+    border-radius: 36px;
+    font-size: 14px;
+    padding: 0 15px
+}
+
+.create-channel-image {
+    margin-top: 20px;
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+    height: 36px;
+    border: 1px solid #ddd;
+    border-radius: 36px;
+    font-size: 14px;
+    padding: 0 15px
+}
+
+.create-channel-btn {
+    margin-top: 20px;
+    display: inline-block;
+    width: 100px;
+    box-sizing: border-box;
+    height: 36px;
+    border: 1px solid #ddd;
+    border-radius: 36px;
+    font-size: 14px;
+    padding: 0 15px;
+    background-color: #ddd;
+    cursor: pointer;
+}
+
+.infobox {
+    display: none;
+    justify-content: space-between;
+    position: fixed;
+    top: 51px;
+    width: calc( 100% - 320px );
+    background-color: black;
+    color: white;
+    padding: 5px;
+    z-index: 1;
+    word-break: break-all;
+}
+
+.infobox-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.infobox-x {
+    display: flex;
+    margin-left: 20px;
+    margin-right: 10px;
+    flex-direction: column;
+    justify-content: center;
+    font-size: 25px;
+    cursor: pointer;
+}
+
 /* mobile */
 
 @media only screen and (max-width: 600px) {
     .chat .sidebar {
         width: 100%;
-    }
-
-    .chat .sidebar_deactivator {
-        display: none;
     }
 
     .chat .content {
@@ -396,5 +605,9 @@ body {
         border-radius: 20px;
         cursor: pointer;
         text-align: center;
+    }
+
+    .infobox {
+        width: 100%;
     }
 }
