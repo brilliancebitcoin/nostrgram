@@ -28,27 +28,32 @@
         socket.addEventListener('message', async function( message ) {
             var [ type, subId, event ] = JSON.parse( message.data );
             var { kind, content } = event || {}
-            if (!event || kind == 40 && content.includes( '"msgtype":"offer"' ) ) return
-            if (kind == 40 && !content.includes( '"msgtype":"offer"' ) ) {
-                document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += ( displayChannel( JSON.parse( content )[ "picture" ], JSON.parse( content )[ "name" ], "Test test test", event.id ) );
+            if (kind == 40 ) {
+                document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += ( displayChannel( JSON.parse( content )[ "picture" ], JSON.parse( content )[ "name" ], "", event.id, event.created_at ) );
+                getLatestMessage( event.id );
             }
             if (
                 kind == 42
-                && subId == "add-messages"
+                && subId.includes( "add-messages" )
                 ) {
-                if ( content.includes( "{" ) ) return;
                 var isMine = ( event.pubkey == pubKey );
                 var msgclass = ( isMine ) ? '':'class="message"'
                 var now = Math.floor( Date.now() / 1000 )
                 var event_time = event.created_at
                 var how_long_ago = convertHMS( now - event_time )
+                var parent = "";
+                var i; for ( i=0; i<event.tags.length; i++ ) {
+                    if ( event[ "tags" ][ i ][ 0 ] == "e" ) {
+                        parent = event[ "tags" ][ i ][ 1 ];
+                    }
+                }
                 if ( isMine ) {
                     var html = `
                         <div data-author="${event.pubkey}" class="message me">
                             <div class="bubble">
                                 ${content}
                             </div>
-                            <div class="time">${how_long_ago}</div>
+                            <div data-timestamp="${event_time}" class="time">${how_long_ago}</div>
                         </div>
                     `;
                 } else {
@@ -60,18 +65,37 @@
                                 </div>
                                 ${content}
                             </div>
-                            <div class="time">${how_long_ago}</div>
+                            <div data-timestamp="${event_time}" class="time">${how_long_ago}</div>
                         </div>
                     `;                    
                 }
                 document.getElementsByClassName( "message-content" )[ 0 ].innerHTML += html;
                 document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
+                document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
+                document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
+                document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestamp", event_time );
+                document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago );
+            }
+            if (
+                kind == 42
+                && subId.includes( "latest-message" )
+                ) {
+                var now = Math.floor( Date.now() / 1000 )
+                var event_time = event.created_at
+                var how_long_ago = convertHMS( now - event_time )
+                var parent = "";
+                var i; for ( i=0; i<event.tags.length; i++ ) {
+                    if ( event[ "tags" ][ i ][ 0 ] == "e" ) {
+                        parent = event[ "tags" ][ i ][ 1 ];
+                    }
+                }
+                document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].innerText = content;
+                document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago )
+                document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestamp", event_time )
             }
             if (kind === 4) {
                 content = await decrypt(privKey, pubKey, content)
             }
-            //console.log('content:', content)
-            //console.log('event:', event)
         })
         var subId   = bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" )
         var filter  = { "ids": [ "f06a690997a1b7d8283c90a7224eb8b7fe96b7c3d3d8cc7b2e7f743532c02b42", "7c16977e3591be5e6d847c5e50697768fa8ecd4a06ea1acc18468b8d30962f50" ] }
@@ -156,14 +180,14 @@
         }
     </script>
     <script>
-        function displayChannel( image, name, message, id ) {
+        function displayChannel( image, name, message, id, timestamp ) {
             var html = `
                         <li class="channel ${id}" data-id="${id}" onclick="selectChannel( this );">
                             <a href="#">
                                 <img src="${image}" alt="">
                                 <div class="channel">
                                     <div class="name">${name}</div>
-                                    <div class="message">${message}</div>
+                                    <div data-timestamp="${timestamp}" class="message">${message}</div>
                                 </div>
                             </a>
                         </li>
@@ -177,14 +201,14 @@
                 document.getElementsByClassName( "channel" )[ i ].classList.remove( "active" );
             }
             document.getElementsByClassName( channel.getAttribute( "data-id" ) )[ 0 ].classList.add( "active" );
-            document.getElementsByClassName( channel.getAttribute( "data-id" ) )[ 0 ].classList.add( "active" );
+            console.log( channel.getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestring" ) );
             var html = `
                         <div class="message-header">
                             <div class="user-info">
                                 <img src="${channel.getElementsByTagName( "img" )[ 0 ].src}" alt="">
                                 <div class="user">
                                     <div class="name">${channel.getElementsByClassName( "name" )[ 0 ].innerText}</div>
-                                    <div class="time">10 minutes ago</div>
+                                    <div data-timestamp="${channel.getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestamp" )}" class="time">${channel.getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestring" )}</div>
                                 </div>
                             </div>
                             <div class="actions">
@@ -246,10 +270,22 @@
     </script>
     <script>
         function addMessages( id ) {
-            var subId   = "add-messages";
+            var subId   = "add-messages" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 0, 20 );
             var filter  = {
                 "kinds": [ 42 ],
                 "#e": [id]
+            }
+            var subscription = [ "REQ", subId, filter ]
+            socket.send(JSON.stringify( subscription ));
+        }
+    </script>
+    <script>
+        function getLatestMessage( id ) {
+            var subId   = "latest-message" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 0, 20 );
+            var filter  = {
+                "kinds": [ 42 ],
+                "#e": [id],
+                "limit": 1
             }
             var subscription = [ "REQ", subId, filter ]
             socket.send(JSON.stringify( subscription ));
@@ -307,6 +343,19 @@
             }
             return seconds + " " + secondsstring + " ago";
         }
+    </script>
+    <script>
+        function updateTimes() {
+            console.log( "times updated" );
+            var i; for ( i=0; i<document.getElementsByClassName( "time" ).length; i++ ) {
+                var now = Math.floor( Date.now() / 1000 )
+                var event_time = document.getElementsByClassName( "time" )[ i ].getAttribute( "data-timestamp" )
+                var how_long_ago = convertHMS( now - event_time )
+                document.getElementsByClassName( "time" )[ i ].innerText = how_long_ago;
+            }
+            setTimeout( function() {updateTimes();}, 10000 );
+        }
+        updateTimes();
     </script>
     <div class="chat">
         <div class="sidebar">
