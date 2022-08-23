@@ -70,6 +70,7 @@
                     `;                    
                 }
                 document.getElementsByClassName( "message-content" )[ 0 ].innerHTML += html;
+                document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
                 document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
                 document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
                 document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
@@ -284,7 +285,7 @@
                 `;
                 document.getElementsByClassName( "message-header-alt" )[ 0 ].innerHTML = html2;
                 document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "flex";
-                document.getElementsByClassName( "message-header-alt" )[ 0 ].style.width = window.innerWidth - 38 + "px";
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].style.width = window.innerWidth - 15 + "px";
             }
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', function ( e ) {
                 if ( e.key === 'Enter' ) {
@@ -298,6 +299,7 @@
             if ( window.innerWidth < 601 ) {
                 document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
                 document.getElementsByClassName( "content" )[ 0 ].style.display = "block";
+                document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
                 document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
             }
             document.getElementsByClassName( "sidebar_arrow" )[ 0 ].addEventListener( "click", function() {
@@ -419,6 +421,7 @@
         document.getElementsByClassName( "sidebar_deactivator" )[ 0 ].addEventListener( "click", function() {
             document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
             document.getElementsByClassName( "content" )[ 0 ].style.display = "block";
+            document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
             document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
         })
     </script>
