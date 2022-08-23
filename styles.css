@@ -277,11 +277,14 @@ body {
 }
 
 
-.message-header-alt .channel-info img {
+.message-header-alt .channel-info span {
     width: 40px;
     height: 40px;
     border-radius: 50%;
     margin-right: 10px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .message-header-alt .channel-info .channel-wrapper .name {
