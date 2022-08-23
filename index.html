@@ -39,13 +39,16 @@
                 if ( content.includes( "{" ) ) return;
                 var isMine = ( event.pubkey == pubKey );
                 var msgclass = ( isMine ) ? '':'class="message"'
+                var now = Math.floor( Date.now() / 1000 )
+                var event_time = event.created_at
+                var how_long_ago = convertHMS( now - event_time )
                 if ( isMine ) {
                     var html = `
                         <div data-author="${event.pubkey}" class="message me">
                             <div class="bubble">
                                 ${content}
                             </div>
-                            <div class="time">1 dk önce</div>
+                            <div class="time">${how_long_ago}</div>
                         </div>
                     `;
                 } else {
@@ -57,7 +60,7 @@
                                 </div>
                                 ${content}
                             </div>
-                            <div class="time">1 dk önce</div>
+                            <div class="time">${how_long_ago}</div>
                         </div>
                     `;                    
                 }
@@ -267,6 +270,42 @@
             var signedEvent = await getSignedEvent(event, privKey);
             socket.send(JSON.stringify([ "EVENT", signedEvent ]))
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
+        }
+    </script>
+    <script>
+        function convertHMS(value) {
+            const sec = parseInt(value, 10); // convert value to number if it's string
+            let years   = Math.floor(sec / 31536000); // get years
+            let months  = Math.floor((sec - (years * 31536000)) / 2592000); // get months
+            let days    = Math.floor((sec - (years * 31536000) - (months * 2592000)) / 86400); // get days
+            let hours   = Math.floor((sec - (years * 31536000) - (months * 2592000) - (days * 86400)) / 3600); // get hours
+            let minutes = Math.floor((sec - (years * 31536000) - (months * 2592000) - (days * 86400) - (hours * 3600)) / 60); // get minutes
+            let seconds = sec - (years * 31536000) - (months * 2592000) - (days * 86400) - (hours * 3600) - (minutes * 60); //  get seconds
+            var yearsstring = (years > 1) ? "years":"year";
+            var monthsstring = (months > 1) ? "months":"month";
+            var daysstring = (days > 1) ? "days":"day";
+            var hoursstring = (hours > 1) ? "hours":"hour";
+            var minutesstring = (minutes > 1) ? "minutes":"minute";
+            var secondsstring = (seconds > 1) ? "seconds":"second";
+            if ( years > 0 ) {
+                return years + " " + yearsstring + " ago";
+            }
+            if ( months > 0 ) {
+                return months + " " + monthsstring + " ago";
+            }
+            if ( days > 0 ) {
+                return days + " " + daysstring + " ago";
+            }
+            if ( hours > 0 ) {
+                return hours + " " + hoursstring + " ago";
+            }
+            if ( minutes > 0 ) {
+                return minutes + " " + minutesstring + " ago";
+            }
+            if ( seconds == 0 ) {
+                return seconds + " seconds ago";
+            }
+            return seconds + " " + secondsstring + " ago";
         }
     </script>
     <div class="chat">
