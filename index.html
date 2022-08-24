@@ -473,17 +473,27 @@
         async function sendNote() {
             var note = document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value;
             if ( !note || note == "" ) return;
+            var now = Math.floor( Date.now() / 1000 );
             var id = document.getElementsByClassName( "channel-outer active" )[ 0 ].getAttribute( "data-id" );
             var event = {
                 "content"    : note,
-                "created_at" : Math.floor( Date.now() / 1000 ),
+                "created_at" : now,
                 "kind"       : 42,
                 "tags"       : [["e", id]],
                 "pubkey"     : pubKey,
             }
             var signedEvent = await getSignedEvent(event, privKey);
             socket.send(JSON.stringify([ "EVENT", signedEvent ]))
+            var html = `
+                <div data-author="${pubKey}" class="message me ${signedEvent.id}">
+                    <div class="bubble">${note}</div>
+                    <div data-timestamp="${now}" class="time">0 seconds ago</div>
+                </div>
+            `;
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
+            document.getElementsByClassName( "message-content" )[ 0 ].innerHTML += html;
+            document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
+            document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
         }
     </script>
     <script>
