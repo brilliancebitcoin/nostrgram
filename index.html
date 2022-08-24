@@ -67,13 +67,12 @@
                 var event_time = event.created_at
                 var how_long_ago = convertHMS( now - event_time )
                 var parent = "";
-                if ( !document.getElementsByClassName( parent )[ 0 ].classList.contains( "active" ) ) return
                 var i; for ( i=0; i<event.tags.length; i++ ) {
                     if ( event[ "tags" ][ i ][ 0 ] == "e" && ( !parent || parent == "" ) ) {
                         parent = event[ "tags" ][ i ][ 1 ];
                     }
                 }
-                if 
+                if ( !document.getElementsByClassName( parent )[ 0 ].classList.contains( "active" ) ) return
                 var color = "";
                 if ( isNaN( event.pubkey.substring( 0, 1 ) ) && ( event.pubkey.substring( 0, 1 ) == "e" || event.pubkey.substring( 0, 1 ) == "f" ) ) {
                     color = "red";
