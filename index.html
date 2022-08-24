@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css?v=12" />
+    <link rel="stylesheet" href="styles.css?v=13" />
     <title>Nostrgram</title>
     <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
@@ -32,17 +32,35 @@
             pubKey      = pubKey.substring( 2 )
             var subscribed_channels = [ "f06a690997a1b7d8283c90a7224eb8b7fe96b7c3d3d8cc7b2e7f743532c02b42" ];
             var relay = "wss://relay.damus.io";
+            var stuff_to_backup = {}
+            stuff_to_backup[ "privkey" ] = privKey;
+            stuff_to_backup[ "pubkey" ] = pubKey;
+            stuff_to_backup[ "channels" ] = JSON.stringify( subscribed_channels );
+            stuff_to_backup[ "relays" ] = JSON.stringify( [ relay ] );
+            localStorage[ "backup" ] = JSON.stringify( stuff_to_backup );
         }
-        var stuff_to_backup = {}
-        stuff_to_backup[ "privkey" ] = privKey;
-        stuff_to_backup[ "pubkey" ] = pubKey;
-        stuff_to_backup[ "channels" ] = JSON.stringify( subscribed_channels );
-        stuff_to_backup[ "relays" ] = JSON.stringify( [ relay ] );
-        localStorage[ "backup" ] = JSON.stringify( stuff_to_backup );
+        var array_of_pubkeys = [];
+        var namemap = {}
         var socket = new WebSocket( relay );
         socket.addEventListener('message', async function( message ) {
             var [ type, subId, event ] = JSON.parse( message.data );
             var { kind, content } = event || {}
+            if ( subId.startsWith( "00000001" ) ) {
+                if ( content && !checkForUserMetaErrors( content ) ) {
+                    if ( "name" in JSON.parse( content ) && !( !JSON.parse( content )[ "name" ] || JSON.parse( content )[ "name" ] == "" ) ) {
+                        namemap[ event.pubkey ] = JSON.parse( content )[ "name" ];
+                        var i; for ( i=0; i<document.getElementsByClassName( event.pubkey ).length; i++ ) {
+                            document.getElementsByClassName( event.pubkey )[ i ].innerText = JSON.parse( content )[ "name" ];
+                        }
+                    } else {
+                        namemap[ event.pubkey ] = "none";
+                    }
+                } else if ( content && checkForUserMetaErrors( content ) ) {
+                    namemap[ event.pubkey ] = "none";
+                }
+                var closer = [ "CLOSE", subId ];
+                socket.send(JSON.stringify( closer ));
+            }
             if ( kind && subId.startsWith( "00000000" ) ) {
                 if ( kind != 40 ) {
                     alert("unknown error, could not add this channel -- please contact a developer for help");
@@ -76,7 +94,9 @@
                 ) {
                 if ( document.getElementsByClassName( event.id )[ 0 ] ) return
                 var isMine = ( event.pubkey == pubKey );
-                var msgclass = ( isMine ) ? '':'class="message"'
+                if ( !isMine && !array_of_pubkeys.includes( event.pubkey ) ) {
+                    array_of_pubkeys.push( event.pubkey );
+                }
                 var now = Math.floor( Date.now() / 1000 )
                 var event_time = event.created_at
                 var how_long_ago = convertHMS( now - event_time )
@@ -112,6 +132,10 @@
                 if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 2 ) {
                     color = "purple";
                 };
+                var name = event.pubkey.substring( 0, 15 ) + "...";
+                if ( event.pubkey in namemap && namemap[ event.pubkey ] != "none" ) {
+                    name = namemap[ event.pubkey ];
+                }
                 if ( isMine ) {
                     var html = `
                         <div data-author="${event.pubkey}" class="message me ${event.id}">
@@ -122,7 +146,7 @@
                 } else {
                     var html = `
                         <div class="message ${event.id}">
-                            <div class="bubble"><div class="author ${color}">${event.pubkey.substring( 0, 15 ) + "..."}</div>${content}</div>
+                            <div class="bubble"><div class="author ${color} ${event.pubkey}">${name}</div>${content}</div>
                             <div data-timestamp="${event_time}" class="time">${how_long_ago}</div>
                         </div>
                     `;
@@ -477,16 +501,24 @@
         }
     </script>
     <script>
-        function updateTimes() {
+        function updateTimesAndNames() {
+            array_of_pubkeys.forEach( function( item, index ) {
+                setTimeout( function() {
+                    if ( 1==1 ) {
+                        getUserMeta( array_of_pubkeys[ 0 ] );
+                    }
+                    array_of_pubkeys.shift();
+                }, index * 300 );
+            })
             var i; for ( i=0; i<document.getElementsByClassName( "time" ).length; i++ ) {
                 var now = Math.floor( Date.now() / 1000 )
                 var event_time = document.getElementsByClassName( "time" )[ i ].getAttribute( "data-timestamp" )
                 var how_long_ago = convertHMS( now - event_time )
                 document.getElementsByClassName( "time" )[ i ].innerText = how_long_ago;
             }
-            setTimeout( function() {updateTimes();}, 10000 );
+            setTimeout( function() {updateTimesAndNames();}, 10000 );
         }
-        updateTimes();
+        updateTimesAndNames();
     </script>
     <script>
         function manageChannels() {
@@ -761,6 +793,16 @@
         }
     </script>
     <script>
+        function checkForUserMetaErrors( content ) {
+            try {  
+                var json = JSON.parse( content );
+            } catch ( e ) {  
+                return true;  
+            }
+            return false;
+        }
+    </script>
+    <script>
         function checkForChannelSubscriptionErrors( content ) {
             try {  
                 var json = JSON.parse( content );
@@ -904,13 +946,29 @@
                 var match = /\r|\n/.exec(text);
                 if ( match || document.getElementsByClassName( "note-input" )[ 0 ].offsetHeight >= 40 ) {
                     document.getElementsByClassName( "note-input" )[ 0 ].style.lineHeight = "18px";
+                    document.getElementsByClassName( "note-input" )[ 0 ].style.borderRadius = "10px";
                 } else if ( document.getElementsByClassName( "note-input" )[ 0 ].offsetHeight < 34 ) {
                     document.getElementsByClassName( "note-input" )[ 0 ].style.lineHeight = "35px";
+                    document.getElementsByClassName( "note-input" )[ 0 ].style.borderRadius = "36px";
                 }
             }
             setTimeout( function() {setNoteInputHeight();}, 50 );
         }
         setNoteInputHeight();
+    </script>
+    <script>
+        function getUserMeta( pubkey ) {
+            if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
+                var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
+                    document.getElementsByClassName( pubkey )[ i ].innerText = namemap[ pubkey ];
+                }
+            } else if ( !( pubkey in namemap ) ) {
+                var newsubId   = "00000001" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 )
+                var newfilter  = { "authors": [ pubkey ], "kinds": [0], "limit": 1 }
+                var newsubmo = [ "REQ", newsubId, newfilter ]
+                socket.send(JSON.stringify( newsubmo ));
+            }
+        }
     </script>
 </body>
 
