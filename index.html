@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css?v=11" />
+    <link rel="stylesheet" href="styles.css?v=12" />
     <title>Nostrgram</title>
     <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
@@ -894,10 +894,9 @@
                 document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";
                 var text = document.getElementsByClassName( "note-input" )[ 0 ].value;
                 var match = /\r|\n/.exec(text);
-                if ( match || document.getElementsByClassName( "note-input" )[ 0 ].offsetHeight >= 36 ) {
+                if ( match || document.getElementsByClassName( "note-input" )[ 0 ].offsetHeight >= 40 ) {
                     document.getElementsByClassName( "note-input" )[ 0 ].style.lineHeight = "18px";
-                } else {
-                    console.log( document.getElementsByClassName( "note-input" )[ 0 ].offsetHeight );
+                } else if ( document.getElementsByClassName( "note-input" )[ 0 ].offsetHeight < 34 ) {
                     document.getElementsByClassName( "note-input" )[ 0 ].style.lineHeight = "35px";
                 }
             }
