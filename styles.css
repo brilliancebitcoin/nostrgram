@@ -151,6 +151,10 @@ body {
     background-repeat: no-repeat;
 }
 
+.chat .sidebar .channels ul li a .channel-inner {
+    max-width: 80%;
+}
+
 .chat .sidebar .channels ul li a .channel-inner .name {
     font-size: 15px;
     color: #333;
