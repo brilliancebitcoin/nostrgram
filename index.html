@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css?v=13" />
+    <link rel="stylesheet" href="styles.css?v=14" />
     <title>Nostrgram</title>
     <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
@@ -39,8 +39,12 @@
             stuff_to_backup[ "relays" ] = JSON.stringify( [ relay ] );
             localStorage[ "backup" ] = JSON.stringify( stuff_to_backup );
         }
+        if ( localStorage[ "namemap" ] ) {
+            var namemap = JSON.parse( localStorage[ "namemap" ] );
+        } else {
+            var namemap = {}
+        }
         var array_of_pubkeys = [];
-        var namemap = {}
         var socket = new WebSocket( relay );
         socket.addEventListener('message', async function( message ) {
             var [ type, subId, event ] = JSON.parse( message.data );
@@ -49,14 +53,17 @@
                 if ( content && !checkForUserMetaErrors( content ) ) {
                     if ( "name" in JSON.parse( content ) && !( !JSON.parse( content )[ "name" ] || JSON.parse( content )[ "name" ] == "" ) ) {
                         namemap[ event.pubkey ] = JSON.parse( content )[ "name" ];
+                        localStorage[ "namemap" ] = JSON.stringify( namemap );
                         var i; for ( i=0; i<document.getElementsByClassName( event.pubkey ).length; i++ ) {
                             document.getElementsByClassName( event.pubkey )[ i ].innerText = JSON.parse( content )[ "name" ];
                         }
                     } else {
                         namemap[ event.pubkey ] = "none";
+                        localStorage[ "namemap" ] = JSON.stringify( namemap );
                     }
                 } else if ( content && checkForUserMetaErrors( content ) ) {
                     namemap[ event.pubkey ] = "none";
+                    localStorage[ "namemap" ] = JSON.stringify( namemap );
                 }
                 var closer = [ "CLOSE", subId ];
                 socket.send(JSON.stringify( closer ));
@@ -87,6 +94,8 @@
                     document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += ( displayChannel( JSON.parse( content )[ "picture" ], JSON.parse( content )[ "name" ], "", event.id, event.created_at ) );
                     getLatestMessage( event.id );
                 }
+                var closer = [ "CLOSE", subId ];
+                socket.send(JSON.stringify( closer ));
             }
             if (
                 kind == 42
@@ -136,6 +145,7 @@
                 if ( event.pubkey in namemap && namemap[ event.pubkey ] != "none" ) {
                     name = namemap[ event.pubkey ];
                 }
+                content = content.replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
                 if ( isMine ) {
                     var html = `
                         <div data-author="${event.pubkey}" class="message me ${event.id}">
@@ -151,7 +161,12 @@
                         </div>
                     `;
                 }
-                document.getElementsByClassName( "message-content" )[ 0 ].innerHTML += html;
+                var array = [];
+                array.push( html );
+                array.forEach( function( item ) {
+                    document.getElementsByClassName( "message-content" )[ 0 ].innerHTML = item + document.getElementsByClassName( "message-content" )[ 0 ].innerHTML;
+                })
+                array.reverse();
                 document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
                 document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
                 if ( document.getElementsByClassName( "message-header" )[ 0 ] ) {
@@ -185,6 +200,8 @@
                 document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].innerText = shortened_content;
                 document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago )
                 document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestamp", event_time )
+                var closer = [ "CLOSE", subId ];
+                socket.send(JSON.stringify( closer ));
             }
             if (kind === 4) {
                 content = await decrypt(privKey, pubKey, content)
@@ -429,7 +446,8 @@
             var subId   = "add-messages" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 0, 20 );
             var filter  = {
                 "kinds": [ 42 ],
-                "#e": [id]
+                "#e": [id],
+                "limit": 200
             }
             var subscription = [ "REQ", subId, filter ]
             socket.send(JSON.stringify( subscription ));
@@ -502,13 +520,9 @@
     </script>
     <script>
         function updateTimesAndNames() {
-            array_of_pubkeys.forEach( function( item, index ) {
-                setTimeout( function() {
-                    if ( 1==1 ) {
-                        getUserMeta( array_of_pubkeys[ 0 ] );
-                    }
-                    array_of_pubkeys.shift();
-                }, index * 300 );
+            array_of_pubkeys.forEach( function() {
+                getUserMeta( array_of_pubkeys[ 0 ] );
+                array_of_pubkeys.shift();
             })
             var i; for ( i=0; i<document.getElementsByClassName( "time" ).length; i++ ) {
                 var now = Math.floor( Date.now() / 1000 )
