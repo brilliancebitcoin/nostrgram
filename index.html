@@ -789,9 +789,12 @@
     </script>
     <script>
         function isHex(string) {
-                var a = parseInt(string, 16)
-                return a.toString(16) === string
-            }
+            var a = parseInt(string, 16)
+            var padding = "000000000000";
+            padding = padding + a.toString(16);
+            final = padding.slice( -Math.abs( string.length ) )
+            return final === string
+        }
         function importPrivkey( privkey ) {
             if ( privkey.length != 64 ) {
                 alert( "Your private key must be a 32 byte hex-formatted string" );
