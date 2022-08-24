@@ -223,10 +223,13 @@ body {
 }
 
 .chat .content .message-header .channel-info .channel-wrapper .time {
-
     font-size: 13px;
     color: #999;
+}
 
+.chat .content .message-header .channel-info .channel-wrapper .message {
+    font-size: 13px;
+    color: #999;
 }
 
 .chat .content .message-header .actions ul {
@@ -294,10 +297,13 @@ body {
 }
 
 .message-header-alt .channel-info .channel-wrapper .time {
-
     font-size: 13px;
     color: #999;
+}
 
+.message-header-alt .channel-info .channel-wrapper .message {
+    font-size: 13px;
+    color: #999;
 }
 
 .message-header-alt .actions ul {
