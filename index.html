@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css?v=5" />
+    <link rel="stylesheet" href="styles.css?v=6" />
     <title>Nostr Chat</title>
     <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
@@ -158,7 +158,6 @@
         var filter  = { "ids": subscribed_channels }
 
         socket.addEventListener('open', async function( e ) {
-            console.log( "connected to " + relay )
               
             var subscription = [ "REQ", subId, filter ]
 
@@ -500,11 +499,6 @@
                         <ul>
                             <li>
                                 <a href="#">
-                                    <i class="fa fa-info-circle"></i>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#">
                                     <i class="fa fa-ellipsis-v"></i>
                                 </a>
                             </li>
@@ -519,9 +513,9 @@
                     <div class="removable-channels"></div>
                     <h2 style="margin-top: 20px;">Create a channel</h2>
                     <input class="create-channel-name" type="text" placeholder="channel name" />
-                    <input class="create-channel-image" type="text" placeholder="channel image" />
-                    <p class="image-instructions">The image needs to be hosted externally (such as on imgur) because I don't want to store a bunch of images</p>
-                    <button class="create-channel-btn">Submit</button>
+                    <input class="create-channel-image" type="text" placeholder="channel image e.g. https://i.ibb.co/Q8X9cQL/bitcoin-chess.png" />
+                    <p class="image-instructions">The image needs to be hosted externally (such as on imgur or imgbb) because I don't want to store a bunch of images</p>
+                    <button class="create-channel-btn" onclick="createChannel()">Submit</button>
                 </div>
             `;
             document.getElementsByClassName( "content" )[ 0 ].innerHTML = html;
@@ -615,6 +609,31 @@
                     subscribed_channels.pop( i );
                 }
             }
+        }
+    </script>
+    <script>
+        async function createChannel() {
+            if ( !document.getElementsByClassName( "create-channel-name" )[ 0 ].value || document.getElementsByClassName( "create-channel-name" )[ 0 ].value == "" ) return
+            if ( !document.getElementsByClassName( "create-channel-image" )[ 0 ].value || document.getElementsByClassName( "create-channel-image" )[ 0 ].value == "" ) return
+            var name = document.getElementsByClassName( "create-channel-name" )[ 0 ].value;
+            var img = document.getElementsByClassName( "create-channel-image" )[ 0 ].value;
+            document.getElementsByClassName( "create-channel-name" )[ 0 ].value = "";
+            document.getElementsByClassName( "create-channel-image" )[ 0 ].value = "";
+            var chan = {}
+            chan[ "about" ] = "";
+            chan[ "name" ] = name;
+            chan[ "picture" ] = img;
+            var note = JSON.stringify( chan );
+            var event = {
+                "content"    : note,
+                "created_at" : Math.floor( Date.now() / 1000 ),
+                "kind"       : 40,
+                "tags"       : [],
+                "pubkey"     : pubKey,
+            }
+            var signedEvent = await getSignedEvent(event, privKey);
+            socket.send(JSON.stringify([ "EVENT", signedEvent ]))
+            setTimeout( function() {addChannel( signedEvent.id );}, 1500 );
         }
     </script>
     <script>
