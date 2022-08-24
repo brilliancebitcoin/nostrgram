@@ -366,7 +366,7 @@ body {
     border-radius: 20px;
     font-size: 15px;
     margin-bottom: 5px;
-    white-space: pre;
+    white-space: pre-wrap;
 }
 
 .chat .content .message-content .message .bubble .author {
