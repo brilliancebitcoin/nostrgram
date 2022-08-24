@@ -699,6 +699,12 @@
             var newfilter  = { "ids": [ id ] }
             var newsubscription = [ "REQ", newsubId, newfilter ]
             socket.send(JSON.stringify( newsubscription ));
+            var stuff_to_backup = {}
+            stuff_to_backup[ "privkey" ] = privKey;
+            stuff_to_backup[ "pubkey" ] = pubKey;
+            stuff_to_backup[ "channels" ] = JSON.stringify( subscribed_channels );
+            stuff_to_backup[ "relays" ] = JSON.stringify( [ relay ] );
+            localStorage[ "backup" ] = JSON.stringify( stuff_to_backup );
         }
     </script>
     <script>
@@ -712,6 +718,12 @@
                     subscribed_channels.pop( i );
                 }
             }
+            var stuff_to_backup = {}
+            stuff_to_backup[ "privkey" ] = privKey;
+            stuff_to_backup[ "pubkey" ] = pubKey;
+            stuff_to_backup[ "channels" ] = JSON.stringify( subscribed_channels );
+            stuff_to_backup[ "relays" ] = JSON.stringify( [ relay ] );
+            localStorage[ "backup" ] = JSON.stringify( stuff_to_backup );
         }
     </script>
     <script>
