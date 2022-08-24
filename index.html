@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css?v=7" />
-    <title>Nostr Chat</title>
+    <title>Nostrgram</title>
     <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
     <script src="https://bundle.run/browserify-cipher@1.0.1"></script>
@@ -19,12 +19,26 @@
         var crypto  = window.crypto 
         var getRand = size => crypto.getRandomValues(new Uint8Array(size))
         var sha256  = bitcoinjs.crypto.sha256
-        var keypair = bitcoinjs.ECPair.makeRandom()
-        var privKey = keypair.privateKey.toString( "hex" )
-        var pubKey  = keypair.publicKey.toString( "hex" )
-        pubKey      = pubKey.substring( 2 )
-        var subscribed_channels = [ "f06a690997a1b7d8283c90a7224eb8b7fe96b7c3d3d8cc7b2e7f743532c02b42" ];
-        var relay = "wss://relay.damus.io";
+        if ( localStorage[ "backup" ] ) {
+            var backup = JSON.parse( localStorage[ "backup" ] );
+            var privKey = backup[ "privkey" ];
+            var pubKey = backup[ "pubkey" ];
+            var subscribed_channels = JSON.parse( backup[ "channels" ] );
+            var relay = JSON.parse( backup[ "relays" ] )[ 0 ];
+        } else {
+            var keypair = bitcoinjs.ECPair.makeRandom()
+            var privKey = keypair.privateKey.toString( "hex" )
+            var pubKey  = keypair.publicKey.toString( "hex" )
+            pubKey      = pubKey.substring( 2 )
+            var subscribed_channels = [ "f06a690997a1b7d8283c90a7224eb8b7fe96b7c3d3d8cc7b2e7f743532c02b42" ];
+            var relay = "wss://relay.damus.io";
+        }
+        var stuff_to_backup = {}
+        stuff_to_backup[ "privkey" ] = privKey;
+        stuff_to_backup[ "pubkey" ] = pubKey;
+        stuff_to_backup[ "channels" ] = JSON.stringify( subscribed_channels );
+        stuff_to_backup[ "relays" ] = JSON.stringify( [ relay ] );
+        localStorage[ "backup" ] = JSON.stringify( stuff_to_backup );
         var socket = new WebSocket( relay );
         socket.addEventListener('message', async function( message ) {
             var [ type, subId, event ] = JSON.parse( message.data );
@@ -47,7 +61,7 @@
                     `;
                 }
             }
-            if (kind == 40 ) {
+            if ( kind == 40 ) {
                 var isError = checkForChannelSubscriptionErrors( content );
                 if ( isError ) {
                     alert("unknown error, could not add this channel -- please contact a developer for help");
@@ -101,21 +115,14 @@
                 if ( isMine ) {
                     var html = `
                         <div data-author="${event.pubkey}" class="message me ${event.id}">
-                            <div class="bubble">
-                                ${content}
-                            </div>
+                            <div class="bubble">${content}</div>
                             <div data-timestamp="${event_time}" class="time">${how_long_ago}</div>
                         </div>
                     `;
                 } else {
                     var html = `
                         <div class="message ${event.id}">
-                            <div class="bubble">
-                                <div class="author ${color}">
-                                    ${event.pubkey.substring( 0, 15 ) + "..."}
-                                </div>
-                                ${content}
-                            </div>
+                            <div class="bubble"><div class="author ${color}">${event.pubkey.substring( 0, 15 ) + "..."}</div>${content}</div>
                             <div data-timestamp="${event_time}" class="time">${how_long_ago}</div>
                         </div>
                     `;
@@ -257,6 +264,7 @@
             var i; for ( i=0; i<document.getElementsByClassName( "channel-outer" ).length; i++ ) {
                 document.getElementsByClassName( "channel-outer" )[ i ].classList.remove( "active" );
             }
+            document.getElementsByClassName( "manage-channels-outer" )[ 0 ].classList.remove( "active" );
             document.getElementsByClassName( channel.getAttribute( "data-id" ) )[ 0 ].classList.add( "active" );
             var html = `
                 <div class="message-header">
@@ -274,7 +282,7 @@
                                     <i class="fa fa-info-circle"></i>
                                 </a>
                             </li>
-                            <li>
+                            <li class="hotdog">
                                 <a href="#">
                                     <i class="fa fa-ellipsis-v"></i>
                                 </a>
@@ -296,7 +304,7 @@
                             </a>
                         </li>
                         <li class="input">
-                            <input type="text" placeholder="Say something">
+                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something"></textarea>
                         </li>
                         <li class="send-btn">
                             <a href="#">
@@ -334,7 +342,7 @@
                                     <i class="fa fa-info-circle"></i>
                                 </a>
                             </li>
-                            <li>
+                            <li class="hotdog">
                                 <a href="#">
                                     <i class="fa fa-ellipsis-v"></i>
                                 </a>
@@ -373,9 +381,12 @@
                 document.getElementsByClassName( "infobox-x" )[ 0 ].addEventListener( "click", function() {
                     document.getElementsByClassName( "infobox" )[ 0 ].style.display = "none";
                 })
-            });            
+            });
+            document.getElementsByClassName( "hotdog" )[ 0 ].addEventListener( "click", function() {
+                showSettings();
+            });
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', function ( e ) {
-                if ( e.key === 'Enter' ) {
+                if ( e.key === 'Enter' && !isShiftDown() ) {
                   sendNote();
                 }
             });
@@ -498,7 +509,7 @@
                     </div>
                     <div class="actions">
                         <ul>
-                            <li>
+                            <li class="hotdog">
                                 <a href="#">
                                     <i class="fa fa-ellipsis-v"></i>
                                 </a>
@@ -544,12 +555,7 @@
                     </div>
                     <div class="actions">
                         <ul>
-                            <li>
-                                <a href="#">
-                                    <i class="fa fa-info-circle"></i>
-                                </a>
-                            </li>
-                            <li>
+                            <li class="hotdog">
                                 <a href="#">
                                     <i class="fa fa-ellipsis-v"></i>
                                 </a>
@@ -576,6 +582,9 @@
                     document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "none";
                 })
             }
+            document.getElementsByClassName( "hotdog" )[ 0 ].addEventListener( "click", function() {
+                showSettings();
+            });
             document.getElementsByClassName( "add-channel-btn" )[ 0 ].addEventListener( 'click', function ( e ) {
                 var channel_id = document.getElementsByClassName( "add-channel-input" )[ 0 ].value;
                 if ( channel_id && channel_id != "" ) {addChannel( channel_id );}
@@ -585,6 +594,99 @@
                     var channel_id = document.getElementsByClassName( "add-channel-input" )[ 0 ].value;
                     if ( channel_id && channel_id != "" ) {addChannel( channel_id );}
                 }
+            });
+        }
+    </script>
+    <script>
+        async function showSettings() {
+            var i; for ( i=0; i<document.getElementsByClassName( "channel-outer" ).length; i++ ) {
+                document.getElementsByClassName( "channel-outer" )[ i ].classList.remove( "active" );
+            }
+            document.getElementsByClassName( "manage-channels-outer" )[ 0 ].classList.remove( "active" );
+            var html = `
+                <div class="message-header">
+                    <div class="channel-info">
+                        <span class="plus-circle fa fa-sliders"></span>
+                        <div class="channel-wrapper">
+                            <div class="name">Settings</div>
+                            <div class="message">Modify all the things</div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <ul>
+                            <li class="hotdog">
+                                <a href="#">
+                                    <i class="fa fa-ellipsis-v"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="message-content">
+                    <h2>Your public key</h2>
+                    <input class="public-key" type="text" value="${pubKey}" disabled/>
+                    <button class="copy-pubkey-btn">Copy</button>
+                    <h2 style="margin-top: 20px;">Your private key</h2>
+                    <input class="private-key" type="text" value="${privKey}" disabled/>
+                    <button class="copy-privkey-btn">Copy</button>
+                    <h2 style="margin-top: 20px;">Import an account</h2>
+                    <input class="import-privkey-input" type="text" placeholder="paste a private key" />
+                    <button class="import-privkey-btn">Import</button>
+                </div>
+            `;
+            document.getElementsByClassName( "content" )[ 0 ].innerHTML = html;
+            document.getElementsByClassName( "message-content" )[ 0 ].style.display = "block";
+            document.getElementsByClassName( "message-content" )[ 0 ].style.flexDirection = "initial";
+            if ( window.innerWidth < 601 ) {
+                var html2 = `
+                    <span class="sidebar_arrow">&rsaquo;</span>
+                    <div class="channel-info">
+                        <span class="plus-circle fa fa-list-check"></span>
+                        <div class="channel-wrapper">
+                            <div class="name">Manage channels</div>
+                            <div class="message">Find/create/remove channels</div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <ul>
+                            <li class="hotdog">
+                                <a href="#">
+                                    <i class="fa fa-ellipsis-v"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                `;
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].innerHTML = html2;
+                document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.width = "100%";
+                document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.display = "flex";
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "flex";
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].style.width = window.innerWidth - 38 + "px";
+            }
+            if ( window.innerWidth < 601 ) {
+                document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
+                document.getElementsByClassName( "content" )[ 0 ].style.display = "flex";
+            }
+            if ( document.getElementsByClassName( "sidebar_arrow" )[ 0 ] ) {
+                document.getElementsByClassName( "sidebar_arrow" )[ 0 ].addEventListener( "click", function() {
+                    document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "block";
+                    document.getElementsByClassName( "content" )[ 0 ].style.display = "none";
+                    document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.display = "none";
+                    document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "none";
+                })
+            }
+            document.getElementsByClassName( "hotdog" )[ 0 ].addEventListener( "click", function() {
+                showSettings();
+            });
+            document.getElementsByClassName( "copy-pubkey-btn" )[ 0 ].addEventListener( "click", function() {
+                copyText( document.getElementsByClassName( "public-key" )[ 0 ] );
+            });
+            document.getElementsByClassName( "copy-privkey-btn" )[ 0 ].addEventListener( "click", function() {
+                copyText( document.getElementsByClassName( "private-key" )[ 0 ] );
+            });
+            document.getElementsByClassName( "import-privkey-btn" )[ 0 ].addEventListener( "click", function() {
+                importPrivkey( document.getElementsByClassName( "import-privkey-input" )[ 0 ].value );
             });
         }
     </script>
@@ -660,6 +762,66 @@
             return false;
         }
     </script>
+    <script>
+        function copyText( element ) {
+            element.select();
+            element.setSelectionRange( 0, 99999 );
+            navigator.clipboard.writeText( element.value );
+            alert( "copied! " + element.value )
+        }
+    </script>
+    <script>
+        function isHex(string) {
+                var a = parseInt(string, 16)
+                return a.toString(16) === string
+            }
+        function importPrivkey( privkey ) {
+            if ( privkey.length != 64 ) {
+                alert( "Your private key must be a 32 byte hex-formatted string" );
+                return;
+            }
+            if ( !(
+                isHex( privkey.substring( 0, 8 ) )
+                && isHex( privkey.substring( 8, 16 ) )
+                && isHex( privkey.substring( 16, 24 ) )
+                && isHex( privkey.substring( 24, 32 ) )
+                && isHex( privkey.substring( 32, 40 ) )
+                && isHex( privkey.substring( 40, 48 ) )
+                && isHex( privkey.substring( 48, 56 ) )
+                && isHex( privkey.substring( 56, 64 ) )
+                ) ) {
+                alert( "your private key is not hex" );
+                return;
+            }
+            var pubkey = nobleSecp256k1.getPublicKey( privkey, true )
+            pubkey = pubkey.substring( 2 );
+            privKey = privkey;
+            pubKey = pubkey;
+            document.getElementsByClassName( "public-key" )[ 0 ].value = pubKey;
+            document.getElementsByClassName( "private-key" )[ 0 ].value = privKey;
+            var stuff_to_backup = {}
+            stuff_to_backup[ "privkey" ] = privKey;
+            stuff_to_backup[ "pubkey" ] = pubKey;
+            stuff_to_backup[ "channels" ] = JSON.stringify( subscribed_channels );
+            stuff_to_backup[ "relays" ] = JSON.stringify( [ relay ] );
+            localStorage[ "backup" ] = JSON.stringify( stuff_to_backup );
+            console.log( localStorage[ "backup" ] );
+            alert( "success, your account has been imported" );
+        }
+    </script>
+    <script>
+        var keymap = {};
+        onkeydown = onkeyup = function(e){
+            e = e || event; // to deal with IE
+            keymap[e.key] = e.type == 'keydown';
+        }
+        function isShiftDown() {
+            if ( "Shift" in keymap ) {
+                return keymap[ "Shift" ];
+            }
+            return false;
+        }
+    </script>
     <div class="chat">
         <div class="sidebar">
             <div class="search">
@@ -681,9 +843,27 @@
             </div>
         </div>
         <div class="content">
+            <div class="message-header">
+                <div class="channel-info">
+                    <span class="plus-circle">N</span>
+                    <div class="channel-wrapper">
+                        <div class="name">Nostrgram</div>
+                        <div class="message">Talk to people</div>
+                    </div>
+                </div>
+                <div class="actions">
+                    <ul>
+                        <li class="hotdog">
+                            <a href="#">
+                                <i class="fa fa-ellipsis-v"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
             <div class="message-content">
                 <div class="startup-message">
-                    Please select a channel on the left
+                    Please select a channel on the left. You can also go to Settings (three dots in the top right) to import a private key or backup your current keys.
                 </div>
             </div>
         </div>
@@ -692,7 +872,27 @@
     </div>
     <div class="message-header-alt">
     </div>
-
+    <script>
+        document.getElementsByClassName( "hotdog" )[ 0 ].addEventListener( "click", function() {
+            showSettings();
+        });
+    </script>
+    <script>
+        function setNoteInputHeight() {
+            if ( document.getElementsByClassName( "note-input" )[ 0 ] ) {
+            document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";
+            var text = document.getElementsByClassName( "note-input" )[ 0 ].value;
+            var match = /\r|\n/.exec(text);
+            if ( match ) {
+              document.getElementsByClassName( "note-input" )[ 0 ].style.lineHeight = "14px";
+            } else {
+              document.getElementsByClassName( "note-input" )[ 0 ].style.lineHeight = "35px";
+            }
+            }
+          setTimeout( function() {setNoteInputHeight();}, 50 );
+        }
+        setNoteInputHeight();
+    </script>
 </body>
 
 </html>
