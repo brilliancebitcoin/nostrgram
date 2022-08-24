@@ -577,6 +577,7 @@
             if ( window.innerWidth < 601 ) {
                 document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
                 document.getElementsByClassName( "content" )[ 0 ].style.display = "flex";
+                document.getElementsByClassName( "message-header" )[ 0 ].remove();
             }
             if ( document.getElementsByClassName( "sidebar_arrow" )[ 0 ] ) {
                 document.getElementsByClassName( "sidebar_arrow" )[ 0 ].addEventListener( "click", function() {
