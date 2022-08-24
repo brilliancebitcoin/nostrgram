@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css?v=6" />
+    <link rel="stylesheet" href="styles.css?v=7" />
     <title>Nostr Chat</title>
     <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
@@ -23,7 +23,7 @@
         var privKey = keypair.privateKey.toString( "hex" )
         var pubKey  = keypair.publicKey.toString( "hex" )
         pubKey      = pubKey.substring( 2 )
-        var subscribed_channels = [ "f06a690997a1b7d8283c90a7224eb8b7fe96b7c3d3d8cc7b2e7f743532c02b42", "7c16977e3591be5e6d847c5e50697768fa8ecd4a06ea1acc18468b8d30962f50" ];
+        var subscribed_channels = [ "f06a690997a1b7d8283c90a7224eb8b7fe96b7c3d3d8cc7b2e7f743532c02b42" ];
         var relay = "wss://relay.damus.io";
         var socket = new WebSocket( relay );
         socket.addEventListener('message', async function( message ) {
@@ -613,10 +613,14 @@
     </script>
     <script>
         async function createChannel() {
-            if ( !document.getElementsByClassName( "create-channel-name" )[ 0 ].value || document.getElementsByClassName( "create-channel-name" )[ 0 ].value == "" ) return
-            if ( !document.getElementsByClassName( "create-channel-image" )[ 0 ].value || document.getElementsByClassName( "create-channel-image" )[ 0 ].value == "" ) return
             var name = document.getElementsByClassName( "create-channel-name" )[ 0 ].value;
             var img = document.getElementsByClassName( "create-channel-image" )[ 0 ].value;
+            if ( !name || name == "" ) return
+            if ( !img || img == "" ) return
+            if ( !img.startsWith( "https://" ) || ( !img.endsWith( ".png" ) && !img.endsWith( ".jpg" ) && !img.endsWith( ".jpeg" ) && !img.endsWith( ".gif" ) && !img.endsWith( ".webp" ) ) ) {
+                    alert( "There was an error with your image url, it either did not begin with https:// or it did not end with .png, .jpg, .jpeg, .gif, or .webp" );
+                    return;
+                }
             document.getElementsByClassName( "create-channel-name" )[ 0 ].value = "";
             document.getElementsByClassName( "create-channel-image" )[ 0 ].value = "";
             var chan = {}
@@ -645,7 +649,10 @@
                 }  
                 if ( !( "name" in json ) ) {
                     return true;
-                }  
+                }
+                if ( !json[ "picture" ].startsWith( "https://" ) || ( !json[ "picture" ].endsWith( ".png" ) && !json[ "picture" ].endsWith( ".jpg" ) && !json[ "picture" ].endsWith( ".jpeg" ) && !json[ "picture" ].endsWith( ".gif" ) && !json[ "picture" ].endsWith( ".webp" ) ) ) {
+                    return true;
+                }
             } catch ( e ) {  
                 return true;  
             }
