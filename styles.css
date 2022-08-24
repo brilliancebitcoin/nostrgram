@@ -161,6 +161,7 @@ body {
 .chat .sidebar .channels ul li a .channel-inner .message {
     font-size: 13px;
     color: #999;
+    word-break: break-word;
 }
 
 .chat .sidebar .channels ul li a .notification {
@@ -357,7 +358,8 @@ body {
 .chat .content .message-content .message {
     align-self: flex-start;
     margin-bottom: 20px;
-
+    max-width: 80%;
+    word-break: break-word;
 }
 
 .chat .content .message-content .message .bubble {
@@ -606,7 +608,7 @@ body {
     color: white;
     padding: 5px;
     z-index: 1;
-    word-break: break-all;
+    word-break: break-word;
 }
 
 .infobox-text {
