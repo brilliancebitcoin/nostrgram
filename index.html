@@ -154,7 +154,11 @@
                         parent = event[ "tags" ][ i ][ 1 ];
                     }
                 }
-                document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].innerText = content;
+                var shortened_content = content.replace( /\n/g, " " ).substring( 0, 50 );
+                if ( content.length > 50 ) {
+                    shortened_content = shortened_content + "...";
+                }
+                document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].innerText = shortened_content;
                 document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago )
                 document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestamp", event_time )
             }
