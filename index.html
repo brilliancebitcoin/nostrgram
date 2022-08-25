@@ -244,6 +244,7 @@
         })
 
         async function openConnection( e ) {
+            getUserMeta( pubKey );
             //heartbeat tests
             //console.log( "connected to " + relay );
             heartbeat = true;
@@ -1088,7 +1089,6 @@
                 }, 1500 );
             }
         }
-        getUserMeta( pubKey );
     </script>
     <script>
         function forceUpdateUserMeta( pubkey ) {
