@@ -197,10 +197,10 @@
                 }
                 if ( now - event_time > 15 ) {
                     document.getElementsByClassName( "message-content" )[ 0 ].innerHTML = html + document.getElementsByClassName( "message-content" )[ 0 ].innerHTML;
-                    document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                    document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
                 } else {
                     document.getElementsByClassName( "message-content" )[ 0 ].innerHTML += html;
+                    document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
+                    document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
                 }
                 if ( document.getElementsByClassName( "message-header" )[ 0 ] && Number( document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
                     document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
