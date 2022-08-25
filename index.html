@@ -733,13 +733,18 @@
                 document.getElementsByClassName( "channel-outer" )[ i ].classList.remove( "active" );
             }
             document.getElementsByClassName( "manage-channels-outer" )[ 0 ].classList.remove( "active" );
+            if ( namemap[ pubKey ] && namemap[ pubKey ] != "none" ) {
+                var name = namemap[ pubKey ];
+            }
             if ( localStorage[ "my-meta-info" ] ) {
                 var myMetaInfo = JSON.parse( localStorage[ "my-meta-info" ] );
                 var name = myMetaInfo[ "name" ];
                 var about = myMetaInfo[ "about" ];
                 var picture = myMetaInfo[ "picture" ];
             } else {
-                var name = "";
+                if ( !name ) {
+                    var name = "";
+                }
                 var about = "";
                 var picture = "";
             }
