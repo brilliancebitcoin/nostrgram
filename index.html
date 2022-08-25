@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css?v=14" />
+    <link rel="stylesheet" href="styles.css?v=15" />
     <title>Nostrgram</title>
     <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
@@ -161,12 +161,11 @@
                         </div>
                     `;
                 }
-                var array = [];
-                array.push( html );
-                array.forEach( function( item ) {
-                    document.getElementsByClassName( "message-content" )[ 0 ].innerHTML = item + document.getElementsByClassName( "message-content" )[ 0 ].innerHTML;
-                })
-                array.reverse();
+                if ( now - event_time > 15 ) {
+                    document.getElementsByClassName( "message-content" )[ 0 ].innerHTML = html + document.getElementsByClassName( "message-content" )[ 0 ].innerHTML;
+                } else {
+                    document.getElementsByClassName( "message-content" )[ 0 ].innerHTML += html;
+                }
                 document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
                 document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
                 if ( document.getElementsByClassName( "message-header" )[ 0 ] && Number( document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
