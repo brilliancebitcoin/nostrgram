@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css?v=21" />
+    <link rel="stylesheet" href="styles.css?v=22" />
     <title>Nostrgram</title>
     <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
@@ -334,7 +334,7 @@
         function displayChannel( image, name, message, id, timestamp ) {
             var html = `
                         <li class="channel-outer ${id}" data-id="${id}" data-img="${image}" onclick="selectChannel( this );">
-                            <a href="#">
+                            <a>
                                 <span style="background-image: url(${image})"></span>
                                 <div class="channel-inner">
                                     <div class="name">${name}</div>
@@ -370,12 +370,12 @@
                     <div class="actions">
                         <ul>
                             <li class="info-circle">
-                                <a href="#">
+                                <a>
                                     <i class="fa fa-info-circle"></i>
                                 </a>
                             </li>
                             <li class="hotdog">
-                                <a href="#">
+                                <a>
                                     <i class="fa fa-ellipsis-v"></i>
                                 </a>
                             </li>
@@ -391,7 +391,7 @@
                 <div class="message-form">
                     <ul>
                         <li class="emoji-btn">
-                            <a href="#">
+                            <a>
                                 <i class="fa fa-laugh"></i>
                             </a>
                         </li>
@@ -399,17 +399,17 @@
                             <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something"></textarea>
                         </li>
                         <li class="send-btn">
-                            <a href="#">
+                            <a>
                                 <i class="fa fa-paper-plane"></i>
                             </a>
                         </li>
                         <li class="sound-btn">
-                            <a href="#">
+                            <a>
                                 <i class="fa fa-microphone"></i>
                             </a>
                         </li>
                         <li class="image-btn">
-                            <a href="#">
+                            <a>
                                 <i class="fa fa-image"></i>
                             </a>
                         </li>
@@ -430,12 +430,12 @@
                     <div class="actions">
                         <ul>
                             <li class="info-circle">
-                                <a href="#">
+                                <a>
                                     <i class="fa fa-info-circle"></i>
                                 </a>
                             </li>
                             <li class="hotdog">
-                                <a href="#">
+                                <a>
                                     <i class="fa fa-ellipsis-v"></i>
                                 </a>
                             </li>
@@ -645,7 +645,7 @@
                     <div class="actions">
                         <ul>
                             <li class="hotdog">
-                                <a href="#">
+                                <a>
                                     <i class="fa fa-ellipsis-v"></i>
                                 </a>
                             </li>
@@ -691,7 +691,7 @@
                     <div class="actions">
                         <ul>
                             <li class="hotdog">
-                                <a href="#">
+                                <a>
                                     <i class="fa fa-ellipsis-v"></i>
                                 </a>
                             </li>
@@ -766,7 +766,7 @@
                     <div class="actions">
                         <ul>
                             <li class="hotdog">
-                                <a href="#">
+                                <a>
                                     <i class="fa fa-ellipsis-v"></i>
                                 </a>
                             </li>
@@ -807,7 +807,7 @@
                     <div class="actions">
                         <ul>
                             <li class="hotdog">
-                                <a href="#">
+                                <a>
                                     <i class="fa fa-ellipsis-v"></i>
                                 </a>
                             </li>
@@ -1012,7 +1012,7 @@
             <div class="channels">
                 <ul>
                         <li class="manage-channels-outer" onclick="manageChannels();">
-                            <a href="#">
+                            <a>
                                 <span class="plus-circle fa fa-list-check"></span>
                                 <div class="manage-channels-inner">
                                     <div class="name">Manage channels</div>
@@ -1035,7 +1035,7 @@
                 <div class="actions">
                     <ul>
                         <li class="hotdog">
-                            <a href="#">
+                            <a>
                                 <i class="fa fa-ellipsis-v"></i>
                             </a>
                         </li>
