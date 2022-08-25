@@ -1036,7 +1036,7 @@
                 <div class="message-content">
                     <img class="big-picture" src="${picture}" />
                     <h2>${name}</h2>
-                    <p class="profile-about">${name} lives in an abandoned warehouse on top of a mountain in a jungle. Surviving only on bananas and leftover car parts, ${name} roams the wild horizon of the amazon, looking on and on for something not yet grokked</p>
+                    <p class="profile-about" style="display: none;">${name} lives in an abandoned warehouse on top of a mountain in a jungle. Surviving only on bananas and leftover car parts, ${name} roams the wild horizon of the amazon, looking on and on for something not yet grokked</p>
                     <h2 style="margin-top: 20px;">${name}'s public key</h2>
                     <p class="profile-pubkey">${pubkey}</p>
                     <button class="dm" onclick="dmThisUser( '${pubkey}', '${name}', '${picture}' )">Direct message this user</button>
@@ -1091,7 +1091,7 @@
     </script>
     <script>
         function dmThisUser( pubkey, name, picture ) {
-            if ( !document.getElementsByClassName( pubkey.substring( 0, 20 )[ 0 ] ) ) {
+            if ( !document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ] ) {
                 document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( pubkey, name, picture );
                 var obj = {}
                 obj[ "pubkey" ] = pubkey;
