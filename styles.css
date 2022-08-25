@@ -765,7 +765,7 @@ body {
 @media only screen and (max-width: 600px) {
 
     .chat .content .message-content {
-        margin-top: 51px;
+        padding-top: 61px;
         padding-bottom: 51px;
     }
 
