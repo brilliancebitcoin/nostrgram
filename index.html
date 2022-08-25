@@ -267,6 +267,7 @@
                     document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestamp", event_time )
                 }
             }
+            //this code is for "closed dms" where you only see someone's dms if you first add them to your sidebar
             if ( kind === 4 && subId.includes( "encrypted-dms" ) ) {
                 if ( document.getElementsByClassName( event.id )[ 0 ] ) return
                 var isMine = ( event.pubkey == pubKey );
@@ -361,6 +362,12 @@
                     document.getElementsByClassName( "message-content" )[ 0 ].childNodes[ document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length - 2 ].scrollIntoView();
                 }
             }
+            if ( kind === 4 && subId.includes( "encrypted-open-dms" ) ) {
+                var thereAreEncryptionErrors = await checkForEncryptionErrors( privKey, event.pubkey, event[ "content" ] );
+                if ( !document.getElementsByClassName( event.pubkey.substring( 0, 20 ) )[ 0 ] && !thereAreEncryptionErrors ) {
+                    addPubkeyToSidebar( event.pubkey );
+                }
+            }
         })
 
         async function openConnection( e ) {
@@ -373,19 +380,16 @@
             var filter  = { "ids": subscribed_channels }
             var subscription = [ "REQ", subId, filter ]
             socket.send(JSON.stringify( subscription ));
-            /*
-                var message   = "this message is super secret!"
-                var encrypted = encrypt( privKey, pubKey, message )
-                var event2 = {
-                    "content"    : encrypted,
-                    "created_at" : Math.floor( Date.now() / 1000 ),
-                    "kind"       : 4,
-                    "tags"       : [ [ 'p', pubKey ] ],
-                    "pubkey"     : pubKey,
-                }
-                var signedEvent2 = await getSignedEvent(event2, privKey)
-                socket.send(JSON.stringify([ "EVENT", signedEvent2 ]))
-            */
+            //this gives users open dms
+            var openSubId   = "encrypted-open-dms" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 0, 20 );
+            var openFilter  = {
+                "kinds": [ 4 ],
+                "#p": [ pubKey ],
+                "limit": 200
+            }
+            var openSubscription = [ "REQ", openSubId, openFilter ]
+            var sendable = JSON.stringify( openSubscription )
+            socket.send( sendable );
         }
 
         socket.addEventListener('open', openConnection );
@@ -619,17 +623,18 @@
         }
     </script>
     <script>
-        function addDecryptedMessages( pubkey ) {
-            var subId   = "encrypted-dms" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 0, 20 );
-            sessionStorage[ "encrypted-dms-subid" ] = subId;
-            var filter  = {
+//this code is for "closed dms" where you only see someone's dms if you first add them to your sidebar
+        function addClosedDecryptedMessages( pubkey ) {
+            var closedSubId   = "encrypted-dms" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 0, 20 );
+            sessionStorage[ "encrypted-dms-subid" ] = closedSubId;
+            var closedFilter  = {
                 "authors": [ pubKey, pubkey ],
                 "kinds": [ 4 ],
                 "#p": [ pubKey, pubkey ],
                 "limit": 200
             }
-            var subscription = [ "REQ", subId, filter ]
-            socket.send(JSON.stringify( subscription ));
+            var closedSubscription = [ "REQ", closedSubId, closedFilter ]
+            socket.send(JSON.stringify( closedSubscription ));
         }
     </script>
     <script>
@@ -659,18 +664,7 @@
             }
             var signedEvent = await getSignedEvent(event, privKey);
             socket.send(JSON.stringify([ "EVENT", signedEvent ]))
-            var html = `
-                <div data-author="${pubKey}" class="message me ${signedEvent.id}">
-                    <div class="bubble">${note}</div>
-                    <div data-timestamp="${now}" class="time">0 seconds ago</div>
-                </div>
-            `;
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
-            document.getElementsByClassName( "message-content" )[ 0 ].innerHTML += html;
-            document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-            if ( document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length > 1 ) {
-                document.getElementsByClassName( "message-content" )[ 0 ].childNodes[ document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length - 2 ].scrollIntoView();
-            }
         }
     </script>
     <script>
@@ -1229,7 +1223,7 @@
             document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', function ( e ) {
                 sendEncryptedNote( document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value, pubkey );
             });
-            addDecryptedMessages( pubkey );
+            addClosedDecryptedMessages( pubkey );
         }
     </script>
     <script>
@@ -1309,6 +1303,16 @@
             var signedEvent = await getSignedEvent(event, privKey);
             socket.send(JSON.stringify([ "EVENT", signedEvent ]))
             setTimeout( function() {addChannel( signedEvent.id );}, 1500 );
+        }
+    </script>
+    <script>
+        async function checkForEncryptionErrors( privkey, pubkey, content ) {
+            try {  
+                var content = await decrypt( privkey, pubkey, content );
+            } catch ( e ) {  
+                return true;  
+            }
+            return false;
         }
     </script>
     <script>
@@ -1505,6 +1509,33 @@
                     socket.send(JSON.stringify( closer ));
                 }, 1500 );
             }
+        }
+    </script>
+    <script>
+        function addPubkeyToSidebar( pubkey ) {
+            //check if pubkey is mapped to image
+            if ( pubkey in imagemap && imagemap[ pubkey ] != "none" ) {
+                var picture = imagemap[ pubkey ];
+            } else {
+                var picture = "https://www.gravatar.com/avatar/" + pubkey + "?s=128&d=retro";
+            }
+            //check if pubkey is mapped to name
+            if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
+                var name = namemap[ pubkey ];
+            } else {
+                var name = pubkey.substring( 0, 15 ) + "...";
+            }
+            var obj = {}
+            obj[ "pubkey" ] = pubkey;
+            obj[ "name" ] = name;
+            obj[ "picture" ] = picture;
+            dms_info[ pubkey ] = obj;
+            localStorage[ "dms_info" ] = JSON.stringify( dms_info );
+            setTimeout( function() {
+                if ( !document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ] ) {
+                    document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( pubkey, name, picture );
+                }
+            }, 1000 );
         }
     </script>
     <script>
