@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css?v=15" />
+    <link rel="stylesheet" href="styles.css?v=16" />
     <title>Nostrgram</title>
     <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
@@ -46,9 +46,16 @@
         }
         var array_of_pubkeys = [];
         var socket = new WebSocket( relay );
+        var heartbeat = false;
         socket.addEventListener('message', async function( message ) {
+            heartbeat = true;
             var [ type, subId, event ] = JSON.parse( message.data );
             var { kind, content } = event || {}
+            if ( subId.startsWith( "00000002" ) ) {
+                if ( content ) {
+                    console.log( "heartbeat event:", event );
+                }
+            }
             if ( subId.startsWith( "00000001" ) ) {
                 if ( content && !checkForUserMetaErrors( content ) ) {
                     if ( "name" in JSON.parse( content ) && !( !JSON.parse( content )[ "name" ] || JSON.parse( content )[ "name" ] == "" ) ) {
@@ -70,11 +77,11 @@
             }
             if ( kind && subId.startsWith( "00000000" ) ) {
                 if ( kind != 40 ) {
-                    alert("unknown error, could not add this channel -- please contact a developer for help");
+                    showToast( "unknown error, could not add this channel -- please contact a developer for help" );
                 }
                 var isError = checkForChannelSubscriptionErrors( content );
                 if ( isError ) {
-                    alert("unknown error, could not add this channel -- please contact a developer for help");
+                    showToast( "unknown error, could not add this channel -- please contact a developer for help" );
                 } else {
                     document.getElementsByClassName( "removable-channels" )[ 0 ].innerHTML += `
                             <div class="removable-channel ${event.id}">
@@ -89,7 +96,7 @@
             if ( kind == 40 ) {
                 var isError = checkForChannelSubscriptionErrors( content );
                 if ( isError ) {
-                    alert("unknown error, could not add this channel -- please contact a developer for help");
+                    showToast( "unknown error, could not add this channel -- please contact a developer for help" );
                 } else {
                     document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += ( displayChannel( JSON.parse( content )[ "picture" ], JSON.parse( content )[ "name" ], "", event.id, event.created_at ) );
                     getLatestMessage( event.id );
@@ -203,8 +210,6 @@
                     document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago )
                     document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestamp", event_time )
                 }
-                var closer = [ "CLOSE", subId ];
-                socket.send(JSON.stringify( closer ));
             }
             if (kind === 4) {
                 content = await decrypt(privKey, pubKey, content)
@@ -214,7 +219,8 @@
         var filter  = { "ids": subscribed_channels }
 
         socket.addEventListener('open', async function( e ) {
-              
+            console.log( "connected to " + relay );
+            heartbeat = true;
             var subscription = [ "REQ", subId, filter ]
 
             socket.send(JSON.stringify( subscription ));
@@ -532,20 +538,36 @@
         }
     </script>
     <script>
-        function updateTimesAndNames() {
+        function checkHeartbeat() {
+            heartbeat = false;
+            var heartbeatsubId   = "00000002" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 )
+            var heartbeatfilter  = { "ids": [ "41ce9bc50da77dda5542f020370ecc2b056d8f2be93c1cedf1bf57efcab095b0" ] }
+            var heartbeatsub     = [ "REQ", heartbeatsubId, heartbeatfilter ];
+            socket.send(JSON.stringify( heartbeatsub ));
+            setTimeout( function() {
+                if ( !heartbeat ) {
+                    showToast( "the heartbeat function needed activation" )
+                    socket = new WebSocket( relay );
+                }
+            }, 2000 );
+        }
+    </script>
+    <script>
+        function doBackgroundTasks() {
             array_of_pubkeys.forEach( function() {
                 getUserMeta( array_of_pubkeys[ 0 ] );
                 array_of_pubkeys.shift();
             })
+            setTimeout( function() {checkHeartbeat();}, 1000 );
             var i; for ( i=0; i<document.getElementsByClassName( "time" ).length; i++ ) {
                 var now = Math.floor( Date.now() / 1000 )
                 var event_time = document.getElementsByClassName( "time" )[ i ].getAttribute( "data-timestamp" )
                 var how_long_ago = convertHMS( now - event_time )
                 document.getElementsByClassName( "time" )[ i ].innerText = how_long_ago;
             }
-            setTimeout( function() {updateTimesAndNames();}, 10000 );
+            setTimeout( function() {doBackgroundTasks();}, 10000 );
         }
-        updateTimesAndNames();
+        doBackgroundTasks();
     </script>
     <script>
         function manageChannels() {
@@ -797,7 +819,7 @@
             if ( !name || name == "" ) return
             if ( !img || img == "" ) return
             if ( !img.startsWith( "https://" ) || ( !img.endsWith( ".png" ) && !img.endsWith( ".jpg" ) && !img.endsWith( ".jpeg" ) && !img.endsWith( ".gif" ) && !img.endsWith( ".webp" ) ) ) {
-                    alert( "There was an error with your image url, it either did not begin with https:// or it did not end with .png, .jpg, .jpeg, .gif, or .webp" );
+                    showToast( "There was an error with your image url, it either did not begin with https:// or it did not end with .png, .jpg, .jpeg, .gif, or .webp" );
                     return;
                 }
             document.getElementsByClassName( "create-channel-name" )[ 0 ].value = "";
@@ -853,7 +875,7 @@
             element.select();
             element.setSelectionRange( 0, 99999 );
             navigator.clipboard.writeText( element.value );
-            alert( "copied! " + element.value );
+            showToast( "copied" );
         }
     </script>
     <script>
@@ -866,7 +888,7 @@
         }
         function importPrivkey( privkey ) {
             if ( privkey.length != 64 ) {
-                alert( "Your private key must be a 32 byte hex-formatted string" );
+                showToast( "Your private key must be a 32 byte hex-formatted string" );
                 return;
             }
             if ( !(
@@ -879,7 +901,7 @@
                 && isHex( privkey.substring( 48, 56 ) )
                 && isHex( privkey.substring( 56, 64 ) )
                 ) ) {
-                alert( "your private key is not hex" );
+                showToast( "your private key is not hex" );
                 return;
             }
             var pubkey = nobleSecp256k1.getPublicKey( privkey, true )
@@ -894,7 +916,7 @@
             stuff_to_backup[ "channels" ] = JSON.stringify( subscribed_channels );
             stuff_to_backup[ "relays" ] = JSON.stringify( [ relay ] );
             localStorage[ "backup" ] = JSON.stringify( stuff_to_backup );
-            alert( "success, your account has been imported" );
+            showToast( "success, your account was imported" );
         }
     </script>
     <script>
@@ -997,6 +1019,15 @@
             }
         }
     </script>
+    <script>
+        function showToast( content ) {
+            var x = document.getElementById( "toast" );
+            x.innerText = content;
+            x.className = "show";
+            setTimeout(function(){ x.classList.remove( "show" ); }, 3000);
+        }
+    </script>
+    <div id="toast"></div>
 </body>
 
 </html>
