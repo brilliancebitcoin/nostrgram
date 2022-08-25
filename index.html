@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css?v=23" />
+    <link rel="stylesheet" href="styles.css?v=24" />
     <title>Nostrgram</title>
     <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
     <script src="https://bundle.run/browserify-cipher@1.0.1"></script>
 </head>
-
 <body>
     <!-- based on this: https://github.com/YunusEmreNalbant/css-chat-interface -->
     <script>
@@ -43,6 +41,16 @@
             var namemap = JSON.parse( localStorage[ "namemap" ] );
         } else {
             var namemap = {}
+        }
+        if ( localStorage[ "imagemap" ] ) {
+            var imagemap = JSON.parse( localStorage[ "imagemap" ] );
+        } else {
+            var imagemap = {}
+        }
+        if ( localStorage[ "dms_info" ] ) {
+            var dms_info = JSON.parse( localStorage[ "dms_info" ] );
+        } else {
+            var dms_info = {}
         }
         var array_of_pubkeys = [];
         var socket = new WebSocket( relay );
@@ -94,9 +102,21 @@
                         namemap[ event.pubkey ] = "none";
                         localStorage[ "namemap" ] = JSON.stringify( namemap );
                     }
+                    if ( "picture" in JSON.parse( content ) && !( !JSON.parse( content )[ "picture" ] || JSON.parse( content )[ "picture" ] == "" ) ) {
+                        imagemap[ event.pubkey ] = JSON.parse( content )[ "picture" ];
+                        localStorage[ "imagemap" ] = JSON.stringify( imagemap );
+                        var i; for ( i=0; i<document.getElementsByClassName( event.pubkey ).length; i++ ) {
+                            document.getElementsByClassName( event.pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + JSON.parse( content )[ "picture" ] + ")";
+                        }
+                    } else {
+                        imagemap[ event.pubkey ] = "none";
+                        localStorage[ "imagemap" ] = JSON.stringify( imagemap );
+                    }
                 } else if ( content && checkForUserMetaErrors( content ) ) {
                     namemap[ event.pubkey ] = "none";
                     localStorage[ "namemap" ] = JSON.stringify( namemap );
+                    imagemap[ event.pubkey ] = "none";
+                    localStorage[ "imagemap" ] = JSON.stringify( imagemap );
                 }
                 var closer = [ "CLOSE", subId ];
                 socket.send(JSON.stringify( closer ));
@@ -124,8 +144,13 @@
                 if ( isError ) {
                     showToast( "unknown error, could not add this channel -- please contact a developer for help" );
                 } else {
-                    document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += ( displayChannel( JSON.parse( content )[ "picture" ], JSON.parse( content )[ "name" ], "", event.id, event.created_at ) );
+                    var i; for ( i=0; i<document.getElementsByClassName( "dm-outer" ).length; i++ ) {
+                        document.getElementsByClassName( "dm-outer" )[ i ].remove();
+                        i = i - 1;
+                    }
+                    document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayChannel( JSON.parse( content )[ "picture" ], JSON.parse( content )[ "name" ], "", event.id, event.created_at );
                     getLatestMessage( event.id );
+                    addDmsToSidebar();
                 }
                 var closer = [ "CLOSE", subId ];
                 socket.send(JSON.stringify( closer ));
@@ -175,22 +200,25 @@
                     color = "purple";
                 };
                 var name = event.pubkey.substring( 0, 15 ) + "...";
+                var picture = "https://www.gravatar.com/avatar/" + event.pubkey + "?s=128&d=retro";
                 if ( event.pubkey in namemap && namemap[ event.pubkey ] != "none" ) {
                     name = namemap[ event.pubkey ];
+                }
+                if ( event.pubkey in imagemap && imagemap[ event.pubkey ] != "none" ) {
+                    picture = imagemap[ event.pubkey ];
                 }
                 content = content.replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
                 if ( isMine ) {
                     var html = `
                         <div data-author="${event.pubkey}" class="message me ${event.id}">
-                            <div class="bubble">${content}</div>
-                            <div data-timestamp="${event_time}" class="time">${how_long_ago}</div>
+                            <div class="bubble">${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
                         </div>
                     `;
                 } else {
                     var html = `
                         <div class="message ${event.id}">
-                            <div class="bubble"><div class="author ${color} ${event.pubkey}">${name}</div>${content}</div>
-                            <div data-timestamp="${event_time}" class="time">${how_long_ago}</div>
+                            <span class="picture" style="background-image: url(${picture})" onclick="showProfile( '${event.pubkey}', '${name}', '${picture}' )"></span>
+                            <div class="bubble"><div class="author ${color} ${event.pubkey}">${name}</div>${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
                         </div>
                     `;
                 }
@@ -239,8 +267,99 @@
                     document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestamp", event_time )
                 }
             }
-            if (kind === 4) {
-                content = await decrypt(privKey, pubKey, content)
+            if ( kind === 4 && subId.includes( "encrypted-dms" ) ) {
+                if ( document.getElementsByClassName( event.id )[ 0 ] ) return
+                var isMine = ( event.pubkey == pubKey );
+                if ( !isMine && !array_of_pubkeys.includes( event.pubkey ) ) {
+                    array_of_pubkeys.push( event.pubkey );
+                }
+                var now = Math.floor( Date.now() / 1000 )
+                var event_time = event.created_at
+                var how_long_ago = convertHMS( now - event_time )
+                if ( event.pubkey == pubKey ) {
+                    var otherKey = "";
+                    var i; for ( i=0; i<event.tags.length; i++ ) {
+                        if ( event[ "tags" ][ i ][ 0 ] == "p" && ( !otherKey || otherKey == "" ) ) {
+                            otherKey = event[ "tags" ][ i ][ 1 ];
+                        } else {
+                            otherKey = event.pubkey;
+                        }
+                    }
+                } else {
+                    otherKey = event.pubkey;
+                }
+                content = await decrypt(privKey, otherKey, content)
+                if ( !document.getElementsByClassName( otherKey.substring( 0, 20 ) )[ 0 ].classList.contains( "active" ) ) return
+                var color = "";
+                if ( isNaN( event.pubkey.substring( 0, 1 ) ) && ( event.pubkey.substring( 0, 1 ) == "e" || event.pubkey.substring( 0, 1 ) == "f" ) ) {
+                    color = "red";
+                }
+                if ( isNaN( event.pubkey.substring( 0, 1 ) ) && ( event.pubkey.substring( 0, 1 ) == "c" || event.pubkey.substring( 0, 1 ) == "d" ) ) {
+                    color = "pink";
+                };
+                if ( isNaN( event.pubkey.substring( 0, 1 ) ) && ( event.pubkey.substring( 0, 1 ) == "a" || event.pubkey.substring( 0, 1 ) == "b" ) ) {
+                    color = "orange";
+                };
+                if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 10 ) {
+                    color = "yellow";
+                };
+                if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 8 ) {
+                    color = "green";
+                };
+                if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 6 ) {
+                    color = "lightblue";
+                };
+                if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 4 ) {
+                    color = "blue";
+                };
+                if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 2 ) {
+                    color = "purple";
+                };
+                var name = event.pubkey.substring( 0, 15 ) + "...";
+                var picture = "https://www.gravatar.com/avatar/" + event.pubkey + "?s=128&d=retro";
+                if ( event.pubkey in namemap && namemap[ event.pubkey ] != "none" ) {
+                    name = namemap[ event.pubkey ];
+                }
+                if ( event.pubkey in imagemap && imagemap[ event.pubkey ] != "none" ) {
+                    picture = imagemap[ event.pubkey ];
+                }
+                content = content.replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
+                //console.log( "my time:", now, "event time:", event_time, "how long ago:", how_long_ago )
+                if ( isMine ) {
+                    var html = `
+                        <div data-author="${event.pubkey}" class="message me ${event.id}">
+                            <div class="bubble">${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
+                        </div>
+                    `;
+                } else {
+                    var html = `
+                        <div class="message ${event.id}">
+                            <span class="picture" style="background-image: url(${picture})" onclick="showProfile( '${event.pubkey}', '${name}', '${picture}' )"></span>
+                            <div class="bubble"><div class="author ${color} ${event.pubkey}">${name}</div>${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
+                        </div>
+                    `;
+                }
+                if ( now - event_time > 15 ) {
+                    document.getElementsByClassName( "message-content" )[ 0 ].innerHTML = html + document.getElementsByClassName( "message-content" )[ 0 ].innerHTML;
+                } else {
+                    document.getElementsByClassName( "message-content" )[ 0 ].innerHTML += html;
+                }
+                if ( document.getElementsByClassName( "message-header" )[ 0 ] && Number( document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
+                    document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
+                    document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
+                }
+                if ( window.innerWidth < 601 && Number( document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
+                    document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
+                    document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
+                }
+                if ( Number( document.getElementsByClassName( otherKey.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
+                    document.getElementsByClassName( otherKey.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestamp", event_time );
+                    document.getElementsByClassName( otherKey.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago );
+                }
+                document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
+                if ( document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length > 1 ) {
+                    document.getElementsByClassName( "message-content" )[ 0 ].childNodes[ document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length - 2 ].scrollIntoView();
+                }
             }
         })
 
@@ -249,31 +368,24 @@
             //heartbeat tests
             //console.log( "connected to " + relay );
             heartbeat = true;
+            addDmsToSidebar();
             var subId   = bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" )
             var filter  = { "ids": subscribed_channels }
             var subscription = [ "REQ", subId, filter ]
             socket.send(JSON.stringify( subscription ));
-
-            var event = {
-                "content"    : "this workshop is awesome!",
-                "created_at" : Math.floor( Date.now() / 1000 ),
-                "kind"       : 1,
-                "tags"       : [],
-                "pubkey"     : pubKey,
-            }
-            var signedEvent = await getSignedEvent(event, privKey)
-            //socket.send(JSON.stringify([ "EVENT", signedEvent ]))
-            var message   = "this message is super secret!"
-            var encrypted = encrypt( privKey, pubKey, message )
-            var event2 = {
-                "content"    : encrypted,
-                "created_at" : Math.floor( Date.now() / 1000 ),
-                "kind"       : 4,
-                "tags"       : [ [ 'p', pubKey ] ],
-                "pubkey"     : pubKey,
-            }
-            var signedEvent2 = await getSignedEvent(event2, privKey)
-            //socket.send(JSON.stringify([ "EVENT", signedEvent2 ]))
+            /*
+                var message   = "this message is super secret!"
+                var encrypted = encrypt( privKey, pubKey, message )
+                var event2 = {
+                    "content"    : encrypted,
+                    "created_at" : Math.floor( Date.now() / 1000 ),
+                    "kind"       : 4,
+                    "tags"       : [ [ 'p', pubKey ] ],
+                    "pubkey"     : pubKey,
+                }
+                var signedEvent2 = await getSignedEvent(event2, privKey)
+                socket.send(JSON.stringify([ "EVENT", signedEvent2 ]))
+            */
         }
 
         socket.addEventListener('open', openConnection );
@@ -355,6 +467,9 @@
             socket.send(JSON.stringify( closer ));
             var i; for ( i=0; i<document.getElementsByClassName( "channel-outer" ).length; i++ ) {
                 document.getElementsByClassName( "channel-outer" )[ i ].classList.remove( "active" );
+            }
+            var i; for ( i=0; i<document.getElementsByClassName( "dm-outer" ).length; i++ ) {
+                document.getElementsByClassName( "dm-outer" )[ i ].classList.remove( "active" );
             }
             document.getElementsByClassName( "manage-channels-outer" )[ 0 ].classList.remove( "active" );
             document.getElementsByClassName( channel.getAttribute( "data-id" ) )[ 0 ].classList.add( "active" );
@@ -504,6 +619,20 @@
         }
     </script>
     <script>
+        function addDecryptedMessages( pubkey ) {
+            var subId   = "encrypted-dms" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 0, 20 );
+            sessionStorage[ "encrypted-dms-subid" ] = subId;
+            var filter  = {
+                "authors": [ pubKey, pubkey ],
+                "kinds": [ 4 ],
+                "#p": [ pubKey, pubkey ],
+                "limit": 200
+            }
+            var subscription = [ "REQ", subId, filter ]
+            socket.send(JSON.stringify( subscription ));
+        }
+    </script>
+    <script>
         function getLatestMessage( id ) {
             var subId   = "latest-message" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 0, 20 );
             var filter  = {
@@ -542,6 +671,24 @@
             if ( document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length > 1 ) {
                 document.getElementsByClassName( "message-content" )[ 0 ].childNodes[ document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length - 2 ].scrollIntoView();
             }
+        }
+    </script>
+    <script>
+        async function sendEncryptedNote( note, pubkey ) {
+            var note = document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value;
+            if ( !note || note == "" ) return;
+            var now = Math.floor( Date.now() / 1000 );
+            var encrypted = encrypt( privKey, pubkey, note )
+            var event = {
+                "content"    : encrypted,
+                "created_at" : Math.floor( Date.now() / 1000 ),
+                "kind"       : 4,
+                "tags"       : [ [ 'p', pubkey ] ],
+                "pubkey"     : pubKey,
+            }
+            var signedEvent = await getSignedEvent(event, privKey)
+            socket.send(JSON.stringify([ "EVENT", signedEvent ]))
+            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
         }
     </script>
     <script>
@@ -624,6 +771,9 @@
             var i; for ( i=0; i<document.getElementsByClassName( "channel-outer" ).length; i++ ) {
                 document.getElementsByClassName( "channel-outer" )[ i ].classList.remove( "active" );
             }
+            var i; for ( i=0; i<document.getElementsByClassName( "dm-outer" ).length; i++ ) {
+                document.getElementsByClassName( "dm-outer" )[ i ].classList.remove( "active" );
+            }
             document.getElementsByClassName( "manage-channels-outer" )[ 0 ].classList.add( "active" );
             var channels_info = [];
             var i; for ( i=0; i<document.getElementsByClassName( "channel-outer" ).length; i++ ) {
@@ -672,6 +822,16 @@
                             <span class="x-circle" onclick="removeChannel( '${item.id}' )">&times;</span>
                             <span class="img-circle" style="background-image: url(${item.img})"></span>
                             <span class="removable-channel-name">${item.name}</span>
+                            <div style="clear: both"></div>
+                        </div>
+                `;
+            })
+            Object.keys(dms_info).forEach( function( item ) {
+                document.getElementsByClassName( "removable-channels" )[ 0 ].innerHTML += `
+                        <div class="removable-channel ${item}">
+                            <span class="x-circle" onclick="removeDm( '${item}' )">&times;</span>
+                            <span class="img-circle" style="background-image: url(${dms_info[ item ][ "picture" ]})"></span>
+                            <span class="removable-channel-name">${dms_info[ item ][ "name" ]}</span>
                             <div style="clear: both"></div>
                         </div>
                 `;
@@ -742,6 +902,9 @@
             if ( namemap[ pubKey ] && namemap[ pubKey ] != "none" ) {
                 var name = namemap[ pubKey ];
             }
+            if ( imagemap[ pubKey ] && imagemap[ pubKey ] != "none" ) {
+                var picture = imagemap[ pubKey ];
+            }
             if ( localStorage[ "my-meta-info" ] ) {
                 var myMetaInfo = JSON.parse( localStorage[ "my-meta-info" ] );
                 var name = myMetaInfo[ "name" ];
@@ -752,7 +915,9 @@
                     var name = "";
                 }
                 var about = "";
-                var picture = "";
+                if ( !picture ) {
+                    var picture = "";
+                }
             }
             var html = `
                 <div class="message-header">
@@ -800,8 +965,8 @@
                     <div class="channel-info">
                         <span class="plus-circle fa fa-list-check"></span>
                         <div class="channel-wrapper">
-                            <div class="name">Manage channels</div>
-                            <div class="message">Find/create/remove channels</div>
+                            <div class="name">Settings</div>
+                            <div class="message">Modify all the things</div>
                         </div>
                     </div>
                     <div class="actions">
@@ -848,6 +1013,226 @@
         }
     </script>
     <script>
+        async function showProfile( pubkey, name, picture ) {
+            var html = `
+                <div class="message-header">
+                    <div class="channel-info">
+                        <span class="plus-circle">P</span>
+                        <div class="channel-wrapper">
+                            <div class="name">Profile</div>
+                            <div class="message">Check someone out</div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <ul>
+                            <li class="hotdog">
+                                <a>
+                                    <i class="fa fa-ellipsis-v"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="message-content">
+                    <img class="big-picture" src="${picture}" />
+                    <h2>${name}</h2>
+                    <p class="profile-about">${name} lives in an abandoned warehouse on top of a mountain in a jungle. Surviving only on bananas and leftover car parts, ${name} roams the wild horizon of the amazon, looking on and on for something not yet grokked</p>
+                    <h2 style="margin-top: 20px;">${name}'s public key</h2>
+                    <p class="profile-pubkey">${pubkey}</p>
+                    <button class="dm" onclick="dmThisUser( '${pubkey}', '${name}', '${picture}' )">Direct message this user</button>
+                </div>
+            `;
+            document.getElementsByClassName( "content" )[ 0 ].innerHTML = html;
+            document.getElementsByClassName( "message-content" )[ 0 ].style.display = "block";
+            document.getElementsByClassName( "message-content" )[ 0 ].style.flexDirection = "initial";
+            if ( window.innerWidth < 601 ) {
+                var html2 = `
+                    <span class="sidebar_arrow">&rsaquo;</span>
+                    <div class="channel-info">
+                        <span class="plus-circle">P</span>
+                        <div class="channel-wrapper">
+                            <div class="name">Profile</div>
+                            <div class="message">Check someone out</div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <ul>
+                            <li class="hotdog">
+                                <a>
+                                    <i class="fa fa-ellipsis-v"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                `;
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].innerHTML = html2;
+                document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.width = "100%";
+                document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.display = "flex";
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "flex";
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].style.width = window.innerWidth - 38 + "px";
+            }
+            if ( window.innerWidth < 601 ) {
+                document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
+                document.getElementsByClassName( "content" )[ 0 ].style.display = "flex";
+            }
+            if ( document.getElementsByClassName( "sidebar_arrow" )[ 0 ] ) {
+                document.getElementsByClassName( "sidebar_arrow" )[ 0 ].addEventListener( "click", function() {
+                    document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "block";
+                    document.getElementsByClassName( "content" )[ 0 ].style.display = "none";
+                    document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.display = "none";
+                    document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "none";
+                })
+            }
+            document.getElementsByClassName( "hotdog" )[ 0 ].addEventListener( "click", function() {
+                showSettings();
+            });
+        }
+    </script>
+    <script>
+        function dmThisUser( pubkey, name, picture ) {
+            if ( !document.getElementsByClassName( pubkey.substring( 0, 20 )[ 0 ] ) ) {
+                document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( pubkey, name, picture );
+                var obj = {}
+                obj[ "pubkey" ] = pubkey;
+                obj[ "name" ] = name;
+                obj[ "picture" ] = picture;
+                dms_info[ pubkey ] = obj;
+                localStorage[ "dms_info" ] = JSON.stringify( dms_info );
+            }
+            selectDM( pubkey, name, picture );
+        }
+    </script>
+    <script>
+        function displayDMbox( pubkey, name, picture ) {
+            var html = `
+                        <li class="dm-outer ${pubkey.substring( 0, 20 )}" data-pubkey="${pubkey}" data-img="${picture}" onclick="selectDM( '${pubkey}', '${name}', '${picture}' );">
+                            <a>
+                                <span style="background-image: url(${picture})"></span>
+                                <div class="dm-inner">
+                                    <div class="name">${name}</div>
+                                    <div data-timestamp="" class="message"></div>
+                                </div>
+                            </a>
+                        </li>
+            `;
+            return html;
+        }
+    </script>
+    <script>
+        async function selectDM( pubkey, name, picture ) {
+            var i; for ( i=0; i<document.getElementsByClassName( "channel-outer" ).length; i++ ) {
+                document.getElementsByClassName( "channel-outer" )[ i ].classList.remove( "active" );
+            }
+            var i; for ( i=0; i<document.getElementsByClassName( "dm-outer" ).length; i++ ) {
+                document.getElementsByClassName( "dm-outer" )[ i ].classList.remove( "active" );
+            }
+            document.getElementsByClassName( "manage-channels-outer" )[ 0 ].classList.remove( "active" );
+            document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ].classList.add( "active" );
+            var html = `
+                <div class="message-header">
+                    <div class="channel-info">
+                        <span style="background-image: url(${picture})"></span>
+                        <div class="channel-wrapper">
+                            <div class="name">${name}</div>
+                            <div class="time"></div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <ul>
+                            <li class="hotdog">
+                                <a>
+                                    <i class="fa fa-ellipsis-v"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="message-content">
+                </div>
+                <div class="message-form">
+                    <ul>
+                        <li class="emoji-btn">
+                            <a>
+                                <i class="fa fa-laugh"></i>
+                            </a>
+                        </li>
+                        <li class="input">
+                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something"></textarea>
+                        </li>
+                        <li class="send-btn">
+                            <a>
+                                <i class="fa fa-paper-plane"></i>
+                            </a>
+                        </li>
+                        <li class="sound-btn">
+                            <a>
+                                <i class="fa fa-microphone"></i>
+                            </a>
+                        </li>
+                        <li class="image-btn">
+                            <a>
+                                <i class="fa fa-image"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            `;
+            document.getElementsByClassName( "content" )[ 0 ].innerHTML = html;
+            if ( window.innerWidth < 601 ) {
+                var html2 = `
+                    <span class="sidebar_arrow">&rsaquo;</span>
+                    <div class="channel-info">
+                        <span style="background-image: url(${picture})"></span>
+                        <div class="channel-wrapper">
+                            <div class="name">${name}</div>
+                            <div class="time"></div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <ul>
+                            <li class="hotdog">
+                                <a>
+                                    <i class="fa fa-ellipsis-v"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                `;
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].innerHTML = html2;
+                document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.width = "100%";
+                document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.display = "flex";
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "flex";
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].style.width = window.innerWidth - 38 + "px";
+            }
+            if ( window.innerWidth < 601 ) {
+                document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
+                document.getElementsByClassName( "content" )[ 0 ].style.display = "flex";
+            }
+            if ( document.getElementsByClassName( "sidebar_arrow" )[ 0 ] ) {
+                document.getElementsByClassName( "sidebar_arrow" )[ 0 ].addEventListener( "click", function() {
+                    document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "block";
+                    document.getElementsByClassName( "content" )[ 0 ].style.display = "none";
+                    document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.display = "none";
+                    document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "none";
+                })
+            }
+            document.getElementsByClassName( "hotdog" )[ 0 ].addEventListener( "click", function() {
+                showSettings();
+            });
+            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', function ( e ) {
+                if ( e.key === 'Enter' && !isShiftDown() ) {
+                  sendEncryptedNote( document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value, pubkey );
+                }
+            });
+            document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', function ( e ) {
+                sendEncryptedNote( document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value, pubkey );
+            });
+            addDecryptedMessages( pubkey );
+        }
+    </script>
+    <script>
         function addChannel( id ) {
             document.getElementsByClassName( "add-channel-input" )[ 0 ].value = "";
             if ( document.getElementsByClassName( id )[ 0 ] ) return
@@ -881,6 +1266,20 @@
             stuff_to_backup[ "channels" ] = JSON.stringify( subscribed_channels );
             stuff_to_backup[ "relays" ] = JSON.stringify( [ relay ] );
             localStorage[ "backup" ] = JSON.stringify( stuff_to_backup );
+        }
+    </script>
+    <script>
+        function removeDm( pubkey ) {
+            var i; for ( i=0; i<document.getElementsByClassName( pubkey.substring( 0, 20 ) ).length; i++ ) {
+                document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ i ].remove();
+                i = i - 1;
+            }
+            var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
+                document.getElementsByClassName( pubkey )[ i ].remove();
+                i = i - 1;
+            }
+            delete dms_info[ pubkey ];
+            localStorage[ "dms_info" ] = JSON.stringify( dms_info );
         }
     </script>
     <script>
@@ -1078,6 +1477,20 @@
     </script>
     <script>
         function getUserMeta( pubkey ) {
+            if ( pubkey in imagemap && imagemap[ pubkey ] != "none" ) {
+                var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
+                    document.getElementsByClassName( pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + imagemap[ pubkey ] + ")";;
+                }
+            } else if ( !( pubkey in imagemap ) ) {
+                var newsubId   = "00000001" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 )
+                var newfilter  = { "authors": [ pubkey ], "kinds": [0], "limit": 1 }
+                var newsubmo = [ "REQ", newsubId, newfilter ]
+                socket.send(JSON.stringify( newsubmo ));
+                setTimeout( function() {
+                    var closer = [ "CLOSE", newsubId ];
+                    socket.send(JSON.stringify( closer ));
+                }, 1500 );
+            }
             if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
                 var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
                     document.getElementsByClassName( pubkey )[ i ].innerText = namemap[ pubkey ];
@@ -1135,6 +1548,13 @@
         }
     </script>
     <script>
+        function addDmsToSidebar() {
+            Object.keys(dms_info).forEach( function( item ) {
+                document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( item, dms_info[ item ][ "name" ], dms_info[ item ][ "picture" ] );
+            })
+        }
+    </script>
+    <script>
         function showToast( content ) {
             var x = document.getElementById( "toast" );
             x.innerText = content;
@@ -1144,5 +1564,4 @@
     </script>
     <div id="toast"></div>
 </body>
-
 </html>
