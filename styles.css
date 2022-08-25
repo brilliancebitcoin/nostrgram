@@ -349,9 +349,8 @@ body {
     flex-direction: column;
     padding: 15px;
     overflow: auto;
-    background-image: url("./cartoons.png");
-    background-repeat: repeat;
-    background-size: 900px;
+    background: url("./cartoons.png") repeat center center fixed;
+    background-size: 600px;
 }
 
 .chat .content .message-content::before {
