@@ -88,7 +88,6 @@ body {
     height: 40px;
     width: 40px;
     border-radius: 40px;
-    cursor: pointer;
     text-align: center;
     line-height: 40px;
     font-size: 20px;
@@ -102,7 +101,6 @@ body {
     height: 40px;
     width: 40px;
     border-radius: 40px;
-    cursor: pointer;
     text-align: center;
     line-height: 40px;
     font-size: 20px;
@@ -640,6 +638,16 @@ body {
     padding-right: 10px;
 }
 
+.about-input {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    width: calc( 100% - 15px );
+    margin-top: 20px;
+    border-radius: 36px;
+    padding: 15px;
+    padding-right: 0px;
+    padding-bottom: 25px;
+}
+
 .public-key, .private-key {
     margin-top: 20px;
     display: inline-block;
@@ -670,7 +678,7 @@ body {
     margin-top: 20px;
 }
 
-.import-privkey-input {
+.import-privkey-input, .display-name, .user-picture {
     margin-top: 20px;
     display: inline-block;
     width: 80%;
@@ -682,7 +690,11 @@ body {
     padding: 0 15px
 }
 
-.import-privkey-btn {
+.display-name, .user-picture {
+    width: 100%;
+}
+
+.import-privkey-btn, .submit-user-info {
     display: inline-block;
     width: 100px;
     box-sizing: border-box;
