@@ -697,8 +697,9 @@ body {
 }
 
 #toast {
+  box-sizing: border-box;
   visibility: hidden; /* Hidden by default. Visible on click */
-  min-width: 250px; /* Set a default minimum width */
+  width: 250px; /* Set a default minimum width */
   margin-left: -125px; /* Divide value of min-width by 2 */
   background-color: #4287f5; /* Blue background color */
   color: #fff; /* White text color */
