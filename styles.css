@@ -151,18 +151,21 @@ body {
     background-repeat: no-repeat;
 }
 
-.chat .sidebar .channels ul li a .channel-inner {
+.chat .sidebar .channels ul li a .channel-inner,
+.chat .sidebar .channels ul li a .dm-inner {
     max-width: 80%;
 }
 
-.chat .sidebar .channels ul li a .channel-inner .name {
+.chat .sidebar .channels ul li a .channel-inner .name,
+.chat .sidebar .channels ul li a .dm-inner .name {
     font-size: 15px;
     color: #333;
     font-weight: 500;
     margin-bottom: 3px;
 }
 
-.chat .sidebar .channels ul li a .channel-inner .message {
+.chat .sidebar .channels ul li a .channel-inner .message,
+.chat .sidebar .channels ul li a .dm-inner .message {
     font-size: 13px;
     color: #999;
     word-break: break-word;
@@ -367,15 +370,30 @@ body {
     margin-bottom: 20px;
     max-width: 80%;
     word-break: break-word;
+    position: relative;
+}
+
+.chat .content .message-content .picture {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    vertical-align: middle;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
 }
 
 .chat .content .message-content .message .bubble {
+    display: inline-block;
     padding: 6px 12px;
     background-color: #f7f7f7;
     border-radius: 20px;
     font-size: 15px;
     margin-bottom: 5px;
     white-space: pre-wrap;
+    vertical-align: middle;
 }
 
 .chat .content .message-content .message .bubble .author {
@@ -419,12 +437,19 @@ body {
     color: white;
 }
 
+.chat .content .message-content .message .bubbletime {
+    font-size: 11px;
+    text-align: right;
+    color: #999;
+}
+
 .chat .content .message-content .message.me {
     align-self: flex-end;
 }
 
 .chat .content .message-content .message.me .time {
     text-align: right;
+    color: lightblue;
 }
 
 .chat .content .message-content .message.me .bubble {
@@ -670,7 +695,7 @@ body {
     font-family: monospace;
 }
 
-.copy-pubkey-btn, .copy-privkey-btn {
+.copy-pubkey-btn, .copy-privkey-btn, .dm {
     display: inline-block;
     width: 100px;
     box-sizing: border-box;
@@ -682,6 +707,10 @@ body {
     background-color: white;
     cursor: pointer;
     margin-top: 20px;
+}
+
+.dm {
+    width: auto;
 }
 
 .import-privkey-input, .display-name, .user-picture {
@@ -758,6 +787,11 @@ body {
 @keyframes fadeout {
   from {bottom: 30px; opacity: 1;}
   to {bottom: 0; opacity: 0;}
+}
+
+.big-picture {
+    width: 100%;
+    max-width: 300px;
 }
 
 /* mobile */
