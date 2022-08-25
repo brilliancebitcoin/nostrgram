@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css?v=18" />
+    <link rel="stylesheet" href="styles.css?v=19" />
     <title>Nostrgram</title>
     <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
@@ -63,7 +63,6 @@
             if ( subId.startsWith( "00000001" ) ) {
                 if ( content && !checkForUserMetaErrors( content ) ) {
                     if ( event.pubkey == pubKey ) {
-                        console.log( "made it into the 00000001 checker" );
                         var myMetaInfo = {}
                         if ( "name" in JSON.parse( content ) ) {
                             myMetaInfo[ "name" ] = JSON.parse( content )[ "name" ];
@@ -213,7 +212,9 @@
                     document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago );
                 }
                 document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
+                if ( document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length > 1 ) {
+                    document.getElementsByClassName( "message-content" )[ 0 ].childNodes[ document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length - 2 ].scrollIntoView();
+                }
             }
             if (
                 kind == 42
@@ -456,7 +457,9 @@
                 document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
                 document.getElementsByClassName( "content" )[ 0 ].style.display = "block";
                 document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
+                if ( document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length > 1 ) {
+                    document.getElementsByClassName( "message-content" )[ 0 ].childNodes[ document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length - 2 ].scrollIntoView();
+                }
                 document.getElementsByClassName( "message-header" )[ 0 ].remove();
             }
             if ( document.getElementsByClassName( "sidebar_arrow" )[ 0 ] ) {
@@ -536,7 +539,9 @@
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
             document.getElementsByClassName( "message-content" )[ 0 ].innerHTML += html;
             document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-            document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
+            if ( document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length > 1 ) {
+                document.getElementsByClassName( "message-content" )[ 0 ].childNodes[ document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length - 2 ].scrollIntoView();
+            }
         }
     </script>
     <script>
@@ -1081,7 +1086,6 @@
                 var newsubId   = "00000001" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 )
                 var newfilter  = { "authors": [ pubkey ], "kinds": [0], "limit": 1 }
                 var newsubmo = [ "REQ", newsubId, newfilter ]
-                console.log( "firing off the subscription" );
                 socket.send(JSON.stringify( newsubmo ));
                 setTimeout( function() {
                     var closer = [ "CLOSE", newsubId ];
