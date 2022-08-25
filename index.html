@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css?v=16" />
+    <link rel="stylesheet" href="styles.css?v=17" />
     <title>Nostrgram</title>
     <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
@@ -48,14 +48,18 @@
         var socket = new WebSocket( relay );
         var heartbeat = false;
         socket.addEventListener('message', async function( message ) {
+            //heartbeat tests
+            //console.log( "got a message!", message );
             heartbeat = true;
             var [ type, subId, event ] = JSON.parse( message.data );
             var { kind, content } = event || {}
+/*
             if ( subId.startsWith( "00000002" ) ) {
                 if ( content ) {
                     console.log( "heartbeat event:", event );
                 }
             }
+*/
             if ( subId.startsWith( "00000001" ) ) {
                 if ( content && !checkForUserMetaErrors( content ) ) {
                     if ( "name" in JSON.parse( content ) && !( !JSON.parse( content )[ "name" ] || JSON.parse( content )[ "name" ] == "" ) ) {
@@ -215,15 +219,16 @@
                 content = await decrypt(privKey, pubKey, content)
             }
         })
-        var subId   = bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" )
-        var filter  = { "ids": subscribed_channels }
 
-        socket.addEventListener('open', async function( e ) {
-            console.log( "connected to " + relay );
+        async function openConnection( e ) {
+            //heartbeat tests
+            //console.log( "connected to " + relay );
             heartbeat = true;
+            var subId   = bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" )
+            var filter  = { "ids": subscribed_channels }
             var subscription = [ "REQ", subId, filter ]
-
             socket.send(JSON.stringify( subscription ));
+
             var event = {
                 "content"    : "this workshop is awesome!",
                 "created_at" : Math.floor( Date.now() / 1000 ),
@@ -244,7 +249,10 @@
             }
             var signedEvent2 = await getSignedEvent(event2, privKey)
             //socket.send(JSON.stringify([ "EVENT", signedEvent2 ]))
-        })
+        }
+
+        socket.addEventListener('open', openConnection );
+
         async function getSignedEvent(event, privateKey) {
             var eventData = JSON.stringify([
                 0,                    // Reserved for future use
@@ -315,6 +323,11 @@
     </script>
     <script>
         function selectChannel( channel ) {
+            if ( sessionStorage[ "add-messages-subid" ] ) {
+                var closerid = sessionStorage[ "add-messages-subid" ];
+                var closer = [ "CLOSE", closerid ];
+            }
+            socket.send(JSON.stringify( closer ));
             var i; for ( i=0; i<document.getElementsByClassName( "channel-outer" ).length; i++ ) {
                 document.getElementsByClassName( "channel-outer" )[ i ].classList.remove( "active" );
             }
@@ -453,6 +466,7 @@
     <script>
         function addMessages( id ) {
             var subId   = "add-messages" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 0, 20 );
+            sessionStorage[ "add-messages-subid" ] = subId;
             var filter  = {
                 "kinds": [ 42 ],
                 "#e": [id],
@@ -545,9 +559,16 @@
             var heartbeatsub     = [ "REQ", heartbeatsubId, heartbeatfilter ];
             socket.send(JSON.stringify( heartbeatsub ));
             setTimeout( function() {
+                var closer = [ "CLOSE", heartbeatsubId ];
+                socket.send(JSON.stringify( closer ));
+            }, 1500 );
+            setTimeout( function() {
                 if ( !heartbeat ) {
-                    showToast( "the heartbeat function needed activation" )
+                    //heartbeat tests
+                    //showToast( "the heartbeat function needed activation" );
+                    socket.removeEventListener('open', openConnection );
                     socket = new WebSocket( relay );
+                    socket.addEventListener('open', openConnection );
                 }
             }, 2000 );
         }
@@ -1016,6 +1037,10 @@
                 var newfilter  = { "authors": [ pubkey ], "kinds": [0], "limit": 1 }
                 var newsubmo = [ "REQ", newsubId, newfilter ]
                 socket.send(JSON.stringify( newsubmo ));
+                setTimeout( function() {
+                    var closer = [ "CLOSE", newsubId ];
+                    socket.send(JSON.stringify( closer ));
+                }, 1500 );
             }
         }
     </script>
