@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css?v=17" />
+    <link rel="stylesheet" href="styles.css?v=18" />
     <title>Nostrgram</title>
     <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
@@ -62,6 +62,29 @@
 */
             if ( subId.startsWith( "00000001" ) ) {
                 if ( content && !checkForUserMetaErrors( content ) ) {
+                    if ( event.pubkey == pubKey ) {
+                        console.log( "made it into the 00000001 checker" );
+                        var myMetaInfo = {}
+                        if ( "name" in JSON.parse( content ) ) {
+                            myMetaInfo[ "name" ] = JSON.parse( content )[ "name" ];
+                            if ( document.getElementsByClassName( "display-name" )[ 0 ] ) {
+                                document.getElementsByClassName( "display-name" )[ 0 ].value = JSON.parse( content )[ "name" ];
+                            }
+                        }
+                        if ( "about" in JSON.parse( content ) ) {
+                            myMetaInfo[ "about" ] = JSON.parse( content )[ "about" ];
+                            if ( document.getElementsByClassName( "about-input" )[ 0 ] ) {
+                                document.getElementsByClassName( "about-input" )[ 0 ].value = JSON.parse( content )[ "about" ];
+                            }
+                        }
+                        if ( "picture" in JSON.parse( content ) ) {
+                            myMetaInfo[ "picture" ] = JSON.parse( content )[ "picture" ];
+                            if ( document.getElementsByClassName( "user-picture" )[ 0 ] ) {
+                                document.getElementsByClassName( "user-picture" )[ 0 ].value = JSON.parse( content )[ "picture" ];
+                            }
+                        }
+                        localStorage[ "my-meta-info" ] = JSON.stringify( myMetaInfo );
+                    }
                     if ( "name" in JSON.parse( content ) && !( !JSON.parse( content )[ "name" ] || JSON.parse( content )[ "name" ] == "" ) ) {
                         namemap[ event.pubkey ] = JSON.parse( content )[ "name" ];
                         localStorage[ "namemap" ] = JSON.stringify( namemap );
@@ -174,11 +197,11 @@
                 }
                 if ( now - event_time > 15 ) {
                     document.getElementsByClassName( "message-content" )[ 0 ].innerHTML = html + document.getElementsByClassName( "message-content" )[ 0 ].innerHTML;
+                    document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
+                    document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
                 } else {
                     document.getElementsByClassName( "message-content" )[ 0 ].innerHTML += html;
                 }
-                document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                document.getElementsByClassName( "message-form" )[ 0 ].scrollIntoView();
                 if ( document.getElementsByClassName( "message-header" )[ 0 ] && Number( document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
                     document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
                     document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
@@ -710,6 +733,16 @@
                 document.getElementsByClassName( "channel-outer" )[ i ].classList.remove( "active" );
             }
             document.getElementsByClassName( "manage-channels-outer" )[ 0 ].classList.remove( "active" );
+            if ( localStorage[ "my-meta-info" ] ) {
+                var myMetaInfo = JSON.parse( localStorage[ "my-meta-info" ] );
+                var name = myMetaInfo[ "name" ];
+                var about = myMetaInfo[ "about" ];
+                var picture = myMetaInfo[ "picture" ];
+            } else {
+                var name = "";
+                var about = "";
+                var picture = "";
+            }
             var html = `
                 <div class="message-header">
                     <div class="channel-info">
@@ -730,11 +763,17 @@
                     </div>
                 </div>
                 <div class="message-content">
-                    <h2>Your public key</h2>
-                    <input class="public-key" type="text" value="${pubKey}" disabled/>
+                    <h2>Your info</h2>
+                    <input class="display-name" type="text" placeholder="display name" value="${name}" />
+                    <textarea class="about-input" type="text" rows="5" cols="70" placeholder="enter info about yourself">${about}</textarea>
+                    <input class="user-picture" type="text" placeholder="user picture e.g. https://i.ibb.co/Q8X9cQL/bitcoin-chess.png" value="${picture}" />
+                    <p class="image-instructions">The image needs to be hosted externally (such as on imgur or imgbb) because I don't want to store a bunch of images</p>
+                    <button class="submit-user-info" onclick="submitUserInfo()">Submit</button>
+                    <h2 style="margin-top: 20px;">Your public key</h2>
+                    <input class="public-key" type="text" value="${pubKey}" disabled />
                     <button class="copy-pubkey-btn">Copy</button>
                     <h2 style="margin-top: 20px;">Your private key</h2>
-                    <input class="private-key" type="text" value="${privKey}" disabled/>
+                    <input class="private-key" type="text" value="${privKey}" disabled />
                     <button class="copy-privkey-btn">Copy</button>
                     <h2 style="margin-top: 20px;">Import an account</h2>
                     <input class="import-privkey-input" type="text" placeholder="paste a private key" />
@@ -1036,12 +1075,53 @@
                 var newsubId   = "00000001" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 )
                 var newfilter  = { "authors": [ pubkey ], "kinds": [0], "limit": 1 }
                 var newsubmo = [ "REQ", newsubId, newfilter ]
+                console.log( "firing off the subscription" );
                 socket.send(JSON.stringify( newsubmo ));
                 setTimeout( function() {
                     var closer = [ "CLOSE", newsubId ];
                     socket.send(JSON.stringify( closer ));
                 }, 1500 );
             }
+        }
+    </script>
+    <script>
+        function forceUpdateUserMeta( pubkey ) {
+            var newsubId   = "00000001" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 )
+            var newfilter  = { "authors": [ pubkey ], "kinds": [0], "limit": 1 }
+            var newsubmo = [ "REQ", newsubId, newfilter ]
+            socket.send(JSON.stringify( newsubmo ));
+            setTimeout( function() {
+                var closer = [ "CLOSE", newsubId ];
+                socket.send(JSON.stringify( closer ));
+            }, 1500 );
+        }
+    </script>
+    <script>
+        async function submitUserInfo() {
+            var name = document.getElementsByClassName( "display-name" )[ 0 ].value;
+            var about = document.getElementsByClassName( "about-input" )[ 0 ].value;
+            var img = document.getElementsByClassName( "user-picture" )[ 0 ].value;
+            if ( img && img != "" && ( !img.startsWith( "https://" ) || ( !img.endsWith( ".png" ) && !img.endsWith( ".jpg" ) && !img.endsWith( ".jpeg" ) && !img.endsWith( ".gif" ) && !img.endsWith( ".webp" ) ) ) ) {
+                    showToast( "There was an error with your image url, it either did not begin with https:// or it did not end with .png, .jpg, .jpeg, .gif, or .webp" );
+                    return;
+                }
+            namemap[ pubKey ] = "none";
+            var obj = {}
+            obj[ "name" ] = name;
+            obj[ "about" ] = about;
+            obj[ "picture" ] = img;
+            var note = JSON.stringify( obj );
+            var event = {
+                "content"    : note,
+                "created_at" : Math.floor( Date.now() / 1000 ),
+                "kind"       : 0,
+                "tags"       : [],
+                "pubkey"     : pubKey,
+            }
+            var signedEvent = await getSignedEvent(event, privKey);
+            socket.send(JSON.stringify([ "EVENT", signedEvent ]));
+            setTimeout( function() {forceUpdateUserMeta( pubKey );}, 1500 );
+            showToast( "Your info was processed" );
         }
     </script>
     <script>
