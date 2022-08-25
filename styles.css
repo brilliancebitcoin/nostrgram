@@ -760,7 +760,7 @@ body {
 
     .chat .content .message-content {
         margin-top: 51px;
-        margin-bottom: 80px;
+        padding-bottom: 51px;
     }
 
     .chat .content .message-form {
