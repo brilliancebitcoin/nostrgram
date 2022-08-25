@@ -51,6 +51,11 @@
             heartbeat = true;
             var [ type, subId, event ] = JSON.parse( message.data );
             var { kind, content } = event || {}
+            if ( subId.startsWith( "00000002" ) ) {
+                if ( content ) {
+                    console.log( "heartbeat event:", event );
+                }
+            }
             if ( subId.startsWith( "00000001" ) ) {
                 if ( content && !checkForUserMetaErrors( content ) ) {
                     if ( "name" in JSON.parse( content ) && !( !JSON.parse( content )[ "name" ] || JSON.parse( content )[ "name" ] == "" ) ) {
@@ -541,6 +546,7 @@
             socket.send(JSON.stringify( heartbeatsub ));
             setTimeout( function() {
                 if ( !heartbeat ) {
+                    showToast( "the heartbeat function needed activation" )
                     socket = new WebSocket( relay );
                 }
             }, 2000 );
