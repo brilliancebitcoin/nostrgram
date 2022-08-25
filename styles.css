@@ -113,6 +113,7 @@ body {
     height: 60px;
     align-items: center;
     padding: 0 10px;
+    cursor: pointer;
 }
 
 .chat .sidebar .channels ul li a .manage-channels-inner .name {
@@ -132,6 +133,7 @@ body {
     height: 60px;
     align-items: center;
     padding: 0 10px;
+    cursor: pointer;
 }
 
 .chat .sidebar .channels ul li.active a,
@@ -248,6 +250,7 @@ body {
     font-size: 19px;
     color: #999;
     text-align: center;
+    cursor: pointer;
 }
 
 .chat .content .message-header .actions ul li:hover a {
@@ -316,15 +319,17 @@ body {
 
 .message-header-alt .actions ul li {
     margin-left: 10px;
+    cursor: pointer;
 }
 
 .message-header-alt .actions ul li a {
     font-size: 19px;
     color: #999;
     text-align: center;
+    cursor: pointer;
 }
 
-.message-header-alt .actions ul li a:hover {
+.message-header-alt .actions ul li:hover a {
     color: #222;
 }
 
@@ -470,6 +475,7 @@ body {
     color: #fff;
     text-align: center;
     line-height: 36px;
+    cursor: pointer;
 }
 
 .chat .content .message-form ul li.emoji-btn a {
