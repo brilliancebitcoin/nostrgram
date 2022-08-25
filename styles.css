@@ -757,6 +757,17 @@ body {
 /* mobile */
 
 @media only screen and (max-width: 600px) {
+
+    .chat .content .message-content {
+        margin-top: 51px;
+        margin-bottom: 51px;
+    }
+
+    .chat .content .message-form {
+        position: fixed;
+        bottom: 0px;
+    }
+
     .chat .sidebar {
         width: 100%;
     }
