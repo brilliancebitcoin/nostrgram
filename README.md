@@ -1,4 +1,4 @@
-# Nostrgram
+# Anigma
 
 A clone of telegram but built on nostr
 
