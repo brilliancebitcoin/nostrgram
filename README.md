@@ -4,4 +4,4 @@ A clone of telegram but built on nostr
 
 # How to try
 
-Click here: [https://brilliancebitcoin.github.io/nostrgram](https://brilliancebitcoin.github.io/nostrgram)
+Click here: [https://anigma.io](https://anigma.io)
