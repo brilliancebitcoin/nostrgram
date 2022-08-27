@@ -404,6 +404,11 @@ body {
     vertical-align: middle;
 }
 
+.chat .content .message-content .message .bubble a {
+    color: white;
+    text-decoration: underline;
+}
+
 .chat .content .message-content .message .bubble .author {
     font-weight: bold;
 }
