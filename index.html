@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css?v=24" />
-    <title>Nostrgram</title>
+    <link rel="stylesheet" href="styles.css?v=25" />
+    <title>Anigma</title>
     <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
     <script src="https://bundle.run/browserify-cipher@1.0.1"></script>
@@ -13,6 +13,9 @@
 <body>
     <!-- based on this: https://github.com/YunusEmreNalbant/css-chat-interface -->
     <script>
+        if ( window.location.href.includes( "brilliancebitcoin.github.io/nostrgram" ) ) {
+            window.location.href = "https://anigma.io/";
+        }
         var { getSharedSecret, schnorr, utils } = nobleSecp256k1
         var crypto  = window.crypto 
         var getRand = size => crypto.getRandomValues(new Uint8Array(size))
@@ -469,13 +472,9 @@
                 var closer = [ "CLOSE", closerid ];
             }
             socket.send(JSON.stringify( closer ));
-            var i; for ( i=0; i<document.getElementsByClassName( "channel-outer" ).length; i++ ) {
-                document.getElementsByClassName( "channel-outer" )[ i ].classList.remove( "active" );
+            var i; for ( i=0; i<document.getElementsByClassName( "active" ).length; i++ ) {
+                document.getElementsByClassName( "active" )[ i ].classList.remove( "active" );
             }
-            var i; for ( i=0; i<document.getElementsByClassName( "dm-outer" ).length; i++ ) {
-                document.getElementsByClassName( "dm-outer" )[ i ].classList.remove( "active" );
-            }
-            document.getElementsByClassName( "manage-channels-outer" )[ 0 ].classList.remove( "active" );
             document.getElementsByClassName( channel.getAttribute( "data-id" ) )[ 0 ].classList.add( "active" );
             var html = `
                 <div class="message-header">
@@ -744,11 +743,19 @@
         }
     </script>
     <script>
+        function modDMMeta() {
+            var i; for ( i=0; i<document.getElementsByClassName( "dm-outer" ).length; i++ ) {
+                var pubkey = document.getElementsByClassName( "dm-outer" )[ i ].getAttribute( "data-pubkey" );
+                getUserMeta( pubkey );
+            }
+        }
+    </script>
+    <script>
         function doBackgroundTasks() {
             array_of_pubkeys.forEach( function() {
                 getUserMeta( array_of_pubkeys[ 0 ] );
                 array_of_pubkeys.shift();
-            })
+            });
             setTimeout( function() {checkHeartbeat();}, 1000 );
             var i; for ( i=0; i<document.getElementsByClassName( "time" ).length; i++ ) {
                 var now = Math.floor( Date.now() / 1000 )
@@ -757,16 +764,14 @@
                 document.getElementsByClassName( "time" )[ i ].innerText = how_long_ago;
             }
             setTimeout( function() {doBackgroundTasks();}, 10000 );
+            modDMMeta();
         }
         doBackgroundTasks();
     </script>
     <script>
         function manageChannels() {
-            var i; for ( i=0; i<document.getElementsByClassName( "channel-outer" ).length; i++ ) {
-                document.getElementsByClassName( "channel-outer" )[ i ].classList.remove( "active" );
-            }
-            var i; for ( i=0; i<document.getElementsByClassName( "dm-outer" ).length; i++ ) {
-                document.getElementsByClassName( "dm-outer" )[ i ].classList.remove( "active" );
+            var i; for ( i=0; i<document.getElementsByClassName( "active" ).length; i++ ) {
+                document.getElementsByClassName( "active" )[ i ].classList.remove( "active" );
             }
             document.getElementsByClassName( "manage-channels-outer" )[ 0 ].classList.add( "active" );
             var channels_info = [];
@@ -889,10 +894,9 @@
     </script>
     <script>
         async function showSettings() {
-            var i; for ( i=0; i<document.getElementsByClassName( "channel-outer" ).length; i++ ) {
-                document.getElementsByClassName( "channel-outer" )[ i ].classList.remove( "active" );
+            var i; for ( i=0; i<document.getElementsByClassName( "active" ).length; i++ ) {
+                document.getElementsByClassName( "active" )[ i ].classList.remove( "active" );
             }
-            document.getElementsByClassName( "manage-channels-outer" )[ 0 ].classList.remove( "active" );
             if ( namemap[ pubKey ] && namemap[ pubKey ] != "none" ) {
                 var name = namemap[ pubKey ];
             }
@@ -957,7 +961,7 @@
                 var html2 = `
                     <span class="sidebar_arrow">&rsaquo;</span>
                     <div class="channel-info">
-                        <span class="plus-circle fa fa-list-check"></span>
+                        <span class="plus-circle fa fa-sliders"></span>
                         <div class="channel-wrapper">
                             <div class="name">Settings</div>
                             <div class="message">Modify all the things</div>
@@ -1069,6 +1073,7 @@
             if ( window.innerWidth < 601 ) {
                 document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
                 document.getElementsByClassName( "content" )[ 0 ].style.display = "flex";
+                document.getElementsByClassName( "message-header" )[ 0 ].remove();
             }
             if ( document.getElementsByClassName( "sidebar_arrow" )[ 0 ] ) {
                 document.getElementsByClassName( "sidebar_arrow" )[ 0 ].addEventListener( "click", function() {
@@ -1115,13 +1120,9 @@
     </script>
     <script>
         async function selectDM( pubkey, name, picture ) {
-            var i; for ( i=0; i<document.getElementsByClassName( "channel-outer" ).length; i++ ) {
-                document.getElementsByClassName( "channel-outer" )[ i ].classList.remove( "active" );
+            var i; for ( i=0; i<document.getElementsByClassName( "active" ).length; i++ ) {
+                document.getElementsByClassName( "active" )[ i ].classList.remove( "active" );
             }
-            var i; for ( i=0; i<document.getElementsByClassName( "dm-outer" ).length; i++ ) {
-                document.getElementsByClassName( "dm-outer" )[ i ].classList.remove( "active" );
-            }
-            document.getElementsByClassName( "manage-channels-outer" )[ 0 ].classList.remove( "active" );
             document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ].classList.add( "active" );
             var html = `
                 <div class="message-header">
@@ -1429,9 +1430,9 @@
         <div class="content">
             <div class="message-header">
                 <div class="channel-info">
-                    <span class="plus-circle">N</span>
+                    <span class="plus-circle">A</span>
                     <div class="channel-wrapper">
-                        <div class="name">Nostrgram</div>
+                        <div class="name">Anigma</div>
                         <div class="message">Talk to people</div>
                     </div>
                 </div>
@@ -1485,6 +1486,9 @@
                 var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
                     document.getElementsByClassName( pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + imagemap[ pubkey ] + ")";;
                 }
+                var i; for ( i=0; i<document.getElementsByClassName( pubkey.substring( 0, 20 ) ).length; i++ ) {
+                    document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ i ].getElementsByTagName( "span" )[ 0 ].style.backgroundImage = "url(" + imagemap[ pubkey ] + ")";;
+                }
             } else if ( !( pubkey in imagemap ) ) {
                 var newsubId   = "00000001" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 )
                 var newfilter  = { "authors": [ pubkey ], "kinds": [0], "limit": 1 }
@@ -1498,6 +1502,9 @@
             if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
                 var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
                     document.getElementsByClassName( pubkey )[ i ].innerText = namemap[ pubkey ];
+                }
+                var i; for ( i=0; i<document.getElementsByClassName( pubkey.substring( 0, 20 ) ).length; i++ ) {
+                    document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ i ].getElementsByClassName( "name" )[ 0 ].innerText = namemap[ pubkey ];
                 }
             } else if ( !( pubkey in namemap ) ) {
                 var newsubId   = "00000001" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 )
@@ -1580,9 +1587,19 @@
     </script>
     <script>
         function addDmsToSidebar() {
-            Object.keys(dms_info).forEach( function( item ) {
-                document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( item, dms_info[ item ][ "name" ], dms_info[ item ][ "picture" ] );
-            })
+            Object.keys(dms_info).forEach( function( pubkey ) {
+                var name = dms_info[ pubkey ][ "name" ];
+                var picture = dms_info[ pubkey ][ "picture" ];
+                if ( namemap[ pubkey ] && namemap[ pubkey ] != "none" ) {
+                    name = namemap[ pubkey ];
+                    dms_info[ pubkey ][ "name" ] = name;
+                }
+                if ( imagemap[ pubkey ] && imagemap[ pubkey ] != "none" ) {
+                    picture = imagemap[ pubkey ];
+                    dms_info[ pubkey ][ "picture" ] = picture;
+                }
+                document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( pubkey, name, picture );
+            });
         }
     </script>
     <script>
