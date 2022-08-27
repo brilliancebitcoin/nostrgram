@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css?v=26" />
+    <link rel="stylesheet" href="styles.css?v=27" />
     <title>Anigma</title>
     <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
@@ -13,11 +13,17 @@
 <body>
     <!-- based on this: https://github.com/YunusEmreNalbant/css-chat-interface -->
     <script>
-        function urlify( text ) {
+        function urlify( text, isMine ) {
             var urlRegex = /(https?:\/\/[^\s]+)/g;
-            return text.replace( urlRegex, ( url ) => {
-                return `<a href="${url}" target="_blank" rel="nofollow noopener">${url}</a>`;
-            })
+            if ( isMine ) {
+                return text.replace( urlRegex, ( url ) => {
+                    return `<a href="${url}" target="_blank" rel="nofollow noopener" style="color: white;">${url}</a>`;
+                })
+            } else {
+                return text.replace( urlRegex, ( url ) => {
+                    return `<a href="${url}" target="_blank" rel="nofollow noopener" style="color: #4287f5;">${url}</a>`;
+                })                
+            }
         }
     </script>
     <script>
@@ -219,7 +225,7 @@
                     picture = imagemap[ event.pubkey ];
                 }
                 content = content.replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
-                content = urlify( content );
+                content = urlify( content, isMine );
                 if ( isMine ) {
                     var html = `
                         <div data-author="${event.pubkey}" class="message me ${event.id}">
@@ -337,7 +343,7 @@
                     picture = imagemap[ event.pubkey ];
                 }
                 content = content.replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
-                content = urlify( content );
+                content = urlify( content, isMine );
                 if ( isMine ) {
                     var html = `
                         <div data-author="${event.pubkey}" class="message me ${event.id}">
