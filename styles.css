@@ -405,7 +405,6 @@ body {
 }
 
 .chat .content .message-content .message .bubble a {
-    color: white;
     text-decoration: underline;
 }
 
