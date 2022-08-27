@@ -1012,6 +1012,9 @@
     </script>
     <script>
         async function showProfile( pubkey, name, picture ) {
+            var i; for ( i=0; i<document.getElementsByClassName( "active" ).length; i++ ) {
+                document.getElementsByClassName( "active" )[ i ].classList.remove( "active" );
+            }
             var html = `
                 <div class="message-header">
                     <div class="channel-info">
