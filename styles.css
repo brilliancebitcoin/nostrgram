@@ -360,6 +360,14 @@ body {
     background-size: 600px;
 }
 
+.chat .content .message-content * {
+    max-width: calc( 100vw - 20px );
+}
+
+.chat .content .message-content .profile-pubkey {
+    word-break: break-word;
+}
+
 .chat .content .message-content::before {
    content:'';
    margin-bottom:auto
