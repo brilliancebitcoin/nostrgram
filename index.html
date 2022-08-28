@@ -13,6 +13,26 @@
 <body>
     <!-- based on this: https://github.com/YunusEmreNalbant/css-chat-interface -->
     <script>
+        function bold( text ) {
+            var bold = /\*\*(.*?)\*\*/gm;
+            var html = text.replace( bold, '<strong>$1</strong>' );
+            return html;
+        }
+        function italicize( text ) {
+            var italicize = /\*(.*?)\*/gm;
+            var html = text.replace( italicize, '<span style="font-style: italic;">$1</span>' );
+            return html;
+        }
+        function triplebackticks( text ) {
+            var triplebackticks = /\`\`\`([\s\S]*?)\`\`\`/g;
+            var html = text.replace( triplebackticks, '<pre style="white-space: pre-wrap; padding: 5px; background-color: #999; font-size: 12px;">$1</pre>' );
+            return html;
+        }
+        function backticks( text ) {
+            var backticks = /\`(.*?)\`/gm;
+            var html = text.replace( backticks, '<pre style="white-space: pre-wrap; padding: 5px; background-color: #999; font-size: 12px;">$1</pre>' );
+            return html;
+        }
         function urlify( text, isMine ) {
             var imgRegex = /\b(https?:\/\/\S+(?:png|jpe?g|gif|webp)\S*)\b/g;
             var urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -32,6 +52,14 @@
                     return `<a href="${img}" target="_blank" rel="nofollow noopener"><img src="${img}" /></a>`;
                 })
             }
+            return returnable;
+        }
+        function markdownify( text, isMine ) {
+            var returnable = urlify( text, isMine );
+            returnable = bold( returnable );
+            returnable = italicize( returnable );
+            returnable = triplebackticks( returnable );
+            returnable = backticks( returnable );
             return returnable;
         }
     </script>
@@ -234,7 +262,7 @@
                     picture = imagemap[ event.pubkey ];
                 }
                 content = content.replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
-                content = urlify( content, isMine );
+                content = markdownify( content, isMine );
                 if ( isMine ) {
                     var html = `
                         <div data-author="${event.pubkey}" class="message me ${event.id}">
@@ -352,7 +380,7 @@
                     picture = imagemap[ event.pubkey ];
                 }
                 content = content.replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
-                content = urlify( content, isMine );
+                content = markdownify( content, isMine );
                 if ( isMine ) {
                     var html = `
                         <div data-author="${event.pubkey}" class="message me ${event.id}">
