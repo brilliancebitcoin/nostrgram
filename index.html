@@ -35,6 +35,7 @@
         }
         function urlify( text, isMine ) {
             var imgRegex = /\b(https?:\/\/\S+(?:png|jpe?g|gif|webp)\S*)\b/g;
+            var videoRegex = /\b(https?:\/\/\S+(?:mp4|webm)\S*)\b/g
             var urlRegex = /(https?:\/\/[^\s]+)/g;
             var returnable = "";
             if ( !text.match( imgRegex ) ) {
@@ -50,6 +51,11 @@
             if ( text.match( imgRegex ) ) {
                 returnable = text.replace( imgRegex, ( img ) => {
                     return `<a href="${img}" target="_blank" rel="nofollow noopener"><img src="${img}" /></a>`;
+                })
+            }
+            if (text.match(videoRegex)) {
+                returnable = text.replace(videoRegex, video => {
+                    return `<a href="${video}" target="_blank" rel="nofollow noopener"><video width="320" height="240" controls><source src="${video}" /></video></a>`
                 })
             }
             return returnable;
