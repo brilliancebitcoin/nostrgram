@@ -35,14 +35,15 @@
         }
         function urlify( text, isMine ) {
             var imgRegex = /\b(https?:\/\/\S+(?:png|jpe?g|gif|webp)\S*)\b/g;
+            var vidRegex = /\b(https?:\/\/\S+(?:mp4|webm)\S*)\b/g
             var urlRegex = /(https?:\/\/[^\s]+)/g;
             var returnable = "";
-            if ( !text.match( imgRegex ) ) {
+            if ( !text.match( imgRegex ) && !text.match( vidRegex ) ) {
                 returnable = text.replace( urlRegex, ( url ) => {
                     return `<a href="${url}" target="_blank" rel="nofollow noopener" style="color: #4287f5;">${url}</a>`;
                 })                
             }
-            if ( isMine && !text.match( imgRegex ) ) {
+            if ( isMine && !text.match( imgRegex ) && !text.match( vidRegex ) ) {
                 returnable = text.replace( urlRegex, ( url ) => {
                     return `<a href="${url}" target="_blank" rel="nofollow noopener" style="color: white;">${url}</a>`;
                 })
@@ -50,6 +51,12 @@
             if ( text.match( imgRegex ) ) {
                 returnable = text.replace( imgRegex, ( img ) => {
                     return `<a href="${img}" target="_blank" rel="nofollow noopener"><img src="${img}" /></a>`;
+                })
+            }
+            if ( text.match( vidRegex ) ) {
+                returnable = text.replace( vidRegex, ( video ) => {
+                    var suffix = video.substring( video.lastIndexOf( '.' ) + 1 );
+                    return `<a href="${video}" target="_blank" rel="nofollow noopener"><video width="400" controls><source src="${video}" type="video/${suffix}"></video></a>`
                 })
             }
             return returnable;
