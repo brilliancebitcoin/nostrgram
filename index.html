@@ -64,6 +64,22 @@
         }
     </script>
     <script>
+        function leftJustifyImages() {
+            var i; for ( i=0; i<document.getElementsByClassName( "bubble" ).length; i++ ) {
+                if ( document.getElementsByClassName( "bubble" )[ i ].getElementsByTagName( "img" )[ 0 ] ) {
+                    var image = document.getElementsByClassName( "bubble" )[ i ].getElementsByTagName( "img" )[ 0 ];
+                    var isLoaded = image.complete && image.naturalHeight !== 0;
+                    if ( isLoaded ) {
+                        if ( document.getElementsByClassName( "bubble" )[ i ].getElementsByTagName( "img" )[ 0 ] && ( document.getElementsByClassName( "bubble" )[ i ].offsetWidth > ( window.innerWidth / 2 ) + 100 ) ) {
+                            document.getElementsByClassName( "bubble" )[ i ].parentElement.style.alignSelf = "flex-start";
+                        }
+                    }
+                }
+            }
+            setTimeout( leftJustifyImages, 3000 );
+        }
+    </script>
+    <script>
         if ( window.location.href.includes( "brilliancebitcoin.github.io/nostrgram" ) ) {
             window.location.href = "https://anigma.io/";
         }
@@ -819,6 +835,7 @@
             }
             setTimeout( function() {doBackgroundTasks();}, 10000 );
             modDMMeta();
+            leftJustifyImages();
         }
         doBackgroundTasks();
     </script>
