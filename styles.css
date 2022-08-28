@@ -808,8 +808,8 @@ body {
 }
 
 .big-picture {
-    width: 100%;
-    max-width: 300px;
+    width: 100% !important;
+    max-width: 300px !important;
 }
 
 /* mobile */
