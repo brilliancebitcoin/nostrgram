@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css?v=27" />
+    <link rel="stylesheet" href="styles.css?v=28" />
     <title>Anigma</title>
     <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
@@ -14,16 +14,25 @@
     <!-- based on this: https://github.com/YunusEmreNalbant/css-chat-interface -->
     <script>
         function urlify( text, isMine ) {
+            var imgRegex = /\b(https?:\/\/\S+(?:png|jpe?g|gif|webp)\S*)\b/g;
             var urlRegex = /(https?:\/\/[^\s]+)/g;
-            if ( isMine ) {
-                return text.replace( urlRegex, ( url ) => {
-                    return `<a href="${url}" target="_blank" rel="nofollow noopener" style="color: white;">${url}</a>`;
-                })
-            } else {
-                return text.replace( urlRegex, ( url ) => {
+            var returnable = "";
+            if ( !text.match( imgRegex ) ) {
+                returnable = text.replace( urlRegex, ( url ) => {
                     return `<a href="${url}" target="_blank" rel="nofollow noopener" style="color: #4287f5;">${url}</a>`;
                 })                
             }
+            if ( isMine && !text.match( imgRegex ) ) {
+                returnable = text.replace( urlRegex, ( url ) => {
+                    return `<a href="${url}" target="_blank" rel="nofollow noopener" style="color: white;">${url}</a>`;
+                })
+            }
+            if ( text.match( imgRegex ) ) {
+                returnable = text.replace( imgRegex, ( img ) => {
+                    return `<a href="${img}" target="_blank" rel="nofollow noopener"><img src="${img}" /></a>`;
+                })
+            }
+            return returnable;
         }
     </script>
     <script>
