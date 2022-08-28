@@ -379,6 +379,7 @@ body {
     max-width: 80%;
     word-break: break-word;
     position: relative;
+    max-width: 50vw;
 }
 
 .chat .content .message-content .picture {
@@ -402,10 +403,15 @@ body {
     margin-bottom: 5px;
     white-space: pre-wrap;
     vertical-align: middle;
+    max-width: 50vw;
 }
 
 .chat .content .message-content .message .bubble a {
     text-decoration: underline;
+}
+
+.chat .content .message-content .message .bubble img {
+    max-width: 50vw;
 }
 
 .chat .content .message-content .message .bubble .author {
@@ -813,6 +819,14 @@ body {
     .chat .content .message-content {
         padding-top: 61px;
         padding-bottom: 51px;
+    }
+
+    .chat .content .message-content .message .bubble {
+        max-width: calc( 100vw - 60px );
+    }
+
+    .chat .content .message-content .message .bubble img {
+        max-width: calc( 100vw - 60px );
     }
 
     .chat .content .message-form {
