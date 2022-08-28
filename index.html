@@ -30,7 +30,7 @@
         }
         function backticks( text ) {
             var backticks = /\`(.*?)\`/gm;
-            var html = text.replace( backticks, '<pre style="white-space: pre-wrap; padding: 5px; background-color: #999; font-size: 12px;">$1</pre>' );
+            var html = text.replace( backticks, '<pre style="display: inline; white-space: pre-wrap; padding: 5px; background-color: #999; font-size: 12px;">$1</pre>' );
             return html;
         }
         function urlify( text, isMine ) {
