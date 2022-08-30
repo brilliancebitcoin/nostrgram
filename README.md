@@ -12,6 +12,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] parse and display images in messages
 * [x] implement message caching
 * [x] make the emoji button functional
+* [ ] multi select emojis before closing emoji window
 * [ ] integrate lnbits
 * [ ] make an option to set and modify relays in settings
 * [ ] connect to at least two relays by default
@@ -38,3 +39,5 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] search for channels & users
 * [ ] nip05 support (domain-based checkmarkss)
 * [ ] nip07 support (likes and reactions)
+* [ ] on mobile, push up the chat log when a user opens their keyboard
+* [ ] investigate the send button -- there are reports it is broken on mobile when the keyboard is open, but it works for me
