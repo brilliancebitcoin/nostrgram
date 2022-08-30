@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
     <link rel="stylesheet" href="styles.css?v=32" />
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     <title>Anigma</title>
@@ -14,6 +15,7 @@
 <body>
     <!-- based on this: https://github.com/YunusEmreNalbant/css-chat-interface -->
     <script>
+        navigator.serviceWorker && navigator.serviceWorker.register(‘./sw.js’).then(function(registration) {  console.log(‘Excellent, registered with scope: ‘, registration.scope);});
         function bold( text ) {
             var bold = /\*\*(.*?)\*\*/gm;
             var html = text.replace( bold, '<strong>$1</strong>' );
