@@ -11,8 +11,8 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] parse and display urls as clickable links
 * [x] parse and display images in messages
 * [x] implement message caching
+* [x] make the emoji button functional
 * [ ] integrate lnbits
-* [ ] make the emoji button functional
 * [ ] make an option to set and modify relays in settings
 * [ ] connect to at least two relays by default
 * [ ] import channels and other backed up data when you import an account
