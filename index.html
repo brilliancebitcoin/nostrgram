@@ -976,23 +976,27 @@
             modDMMeta();
             leftJustifyImages();
             Object.keys( imagemap ).forEach( function( pubkey ) {
-                var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
-                    if ( !document.getElementsByClassName( pubkey )[ i ].classList.contains( "removable-channel" ) ) {
-                        document.getElementsByClassName( pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + imagemap[ pubkey ] + ")";
+                if ( pubkey in imagemap && imagemap[ pubkey ] != "none" ) {
+                    var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
+                        if ( !document.getElementsByClassName( pubkey )[ i ].classList.contains( "removable-channel" ) ) {
+                            document.getElementsByClassName( pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + imagemap[ pubkey ] + ")";
+                        }
                     }
-                }
-                var i; for ( i=0; i<document.getElementsByClassName( pubkey.substring( 0, 20 ) ).length; i++ ) {
-                    document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ i ].getElementsByTagName( "span" )[ 0 ].style.backgroundImage = "url(" + imagemap[ pubkey ] + ")";
+                    var i; for ( i=0; i<document.getElementsByClassName( pubkey.substring( 0, 20 ) ).length; i++ ) {
+                        document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ i ].getElementsByTagName( "span" )[ 0 ].style.backgroundImage = "url(" + imagemap[ pubkey ] + ")";
+                    }
                 }
             });
             Object.keys( namemap ).forEach( function( pubkey ) {
-                var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
-                    if ( !document.getElementsByClassName( pubkey )[ i ].classList.contains( "removable-channel" ) ) {
-                        document.getElementsByClassName( pubkey )[ i ].innerText = namemap[ pubkey ];
+                if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
+                    var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
+                        if ( !document.getElementsByClassName( pubkey )[ i ].classList.contains( "removable-channel" ) ) {
+                            document.getElementsByClassName( pubkey )[ i ].innerText = namemap[ pubkey ];
+                        }
                     }
-                }
-                var i; for ( i=0; i<document.getElementsByClassName( pubkey.substring( 0, 20 ) ).length; i++ ) {
-                    document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ i ].getElementsByClassName( "name" )[ 0 ].innerText = namemap[ pubkey ];
+                    var i; for ( i=0; i<document.getElementsByClassName( pubkey.substring( 0, 20 ) ).length; i++ ) {
+                        document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ i ].getElementsByClassName( "name" )[ 0 ].innerText = namemap[ pubkey ];
+                    }
                 }
             });
         }
