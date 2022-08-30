@@ -550,6 +550,7 @@
             if ( window.nostr ) {
                 var signedEvent = await window.nostr.signEvent( event );
                 event.sig = signedEvent.sig;
+                console.log( event );
             } else {
                 event.sig = await schnorr.sign( event.id, privateKey ) 
             }
@@ -933,6 +934,7 @@
                 "pubkey"     : pubKey,
             }
             var signedEvent = await getSignedEvent(event, privKey);
+            console.log( signedEvent );
             socket.send(JSON.stringify([ "EVENT", signedEvent ]))
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
         }
