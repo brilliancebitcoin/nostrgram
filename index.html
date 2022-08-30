@@ -16,7 +16,11 @@
 <body>
     <!-- based on this: https://github.com/YunusEmreNalbant/css-chat-interface -->
     <script>
-        navigator.serviceWorker && navigator.serviceWorker.register( './sw.js ').then(function(registration) {  console.log( 'Excellent, registered with scope: ', registration.scope);});
+        navigator.serviceWorker && navigator.serviceWorker.register( './sw.js ').then(function(registration) {
+            //console.log( 'Excellent, registered with scope: ', registration.scope);
+        });
+    </script>
+    <script>
         function bold( text ) {
             var bold = /\*\*(.*?)\*\*/gm;
             var html = text.replace( bold, '<strong>$1</strong>' );
@@ -504,6 +508,10 @@
         })
 
         async function openConnection( e ) {
+            if ( window.nostr ) {
+                pubKey = await window.nostr.getPublicKey();
+                privKey = "";
+            }
             getUserMeta( pubKey );
             //heartbeat tests
             //console.log( "connected to " + relay );
@@ -529,16 +537,22 @@
         socket.addEventListener('open', openConnection );
 
         async function getSignedEvent(event, privateKey) {
-            var eventData = JSON.stringify([
+            var eventArray = [
                 0,                    // Reserved for future use
                 event['pubkey'],        // The sender's public key
                 event['created_at'],    // Unix timestamp
                 event['kind'],        // Message “kind” or type
                 event['tags'],        // Tags identify replies/recipients
                 event['content']        // Your note contents
-            ])
+            ];
+            var eventData = JSON.stringify( eventArray );
             event.id  = sha256( eventData ).toString( 'hex' )
-            event.sig = await schnorr.sign( event.id, privateKey ) 
+            if ( window.nostr ) {
+                var signedEvent = await window.nostr.signEvent( event );
+                event.sig = signedEvent.sig;
+            } else {
+                event.sig = await schnorr.sign( event.id, privateKey ) 
+            }
             return event
         }
         function hexToBytes( hex ) {
