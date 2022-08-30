@@ -136,6 +136,7 @@
             localStorage[ "msg_cache" ] = JSON.stringify( msg_cache );
         }
         var array_of_pubkeys = [];
+        var existing_messages = [];
         var socket = new WebSocket( relay );
         var heartbeat = false;
         socket.addEventListener('message', async function( message ) {
@@ -297,6 +298,9 @@
                 var div = document.createElement( "div" );
                 div.classList.add( "message" );
                 div.classList.add( event.id );
+                msg_cache[ parent ].forEach( function( message ) {
+                    existing_messages.push( Object.keys( message ) [ 0 ] )
+                });
                 addMessageToCache( event.pubkey, event.id, event_time, parent, color, name, picture, content );
                 if ( isMine ) {
                     div.setAttribute( "data-author", event.pubkey );
@@ -311,7 +315,11 @@
                     div.innerHTML = html;
                 }
                 if ( now - event_time > 15 ) {
-                    document.getElementsByClassName( "message-content" )[ 0 ].prepend( div );
+                    if ( existing_messages.includes( event.id ) ) {
+                        document.getElementsByClassName( "message-content" )[ 0 ].prepend( div );
+                    } else {
+                        document.getElementsByClassName( "message-content" )[ 0 ].append( div );
+                    }
                 } else {
                     document.getElementsByClassName( "message-content" )[ 0 ].append( div );
                 }
@@ -416,6 +424,9 @@
                 div.classList.add( "message" );
                 div.classList.add( event.id );
                 var parent = otherKey;
+                msg_cache[ parent ].forEach( function( message ) {
+                    existing_messages.push( Object.keys( message ) [ 0 ] )
+                });
                 addMessageToCache( event.pubkey, event.id, event_time, parent, color, name, picture, content );
                 if ( isMine ) {
                     div.setAttribute( "data-author", event.pubkey );
@@ -430,7 +441,11 @@
                     div.innerHTML = html;
                 }
                 if ( now - event_time > 15 ) {
-                    document.getElementsByClassName( "message-content" )[ 0 ].prepend( div );
+                    if ( existing_messages.includes( event.id ) ) {
+                        document.getElementsByClassName( "message-content" )[ 0 ].prepend( div );
+                    } else {
+                        document.getElementsByClassName( "message-content" )[ 0 ].append( div );
+                    }
                 } else {
                     document.getElementsByClassName( "message-content" )[ 0 ].append( div );
                 }
@@ -554,6 +569,7 @@
     </script>
     <script>
         function selectChannel( channel ) {
+            existing_messages = [];
             if ( sessionStorage[ "add-messages-subid" ] ) {
                 var closerid = sessionStorage[ "add-messages-subid" ];
                 var closer = [ "CLOSE", closerid ];
@@ -1376,6 +1392,7 @@
     </script>
     <script>
         async function selectDM( pubkey, name, picture ) {
+            existing_messages = [];
             var i; for ( i=0; i<document.getElementsByClassName( "active" ).length; i++ ) {
                 document.getElementsByClassName( "active" )[ i ].classList.remove( "active" );
             }
@@ -1884,7 +1901,9 @@
                     picture = imagemap[ pubkey ];
                     dms_info[ pubkey ][ "picture" ] = picture;
                 }
-                document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( pubkey, name, picture );
+                if ( !document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ] ) {
+                    document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( pubkey, name, picture );
+                }
             });
         }
     </script>
