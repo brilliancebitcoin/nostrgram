@@ -16,7 +16,7 @@
 <body>
     <!-- based on this: https://github.com/YunusEmreNalbant/css-chat-interface -->
     <script>
-        navigator.serviceWorker && navigator.serviceWorker.register(‘./sw.js’).then(function(registration) {  console.log(‘Excellent, registered with scope: ‘, registration.scope);});
+        navigator.serviceWorker && navigator.serviceWorker.register( './sw.js ').then(function(registration) {  console.log( 'Excellent, registered with scope: ', registration.scope);});
         function bold( text ) {
             var bold = /\*\*(.*?)\*\*/gm;
             var html = text.replace( bold, '<strong>$1</strong>' );
