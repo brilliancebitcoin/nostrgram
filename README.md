@@ -1,6 +1,6 @@
 # Nostrgram is now called Anigma
 
-A clone of telegram but built on nostr
+A clone of telegram built on nostr
 
 # How to try
 
