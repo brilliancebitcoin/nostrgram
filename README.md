@@ -8,6 +8,7 @@ Click here: [https://anigma.io](https://anigma.io)
 
 # To do
 
+* [x] parse and display urls as clickable links
 * [x] parse and display images in messages
 * [x] implement message caching
 * [ ] integrate lnbits
