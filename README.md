@@ -24,7 +24,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] add message replies via long press or right click
 * [ ] add sticky messages
 * [ ] let channel creators blacklist posts and users (client software can optionally ignore blacklists)
-* [ ] let channel creators add admins with blacklisting powers
+* [ ] let channel creators add admins with sticky powers and blacklisting powers
 * [ ] add sticker packs
 * [ ] make the mic record voice chats powered by [https://relay.nostr.info/test/chat.html](https://relay.nostr.info/test/chat.html)
 * [ ] make the image attach button prompt you to upload your image to imgur and then paste the link
