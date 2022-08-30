@@ -30,7 +30,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] make the image attach button prompt you to upload your image to imgur and then paste the link
 * [ ] show "last seen" indicators for people in your dm list
 * [ ] when a dm is closed, don't show it again til the dm'd person says something
-* [ ] let users block people who they don't want in their dms
+* [ ] let users block individuals from appearing in their dms
 * [ ] let users close their dms so people can't show up unannounced
 * [ ] let users close their dms except to people who pay a fee
 * [ ] if a user types /me at the start of their message their bubble should display their name inline as the first word of their message
