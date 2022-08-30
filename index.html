@@ -319,6 +319,21 @@
                         document.getElementsByClassName( "message-content" )[ 0 ].prepend( div );
                     } else {
                         document.getElementsByClassName( "message-content" )[ 0 ].append( div );
+                        var last_200_messages = [];
+                        var i; for ( i=0; i<document.getElementsByClassName( "bubble" ).length; i++ ) {
+                            last_200_messages.push( document.getElementsByClassName( "bubble" )[ i ].parentElement );
+                        }
+                        last_200_messages.sort(function( a, b ) {return b.getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) - a.getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" )});
+                        var i; for ( i=0; i<document.getElementsByClassName( "bubble" ).length; i++ ) {
+                            if ( i > document.getElementsByClassName( "bubble" ).length - 11 ) {
+                                document.getElementsByClassName( "bubble" )[ i ].parentElement.remove();
+                                i = i - 1;
+                            }
+                        }
+                        last_200_messages.reverse();
+                        last_200_messages.forEach( function( item ) {
+                            document.getElementsByClassName( "message-content" )[ 0 ].append( item );
+                        });
                     }
                 } else {
                     document.getElementsByClassName( "message-content" )[ 0 ].append( div );
@@ -445,6 +460,21 @@
                         document.getElementsByClassName( "message-content" )[ 0 ].prepend( div );
                     } else {
                         document.getElementsByClassName( "message-content" )[ 0 ].append( div );
+                        var last_200_messages = [];
+                        var i; for ( i=0; i<document.getElementsByClassName( "bubble" ).length; i++ ) {
+                            last_200_messages.push( document.getElementsByClassName( "bubble" )[ i ].parentElement );
+                        }
+                        last_200_messages.sort(function( a, b ) {return b.getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) - a.getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" )});
+                        var i; for ( i=0; i<document.getElementsByClassName( "bubble" ).length; i++ ) {
+                            if ( i > document.getElementsByClassName( "bubble" ).length - 11 ) {
+                                document.getElementsByClassName( "bubble" )[ i ].parentElement.remove();
+                                i = i - 1;
+                            }
+                        }
+                        last_200_messages.reverse();
+                        last_200_messages.forEach( function( item ) {
+                            document.getElementsByClassName( "message-content" )[ 0 ].append( item );
+                        });
                     }
                 } else {
                     document.getElementsByClassName( "message-content" )[ 0 ].append( div );
