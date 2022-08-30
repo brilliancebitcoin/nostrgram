@@ -34,3 +34,6 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] let users close their dms so people can't show up unannounced
 * [ ] let users close their dms except to people who pay a fee
 * [ ] if a user types /me at the start of their message their bubble should display their name inline as the first word of their message
+* [ ] search channel history
+* [ ] search for channels & users
+* [ ] nip05 support
