@@ -772,66 +772,68 @@
     <script>
 //this code is for "closed dms" where you only see someone's dms if you first add them to your sidebar
         function addClosedDecryptedMessages( pubkey ) {
-            var cached_messages = msg_cache[ pubkey ];
-            var time_for_since = 0;
-            cached_messages.forEach( function( msg, i ) {
-                var color = msg[ Object.keys( msg )[ 0 ] ][ "color" ];
-                var content = msg[ Object.keys( msg )[ 0 ] ][ "content" ];
-                var event_time = msg[ Object.keys( msg )[ 0 ] ][ "event_time" ];                
-                var id = msg[ Object.keys( msg )[ 0 ] ][ "id" ];
-                var name = msg[ Object.keys( msg )[ 0 ] ][ "name" ];
-                var parent = msg[ Object.keys( msg )[ 0 ] ][ "parent" ];
-                var picture = msg[ Object.keys( msg )[ 0 ] ][ "picture" ];
-                var pubkey = msg[ Object.keys( msg )[ 0 ] ][ "pubkey" ];
-                var now = Math.floor( Date.now() / 1000 )
-                var how_long_ago = convertHMS( now - event_time )
-                var div = document.createElement( "div" );
-                if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
-                    name = namemap[ pubkey ];
-                }
-                if ( pubkey in imagemap && imagemap[ pubkey ] != "none" ) {
-                    picture = imagemap[ pubkey ];
-                }
-                div.classList.add( "message" );
-                div.classList.add( id );
-                var isMine = ( pubkey == pubKey );
-                if ( isMine ) {
-                    div.setAttribute( "data-author", pubkey );
-                    div.classList.add( "me" );
-                    var html = `<div class="bubble">${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
-                    div.innerHTML = html;
-                } else {
-                    var html = `
-                        <span class="picture" style="background-image: url(${picture})" onclick="showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
-                        <div class="bubble"><div class="author ${color} ${pubkey}">${name}</div>${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
-                    `;
-                    div.innerHTML = html;
-                }
-                if ( now - event_time > 15 ) {
-                    document.getElementsByClassName( "message-content" )[ 0 ].prepend( div );
-                } else {
-                    document.getElementsByClassName( "message-content" )[ 0 ].append( div );
-                }
-                if ( document.getElementsByClassName( "message-header" )[ 0 ] && Number( document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
-                    document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
-                    document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
-                }
-                if ( window.innerWidth < 601 && Number( document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
-                    document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
-                    document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
-                }
-                if ( Number( document.getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
-                    document.getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestamp", event_time );
-                    document.getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago );
-                }
-                document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                if ( document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length > 2 ) {
-                    document.getElementsByClassName( "message-content" )[ 0 ].childNodes[ document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length - 3 ].scrollIntoView();
-                }
-                if ( i == cached_messages.length - 1 ) {
-                    time_for_since = event_time - 5;
-                }
-            });
+            if ( msg_cache[ pubkey ] ) {
+                var cached_messages = msg_cache[ pubkey ];
+                var time_for_since = 0;
+                cached_messages.forEach( function( msg, i ) {
+                    var color = msg[ Object.keys( msg )[ 0 ] ][ "color" ];
+                    var content = msg[ Object.keys( msg )[ 0 ] ][ "content" ];
+                    var event_time = msg[ Object.keys( msg )[ 0 ] ][ "event_time" ];                
+                    var id = msg[ Object.keys( msg )[ 0 ] ][ "id" ];
+                    var name = msg[ Object.keys( msg )[ 0 ] ][ "name" ];
+                    var parent = msg[ Object.keys( msg )[ 0 ] ][ "parent" ];
+                    var picture = msg[ Object.keys( msg )[ 0 ] ][ "picture" ];
+                    var pubkey = msg[ Object.keys( msg )[ 0 ] ][ "pubkey" ];
+                    var now = Math.floor( Date.now() / 1000 )
+                    var how_long_ago = convertHMS( now - event_time )
+                    var div = document.createElement( "div" );
+                    if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
+                        name = namemap[ pubkey ];
+                    }
+                    if ( pubkey in imagemap && imagemap[ pubkey ] != "none" ) {
+                        picture = imagemap[ pubkey ];
+                    }
+                    div.classList.add( "message" );
+                    div.classList.add( id );
+                    var isMine = ( pubkey == pubKey );
+                    if ( isMine ) {
+                        div.setAttribute( "data-author", pubkey );
+                        div.classList.add( "me" );
+                        var html = `<div class="bubble">${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
+                        div.innerHTML = html;
+                    } else {
+                        var html = `
+                            <span class="picture" style="background-image: url(${picture})" onclick="showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
+                            <div class="bubble"><div class="author ${color} ${pubkey}">${name}</div>${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
+                        `;
+                        div.innerHTML = html;
+                    }
+                    if ( now - event_time > 15 ) {
+                        document.getElementsByClassName( "message-content" )[ 0 ].prepend( div );
+                    } else {
+                        document.getElementsByClassName( "message-content" )[ 0 ].append( div );
+                    }
+                    if ( document.getElementsByClassName( "message-header" )[ 0 ] && Number( document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
+                        document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
+                        document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
+                    }
+                    if ( window.innerWidth < 601 && Number( document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
+                        document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
+                        document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
+                    }
+                    if ( Number( document.getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
+                        document.getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestamp", event_time );
+                        document.getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago );
+                    }
+                    document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
+                    if ( document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length > 2 ) {
+                        document.getElementsByClassName( "message-content" )[ 0 ].childNodes[ document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length - 3 ].scrollIntoView();
+                    }
+                    if ( i == cached_messages.length - 1 ) {
+                        time_for_since = event_time - 5;
+                    }
+                });
+            }
             var closedSubId   = "encrypted-dms" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 0, 20 );
             sessionStorage[ "encrypted-dms-subid" ] = closedSubId;
             var closedFilter  = {
