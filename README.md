@@ -26,7 +26,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] let channel creators blacklist posts and users (client software can optionally ignore blacklists)
 * [ ] let channel creators add admins with sticky powers and blacklisting powers
 * [ ] add sticker packs
-* [ ] make the mic record voice chats powered by [https://relay.nostr.info/test/chat.html](https://relay.nostr.info/test/chat.html)
+* [ ] make the mic button record and broadcast voice chats powered by [https://relay.nostr.info/test/chat.html](https://relay.nostr.info/test/chat.html)
 * [ ] make the image attach button prompt you to upload your image to imgur and then paste the link
 * [ ] show "last seen" indicators for people in your dm list
 * [ ] when a dm is closed, don't show it again til the dm'd person says something
