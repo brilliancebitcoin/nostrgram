@@ -21,7 +21,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] show a grey message counter in channels with messages you didn't read yet
 * [ ] show a green message counter in channels or dms where someone @'d you or dm'd you
 * [ ] add an about section to profile pages
-* [ ] add message replies
+* [ ] add message replies via long press or right click
 * [ ] add sticky messages
 * [ ] let channel creators blacklist posts and users (client software can optionally ignore blacklists)
 * [ ] let channel creators add admins with blacklisting powers
