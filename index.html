@@ -471,6 +471,7 @@
             socket.send(JSON.stringify( subscription ));
             //this gives users open dms
             var openSubId   = "encrypted-open-dms" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 0, 20 );
+            sessionStorage[ "encrypted-open-dms" ] = openSubId;
             var openFilter  = {
                 "kinds": [ 4 ],
                 "#p": [ pubKey ],
@@ -1243,6 +1244,20 @@
             });
             document.getElementsByClassName( "import-privkey-btn" )[ 0 ].addEventListener( "click", function() {
                 importPrivkey( document.getElementsByClassName( "import-privkey-input" )[ 0 ].value );
+                if ( sessionStorage[ "encrypted-open-dms" ] ) {
+                    var closerid = sessionStorage[ "encrypted-open-dms" ];
+                    var closer = [ "CLOSE", closerid ];
+                }
+                var openSubId   = "encrypted-open-dms" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 0, 20 );
+                sessionStorage[ "encrypted-open-dms" ] = openSubId;
+                var openFilter  = {
+                    "kinds": [ 4 ],
+                    "#p": [ pubKey ],
+                    "limit": 200
+                }
+                var openSubscription = [ "REQ", openSubId, openFilter ]
+                var sendable = JSON.stringify( openSubscription )
+                socket.send( sendable );
             });
         }
     </script>
@@ -1808,6 +1823,7 @@
             obj[ "picture" ] = picture;
             dms_info[ pubkey ] = obj;
             localStorage[ "dms_info" ] = JSON.stringify( dms_info );
+            getUserMeta( pubkey );
             setTimeout( function() {
                 if ( !document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ] ) {
                     document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( pubkey, name, picture );
