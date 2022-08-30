@@ -817,7 +817,7 @@ body {
 #black-bg {
     display: none;
     width:100%;
-    position: absolute;
+    position: fixed;
     top: 0px;
     left: 0px;
     background-color: black;
