@@ -297,7 +297,7 @@
                 var div = document.createElement( "div" );
                 div.classList.add( "message" );
                 div.classList.add( event.id );
-                addMessageToCache( event.pubkey, event.id, isMine, event_time, parent, color, name, picture, content );
+                addMessageToCache( event.pubkey, event.id, event_time, parent, color, name, picture, content );
                 if ( isMine ) {
                     div.setAttribute( "data-author", event.pubkey );
                     div.classList.add( "me" );
@@ -416,7 +416,7 @@
                 div.classList.add( "message" );
                 div.classList.add( event.id );
                 var parent = otherKey;
-                addMessageToCache( event.pubkey, event.id, isMine, event_time, parent, color, name, picture, content );
+                addMessageToCache( event.pubkey, event.id, event_time, parent, color, name, picture, content );
                 if ( isMine ) {
                     div.setAttribute( "data-author", event.pubkey );
                     div.classList.add( "me" );
@@ -703,7 +703,6 @@
                 var content = msg[ Object.keys( msg )[ 0 ] ][ "content" ];
                 var event_time = msg[ Object.keys( msg )[ 0 ] ][ "event_time" ];                
                 var id = msg[ Object.keys( msg )[ 0 ] ][ "id" ];
-                var isMine = msg[ Object.keys( msg )[ 0 ] ][ "isMine" ];
                 var name = msg[ Object.keys( msg )[ 0 ] ][ "name" ];
                 var parent = msg[ Object.keys( msg )[ 0 ] ][ "parent" ];
                 var picture = msg[ Object.keys( msg )[ 0 ] ][ "picture" ];
@@ -713,6 +712,7 @@
                 var div = document.createElement( "div" );
                 div.classList.add( "message" );
                 div.classList.add( id );
+                var isMine = ( pubkey == pubKey );
                 if ( isMine ) {
                     div.setAttribute( "data-author", pubkey );
                     div.classList.add( "me" );
@@ -772,7 +772,6 @@
                 var content = msg[ Object.keys( msg )[ 0 ] ][ "content" ];
                 var event_time = msg[ Object.keys( msg )[ 0 ] ][ "event_time" ];                
                 var id = msg[ Object.keys( msg )[ 0 ] ][ "id" ];
-                var isMine = msg[ Object.keys( msg )[ 0 ] ][ "isMine" ];
                 var name = msg[ Object.keys( msg )[ 0 ] ][ "name" ];
                 var parent = msg[ Object.keys( msg )[ 0 ] ][ "parent" ];
                 var picture = msg[ Object.keys( msg )[ 0 ] ][ "picture" ];
@@ -782,6 +781,7 @@
                 var div = document.createElement( "div" );
                 div.classList.add( "message" );
                 div.classList.add( id );
+                var isMine = ( pubkey == pubKey );
                 if ( isMine ) {
                     div.setAttribute( "data-author", pubkey );
                     div.classList.add( "me" );
@@ -1834,13 +1834,12 @@
         }
     </script>
     <script>
-        function addMessageToCache( pubkey, id, isMine, event_time, parent, color, name, picture, content ) {
+        function addMessageToCache( pubkey, id, event_time, parent, color, name, picture, content ) {
             if ( msg_cache[ parent ].some( function( e ) {if ( Object.keys( e )[ 0 ] == id ) return e } ) ) return
             var lower_obj = {}
             var higher_obj = {}
             lower_obj[ "pubkey" ] = pubkey;
             lower_obj[ "id" ] = id;
-            lower_obj[ "isMine" ] = isMine;
             lower_obj[ "event_time" ] = event_time;
             lower_obj[ "parent" ] = parent;
             lower_obj[ "color" ] = color;
