@@ -122,6 +122,18 @@
         } else {
             var dms_info = {}
         }
+        if ( localStorage[ "msg_cache" ] ) {
+            var msg_cache = JSON.parse( localStorage[ "msg_cache" ] );
+        } else {
+            var msg_cache = {}
+            subscribed_channels.forEach( function( id ) {
+                msg_cache[ id ] = [];
+            });
+            Object.keys(dms_info).forEach( function( pubkey ) {
+                msg_cache[ pubkey ] = [];
+            });
+            localStorage[ "msg_cache" ] = JSON.stringify( msg_cache );
+        }
         var array_of_pubkeys = [];
         var socket = new WebSocket( relay );
         var heartbeat = false;
@@ -221,14 +233,15 @@
                     document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayChannel( JSON.parse( content )[ "picture" ], JSON.parse( content )[ "name" ], "", event.id, event.created_at );
                     getLatestMessage( event.id );
                     addDmsToSidebar();
+                    var channel = document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( event.id )[ 0 ];
+                    if ( subId.startsWith( "00000000" ) ) {
+                        selectChannel( channel );
+                    }
                 }
                 var closer = [ "CLOSE", subId ];
                 socket.send(JSON.stringify( closer ));
             }
-            if (
-                kind == 42
-                && subId.includes( "add-messages" )
-                ) {
+            if ( kind == 42 && subId.includes( "add-messages" ) ) {
                 if ( document.getElementsByClassName( event.id )[ 0 ] ) return
                 var isMine = ( event.pubkey == pubKey );
                 if ( !isMine && !array_of_pubkeys.includes( event.pubkey ) ) {
@@ -280,24 +293,26 @@
                 }
                 content = content.replace( /&/g, "&#38;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
                 content = markdownify( content, isMine );
+                var div = document.createElement( "div" );
+                div.classList.add( "message" );
+                div.classList.add( event.id );
+                addMessageToCache( event.pubkey, event.id, isMine, event_time, parent, color, name, picture, content );
                 if ( isMine ) {
-                    var html = `
-                        <div data-author="${event.pubkey}" class="message me ${event.id}">
-                            <div class="bubble">${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
-                        </div>
-                    `;
+                    div.setAttribute( "data-author", event.pubkey );
+                    div.classList.add( "me" );
+                    var html = `<div class="bubble">${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
+                    div.innerHTML = html;
                 } else {
                     var html = `
-                        <div class="message ${event.id}">
-                            <span class="picture" style="background-image: url(${picture})" onclick="showProfile( '${event.pubkey}', '${name}', '${picture}' )"></span>
-                            <div class="bubble"><div class="author ${color} ${event.pubkey}">${name}</div>${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
-                        </div>
+                        <span class="picture" style="background-image: url(${picture})" onclick="showProfile( '${event.pubkey}', '${name}', '${picture}' )"></span>
+                        <div class="bubble"><div class="author ${color} ${event.pubkey}">${name}</div>${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
                     `;
+                    div.innerHTML = html;
                 }
                 if ( now - event_time > 15 ) {
-                    document.getElementsByClassName( "message-content" )[ 0 ].innerHTML = html + document.getElementsByClassName( "message-content" )[ 0 ].innerHTML;
+                    document.getElementsByClassName( "message-content" )[ 0 ].prepend( div );
                 } else {
-                    document.getElementsByClassName( "message-content" )[ 0 ].innerHTML += html;
+                    document.getElementsByClassName( "message-content" )[ 0 ].append( div );
                 }
                 if ( document.getElementsByClassName( "message-header" )[ 0 ] && Number( document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
                     document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
@@ -316,10 +331,7 @@
                     document.getElementsByClassName( "message-content" )[ 0 ].childNodes[ document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length - 2 ].scrollIntoView();
                 }
             }
-            if (
-                kind == 42
-                && subId.includes( "latest-message" )
-                ) {
+            if ( kind == 42 && subId.includes( "latest-message" ) ) {
                 var now = Math.floor( Date.now() / 1000 )
                 var event_time = event.created_at
                 var how_long_ago = convertHMS( now - event_time )
@@ -399,24 +411,27 @@
                 }
                 content = content.replace( /&/g, "&#38;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
                 content = markdownify( content, isMine );
+                var div = document.createElement( "div" );
+                div.classList.add( "message" );
+                div.classList.add( event.id );
+                var parent = otherKey;
+                addMessageToCache( event.pubkey, event.id, isMine, event_time, parent, color, name, picture, content );
                 if ( isMine ) {
-                    var html = `
-                        <div data-author="${event.pubkey}" class="message me ${event.id}">
-                            <div class="bubble">${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
-                        </div>
-                    `;
+                    div.setAttribute( "data-author", event.pubkey );
+                    div.classList.add( "me" );
+                    var html = `<div class="bubble">${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
+                    div.innerHTML = html;
                 } else {
                     var html = `
-                        <div class="message ${event.id}">
-                            <span class="picture" style="background-image: url(${picture})" onclick="showProfile( '${event.pubkey}', '${name}', '${picture}' )"></span>
-                            <div class="bubble"><div class="author ${color} ${event.pubkey}">${name}</div>${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
-                        </div>
+                        <span class="picture" style="background-image: url(${picture})" onclick="showProfile( '${event.pubkey}', '${name}', '${picture}' )"></span>
+                        <div class="bubble"><div class="author ${color} ${event.pubkey}">${name}</div>${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
                     `;
+                    div.innerHTML = html;
                 }
                 if ( now - event_time > 15 ) {
-                    document.getElementsByClassName( "message-content" )[ 0 ].innerHTML = html + document.getElementsByClassName( "message-content" )[ 0 ].innerHTML;
+                    document.getElementsByClassName( "message-content" )[ 0 ].prepend( div );
                 } else {
-                    document.getElementsByClassName( "message-content" )[ 0 ].innerHTML += html;
+                    document.getElementsByClassName( "message-content" )[ 0 ].append( div );
                 }
                 if ( document.getElementsByClassName( "message-header" )[ 0 ] && Number( document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
                     document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
@@ -680,11 +695,66 @@
     </script>
     <script>
         function addMessages( id ) {
+            var cached_messages = msg_cache[ id ];
+            var time_for_since = 0;
+            cached_messages.forEach( function( msg, i ) {
+                var color = msg[ Object.keys( msg )[ 0 ] ][ "color" ];
+                var content = msg[ Object.keys( msg )[ 0 ] ][ "content" ];
+                var event_time = msg[ Object.keys( msg )[ 0 ] ][ "event_time" ];                
+                var id = msg[ Object.keys( msg )[ 0 ] ][ "id" ];
+                var isMine = msg[ Object.keys( msg )[ 0 ] ][ "isMine" ];
+                var name = msg[ Object.keys( msg )[ 0 ] ][ "name" ];
+                var parent = msg[ Object.keys( msg )[ 0 ] ][ "parent" ];
+                var picture = msg[ Object.keys( msg )[ 0 ] ][ "picture" ];
+                var pubkey = msg[ Object.keys( msg )[ 0 ] ][ "pubkey" ];
+                var now = Math.floor( Date.now() / 1000 )
+                var how_long_ago = convertHMS( now - event_time )
+                var div = document.createElement( "div" );
+                div.classList.add( "message" );
+                div.classList.add( id );
+                if ( isMine ) {
+                    div.setAttribute( "data-author", pubkey );
+                    div.classList.add( "me" );
+                    var html = `<div class="bubble">${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
+                    div.innerHTML = html;
+                } else {
+                    var html = `
+                        <span class="picture" style="background-image: url(${picture})" onclick="showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
+                        <div class="bubble"><div class="author ${color} ${pubkey}">${name}</div>${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
+                    `;
+                    div.innerHTML = html;
+                }
+                if ( now - event_time > 15 ) {
+                    document.getElementsByClassName( "message-content" )[ 0 ].prepend( div );
+                } else {
+                    document.getElementsByClassName( "message-content" )[ 0 ].append( div );
+                }
+                if ( document.getElementsByClassName( "message-header" )[ 0 ] && Number( document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
+                    document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
+                    document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
+                }
+                if ( window.innerWidth < 601 && Number( document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
+                    document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
+                    document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
+                }
+                if ( Number( document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
+                    document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestamp", event_time );
+                    document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago );
+                }
+                document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
+                if ( document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length > 1 ) {
+                    document.getElementsByClassName( "message-content" )[ 0 ].childNodes[ document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length - 2 ].scrollIntoView();
+                }
+                if ( i == cached_messages.length - 1 ) {
+                    time_for_since = event_time - 5;
+                }
+            });
             var subId   = "add-messages" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 0, 20 );
             sessionStorage[ "add-messages-subid" ] = subId;
             var filter  = {
                 "kinds": [ 42 ],
                 "#e": [id],
+                "since": time_for_since,
                 "limit": 200
             }
             var subscription = [ "REQ", subId, filter ]
@@ -694,12 +764,67 @@
     <script>
 //this code is for "closed dms" where you only see someone's dms if you first add them to your sidebar
         function addClosedDecryptedMessages( pubkey ) {
+            var cached_messages = msg_cache[ pubkey ];
+            var time_for_since = 0;
+            cached_messages.forEach( function( msg, i ) {
+                var color = msg[ Object.keys( msg )[ 0 ] ][ "color" ];
+                var content = msg[ Object.keys( msg )[ 0 ] ][ "content" ];
+                var event_time = msg[ Object.keys( msg )[ 0 ] ][ "event_time" ];                
+                var id = msg[ Object.keys( msg )[ 0 ] ][ "id" ];
+                var isMine = msg[ Object.keys( msg )[ 0 ] ][ "isMine" ];
+                var name = msg[ Object.keys( msg )[ 0 ] ][ "name" ];
+                var parent = msg[ Object.keys( msg )[ 0 ] ][ "parent" ];
+                var picture = msg[ Object.keys( msg )[ 0 ] ][ "picture" ];
+                var pubkey = msg[ Object.keys( msg )[ 0 ] ][ "pubkey" ];
+                var now = Math.floor( Date.now() / 1000 )
+                var how_long_ago = convertHMS( now - event_time )
+                var div = document.createElement( "div" );
+                div.classList.add( "message" );
+                div.classList.add( id );
+                if ( isMine ) {
+                    div.setAttribute( "data-author", pubkey );
+                    div.classList.add( "me" );
+                    var html = `<div class="bubble">${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
+                    div.innerHTML = html;
+                } else {
+                    var html = `
+                        <span class="picture" style="background-image: url(${picture})" onclick="showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
+                        <div class="bubble"><div class="author ${color} ${pubkey}">${name}</div>${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
+                    `;
+                    div.innerHTML = html;
+                }
+                if ( now - event_time > 15 ) {
+                    document.getElementsByClassName( "message-content" )[ 0 ].prepend( div );
+                } else {
+                    document.getElementsByClassName( "message-content" )[ 0 ].append( div );
+                }
+                if ( document.getElementsByClassName( "message-header" )[ 0 ] && Number( document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
+                    document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
+                    document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
+                }
+                if ( window.innerWidth < 601 && Number( document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
+                    document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
+                    document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
+                }
+                if ( Number( document.getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
+                    document.getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestamp", event_time );
+                    document.getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago );
+                }
+                document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
+                if ( document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length > 1 ) {
+                    document.getElementsByClassName( "message-content" )[ 0 ].childNodes[ document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length - 2 ].scrollIntoView();
+                }
+                if ( i == cached_messages.length - 1 ) {
+                    time_for_since = event_time - 5;
+                }
+            });
             var closedSubId   = "encrypted-dms" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 0, 20 );
             sessionStorage[ "encrypted-dms-subid" ] = closedSubId;
             var closedFilter  = {
                 "authors": [ pubKey, pubkey ],
                 "kinds": [ 4 ],
                 "#p": [ pubKey, pubkey ],
+                "since": time_for_since,
                 "limit": 200
             }
             var closedSubscription = [ "REQ", closedSubId, closedFilter ]
@@ -1172,6 +1297,8 @@
                 obj[ "picture" ] = picture;
                 dms_info[ pubkey ] = obj;
                 localStorage[ "dms_info" ] = JSON.stringify( dms_info );
+                msg_cache[ pubkey ] = [];
+                localStorage[ "msg_cache" ] = JSON.stringify( msg_cache );
             }
             selectDM( pubkey, name, picture );
         }
@@ -1316,6 +1443,8 @@
             stuff_to_backup[ "channels" ] = JSON.stringify( subscribed_channels );
             stuff_to_backup[ "relays" ] = JSON.stringify( [ relay ] );
             localStorage[ "backup" ] = JSON.stringify( stuff_to_backup );
+            msg_cache[ id ] = [];
+            localStorage[ "msg_cache" ] = JSON.stringify( msg_cache );
         }
     </script>
     <script>
@@ -1335,6 +1464,8 @@
             stuff_to_backup[ "channels" ] = JSON.stringify( subscribed_channels );
             stuff_to_backup[ "relays" ] = JSON.stringify( [ relay ] );
             localStorage[ "backup" ] = JSON.stringify( stuff_to_backup );
+            delete msg_cache[ id ];
+            localStorage[ "msg_cache" ] = JSON.stringify( msg_cache );
         }
     </script>
     <script>
@@ -1349,14 +1480,23 @@
             }
             delete dms_info[ pubkey ];
             localStorage[ "dms_info" ] = JSON.stringify( dms_info );
+            delete msg_cache[ pubkey ];
+            localStorage[ "msg_cache" ] = JSON.stringify( msg_cache );
         }
     </script>
     <script>
         async function createChannel() {
+            console.log( "test" );
             var name = document.getElementsByClassName( "create-channel-name" )[ 0 ].value;
             var img = document.getElementsByClassName( "create-channel-image" )[ 0 ].value;
-            if ( !name || name == "" ) return
-            if ( !img || img == "" ) return
+            if ( !name || name == "" ) {
+                showToast( "add a channel name first" );
+                return;
+            }
+            if ( !img || img == "" ) {
+                showToast( "add a channel image first" );
+                return;
+            }
             if ( !img.startsWith( "https://" ) || ( !img.endsWith( ".png" ) && !img.endsWith( ".jpg" ) && !img.endsWith( ".jpeg" ) && !img.endsWith( ".gif" ) && !img.endsWith( ".webp" ) ) ) {
                     showToast( "There was an error with your image url, it either did not begin with https:// or it did not end with .png, .jpg, .jpeg, .gif, or .webp" );
                     return;
@@ -1538,19 +1678,29 @@
     </script>
     <script>
         function setNoteInputHeight() {
-            if ( document.getElementsByClassName( "note-input" )[ 0 ] ) {
-                document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";
-                var text = document.getElementsByClassName( "note-input" )[ 0 ].value;
-                var match = /\r|\n/.exec(text);
-                if ( match || document.getElementsByClassName( "note-input" )[ 0 ].offsetHeight >= 40 ) {
-                    document.getElementsByClassName( "note-input" )[ 0 ].style.lineHeight = "18px";
-                    document.getElementsByClassName( "note-input" )[ 0 ].style.borderRadius = "10px";
-                } else if ( document.getElementsByClassName( "note-input" )[ 0 ].offsetHeight < 34 ) {
-                    document.getElementsByClassName( "note-input" )[ 0 ].style.lineHeight = "35px";
-                    document.getElementsByClassName( "note-input" )[ 0 ].style.borderRadius = "36px";
-                }
-            }
             setTimeout( function() {setNoteInputHeight();}, 50 );
+            if ( !document.getElementsByClassName( "note-input" )[ 0 ] ) return
+            document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";
+            document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";
+            document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";
+            document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";
+            document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";
+            document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";
+            document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";
+            document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";
+            document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";
+            document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";
+            document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";
+            document.getElementsByClassName( "note-input" )[ 0 ].style.height = (document.getElementsByClassName( "note-input" )[ 0 ].scrollHeight)-1+"px";
+            var text = document.getElementsByClassName( "note-input" )[ 0 ].value;
+            var match = /\r|\n/.exec(text);
+            if ( match || document.getElementsByClassName( "note-input" )[ 0 ].offsetHeight >= 40 ) {
+                document.getElementsByClassName( "note-input" )[ 0 ].style.lineHeight = "18px";
+                document.getElementsByClassName( "note-input" )[ 0 ].style.borderRadius = "10px";
+            } else if ( document.getElementsByClassName( "note-input" )[ 0 ].offsetHeight < 34 ) {
+                document.getElementsByClassName( "note-input" )[ 0 ].style.lineHeight = "35px";
+                document.getElementsByClassName( "note-input" )[ 0 ].style.borderRadius = "36px";
+            }
         }
         setNoteInputHeight();
     </script>
@@ -1558,10 +1708,12 @@
         function getUserMeta( pubkey ) {
             if ( pubkey in imagemap && imagemap[ pubkey ] != "none" ) {
                 var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
-                    document.getElementsByClassName( pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + imagemap[ pubkey ] + ")";;
+                    if ( !document.getElementsByClassName( pubkey )[ i ].classList.contains( "removable-channel" ) ) {
+                        document.getElementsByClassName( pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + imagemap[ pubkey ] + ")";
+                    }
                 }
                 var i; for ( i=0; i<document.getElementsByClassName( pubkey.substring( 0, 20 ) ).length; i++ ) {
-                    document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ i ].getElementsByTagName( "span" )[ 0 ].style.backgroundImage = "url(" + imagemap[ pubkey ] + ")";;
+                    document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ i ].getElementsByTagName( "span" )[ 0 ].style.backgroundImage = "url(" + imagemap[ pubkey ] + ")";
                 }
             } else if ( !( pubkey in imagemap ) ) {
                 var newsubId   = "00000001" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 )
@@ -1575,7 +1727,9 @@
             }
             if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
                 var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
-                    document.getElementsByClassName( pubkey )[ i ].innerText = namemap[ pubkey ];
+                    if ( !document.getElementsByClassName( pubkey )[ i ].classList.contains( "removable-channel" ) ) {
+                        document.getElementsByClassName( pubkey )[ i ].innerText = namemap[ pubkey ];
+                    }
                 }
                 var i; for ( i=0; i<document.getElementsByClassName( pubkey.substring( 0, 20 ) ).length; i++ ) {
                     document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ i ].getElementsByClassName( "name" )[ 0 ].innerText = namemap[ pubkey ];
@@ -1678,9 +1832,36 @@
         }
     </script>
     <script>
+        function addMessageToCache( pubkey, id, isMine, event_time, parent, color, name, picture, content ) {
+            if ( msg_cache[ parent ].some( function( e ) {if ( Object.keys( e )[ 0 ] == id ) return e } ) ) return
+            var lower_obj = {}
+            var higher_obj = {}
+            lower_obj[ "pubkey" ] = pubkey;
+            lower_obj[ "id" ] = id;
+            lower_obj[ "isMine" ] = isMine;
+            lower_obj[ "event_time" ] = event_time;
+            lower_obj[ "parent" ] = parent;
+            lower_obj[ "color" ] = color;
+            lower_obj[ "name" ] = name;
+            lower_obj[ "picture" ] = picture;
+            lower_obj[ "content" ] = content;
+            higher_obj[ id ] = lower_obj;
+            if ( msg_cache[ parent ].length > 199 ) {
+                msg_cache[ parent ].pop();
+            }
+            msg_cache[ parent ].push( higher_obj );
+            msg_cache[ parent ].sort(
+                function( a, b ) {
+                    return b[ Object.keys( b )[ 0 ] ][ "event_time"] - a[ Object.keys( a )[ 0 ] ][ "event_time" ];
+                }
+            )
+            localStorage[ "msg_cache" ] = JSON.stringify( msg_cache );
+        }
+    </script>
+    <script>
         function showToast( content ) {
             var x = document.getElementById( "toast" );
-            x.innerText = content;
+            x.innerHTML = content;
             x.className = "show";
             setTimeout(function(){ x.classList.remove( "show" ); }, 3000);
         }
