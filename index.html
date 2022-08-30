@@ -81,7 +81,7 @@
         }
     </script>
     <script>
-        if ( window.location.href.includes( "brilliancebitcoin.github.io/nostrgram" ) ) {
+        if ( window.location.href.includes( "brilliancebitcoin.github.io/nostrgram" ) && !window.location.href.includes( "brilliancebitcoin.github.io/nostrgram-test" ) ) {
             window.location.href = "https://anigma.io/";
         }
         var { getSharedSecret, schnorr, utils } = nobleSecp256k1
@@ -349,8 +349,8 @@
                     document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago );
                 }
                 document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                if ( document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length > 2 ) {
-                    document.getElementsByClassName( "message-content" )[ 0 ].childNodes[ document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length - 3 ].scrollIntoView();
+                if ( document.getElementsByClassName( "message-bubble" ).length > 0 ) {
+                    document.getElementsByClassName( "message-bubble" )[ document.getElementsByClassName( "message-bubble" ).length - 1 ].scrollIntoView();
                 }
             }
             if ( kind == 42 && subId.includes( "latest-message" ) ) {
@@ -488,8 +488,8 @@
                     document.getElementsByClassName( otherKey.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago );
                 }
                 document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                if ( document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length > 2 ) {
-                    document.getElementsByClassName( "message-content" )[ 0 ].childNodes[ document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length - 3 ].scrollIntoView();
+                if ( document.getElementsByClassName( "message-bubble" ).length > 0 ) {
+                    document.getElementsByClassName( "message-bubble" )[ document.getElementsByClassName( "message-bubble" ).length - 1 ].scrollIntoView();
                 }
             }
             if ( kind === 4 && subId.includes( "encrypted-open-dms" ) ) {
@@ -643,7 +643,7 @@
                             </a>
                         </li>
                         <li class="input">
-                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something"></textarea>
+                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;if ( document.getElementsByClassName( "message-bubble" ).length > 0 ) {document.getElementsByClassName( "message-bubble" )[ document.getElementsByClassName( "message-bubble" ).length - 1 ].scrollIntoView();}'></textarea>
                         </li>
                         <li class="send-btn">
                             <a>
@@ -704,8 +704,8 @@
                 document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
                 document.getElementsByClassName( "content" )[ 0 ].style.display = "block";
                 document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                if ( document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length > 2 ) {
-                    document.getElementsByClassName( "message-content" )[ 0 ].childNodes[ document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length - 3 ].scrollIntoView();
+                if ( document.getElementsByClassName( "message-bubble" ).length > 0 ) {
+                    document.getElementsByClassName( "message-bubble" )[ document.getElementsByClassName( "message-bubble" ).length - 1 ].scrollIntoView();
                 }
                 document.getElementsByClassName( "message-header" )[ 0 ].remove();
             }
@@ -793,8 +793,8 @@
                     document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago );
                 }
                 document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                if ( document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length > 2 ) {
-                    document.getElementsByClassName( "message-content" )[ 0 ].childNodes[ document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length - 3 ].scrollIntoView();
+                if ( document.getElementsByClassName( "message-bubble" ).length > 0 ) {
+                    document.getElementsByClassName( "message-bubble" )[ document.getElementsByClassName( "message-bubble" ).length - 1 ].scrollIntoView();
                 }
                 if ( i == cached_messages.length - 1 ) {
                     time_for_since = event_time - 5;
@@ -869,8 +869,8 @@
                         document.getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago );
                     }
                     document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                    if ( document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length > 2 ) {
-                        document.getElementsByClassName( "message-content" )[ 0 ].childNodes[ document.getElementsByClassName( "message-content" )[ 0 ].childNodes.length - 3 ].scrollIntoView();
+                    if ( document.getElementsByClassName( "message-bubble" ).length > 0 ) {
+                        document.getElementsByClassName( "message-bubble" )[ document.getElementsByClassName( "message-bubble" ).length - 1 ].scrollIntoView();
                     }
                     if ( i == cached_messages.length - 1 ) {
                         time_for_since = event_time - 5;
@@ -1452,7 +1452,7 @@
                             </a>
                         </li>
                         <li class="input">
-                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something"></textarea>
+                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;if ( document.getElementsByClassName( "message-bubble" ).length > 0 ) {document.getElementsByClassName( "message-bubble" )[ document.getElementsByClassName( "message-bubble" ).length - 1 ].scrollIntoView();}'></textarea>
                         </li>
                         <li class="send-btn">
                             <a>
