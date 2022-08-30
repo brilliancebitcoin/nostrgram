@@ -1,0 +1,15 @@
+{
+  "name": "Anigma - Talk to people",
+  "short_name": "Anigma",
+  "display": "minimal-ui",
+  "start_url": "/",
+  "theme_color": "#4287f5",
+  "background_color": "#b0c8a0",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
