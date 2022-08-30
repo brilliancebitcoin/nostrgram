@@ -36,4 +36,5 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] if a user types /me at the start of their message their bubble should display their name inline as the first word of their message
 * [ ] search channel history
 * [ ] search for channels & users
-* [ ] nip05 support
+* [ ] nip05 support (domain-based checkmarkss)
+* [ ] nip07 support (likes and reactions)
