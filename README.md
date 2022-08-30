@@ -13,12 +13,12 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] implement message caching
 * [x] make the emoji button functional
 * [x] on mobile, push up the chat log when a user opens their keyboard
+* [x] integrate nos2x
 * [ ] multi select emojis before closing emoji window
 * [ ] integrate lnbits
 * [ ] make an option to set and modify relays in settings
 * [ ] connect to at least two relays by default
 * [ ] import channels and other backed up data when you import an account
-* [ ] integrate nos2x
 * [ ] parse and display @[username] and @[pubkey] as links to profile pages
 * [ ] show a grey message counter in channels with messages you didn't read yet
 * [ ] show a green message counter in channels or dms where someone @'d you or dm'd you
