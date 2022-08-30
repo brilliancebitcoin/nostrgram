@@ -549,8 +549,9 @@
             event.id  = sha256( eventData ).toString( 'hex' )
             if ( window.nostr ) {
                 var signedEvent = await window.nostr.signEvent( event );
+                console.log( [1], signedEvent );
                 event.sig = signedEvent.sig;
-                console.log( event );
+                console.log( [2], signedEvent.sig, event.sig );
             } else {
                 event.sig = await schnorr.sign( event.id, privateKey ) 
             }
@@ -934,7 +935,7 @@
                 "pubkey"     : pubKey,
             }
             var signedEvent = await getSignedEvent(event, privKey);
-            console.log( signedEvent );
+            console.log( [3], signedEvent );
             socket.send(JSON.stringify([ "EVENT", signedEvent ]))
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
         }
