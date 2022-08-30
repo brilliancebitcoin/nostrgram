@@ -549,9 +549,11 @@
             event.id  = sha256( eventData ).toString( 'hex' )
             if ( window.nostr ) {
                 var signedEvent = await window.nostr.signEvent( event );
-                console.log( [1], signedEvent );
-                event.sig = signedEvent.sig;
-                console.log( [2], signedEvent.sig, event.sig );
+                if ( typeof( signedEvent ) == "string" ) {
+                    event.sig = signedEvent;
+                } else {
+                    event.sig = signedEvent.sig;
+                }
             } else {
                 event.sig = await schnorr.sign( event.id, privateKey ) 
             }
