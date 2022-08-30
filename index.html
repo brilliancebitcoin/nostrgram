@@ -689,6 +689,7 @@
                 }
             });
             document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', function ( e ) {
+                keymap[ "Shift" ] = false;
                 sendNote();
             });
             addMessages( channel.getAttribute( "data-id" ) );
@@ -710,6 +711,12 @@
                 var now = Math.floor( Date.now() / 1000 )
                 var how_long_ago = convertHMS( now - event_time )
                 var div = document.createElement( "div" );
+                if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
+                    name = namemap[ pubkey ];
+                }
+                if ( pubkey in imagemap && imagemap[ pubkey ] != "none" ) {
+                    picture = imagemap[ pubkey ];
+                }
                 div.classList.add( "message" );
                 div.classList.add( id );
                 var isMine = ( pubkey == pubKey );
@@ -779,6 +786,12 @@
                 var now = Math.floor( Date.now() / 1000 )
                 var how_long_ago = convertHMS( now - event_time )
                 var div = document.createElement( "div" );
+                if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
+                    name = namemap[ pubkey ];
+                }
+                if ( pubkey in imagemap && imagemap[ pubkey ] != "none" ) {
+                    picture = imagemap[ pubkey ];
+                }
                 div.classList.add( "message" );
                 div.classList.add( id );
                 var isMine = ( pubkey == pubKey );
@@ -962,6 +975,26 @@
             setTimeout( function() {doBackgroundTasks();}, 10000 );
             modDMMeta();
             leftJustifyImages();
+            Object.keys( imagemap ).forEach( function( pubkey ) {
+                var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
+                    if ( !document.getElementsByClassName( pubkey )[ i ].classList.contains( "removable-channel" ) ) {
+                        document.getElementsByClassName( pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + imagemap[ pubkey ] + ")";
+                    }
+                }
+                var i; for ( i=0; i<document.getElementsByClassName( pubkey.substring( 0, 20 ) ).length; i++ ) {
+                    document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ i ].getElementsByTagName( "span" )[ 0 ].style.backgroundImage = "url(" + imagemap[ pubkey ] + ")";
+                }
+            });
+            Object.keys( namemap ).forEach( function( pubkey ) {
+                var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
+                    if ( !document.getElementsByClassName( pubkey )[ i ].classList.contains( "removable-channel" ) ) {
+                        document.getElementsByClassName( pubkey )[ i ].innerText = namemap[ pubkey ];
+                    }
+                }
+                var i; for ( i=0; i<document.getElementsByClassName( pubkey.substring( 0, 20 ) ).length; i++ ) {
+                    document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ i ].getElementsByClassName( "name" )[ 0 ].innerText = namemap[ pubkey ];
+                }
+            });
         }
         doBackgroundTasks();
     </script>
@@ -1424,6 +1457,7 @@
                 }
             });
             document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', function ( e ) {
+                keymap[ "Shift" ] = false;
                 sendEncryptedNote( document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value, pubkey );
             });
             addClosedDecryptedMessages( pubkey );
@@ -1838,6 +1872,12 @@
             if ( msg_cache[ parent ].some( function( e ) {if ( Object.keys( e )[ 0 ] == id ) return e } ) ) return
             var lower_obj = {}
             var higher_obj = {}
+            if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
+                name = namemap[ pubkey ];
+            }
+            if ( pubkey in imagemap && imagemap[ pubkey ] != "none" ) {
+                picture = imagemap[ pubkey ];
+            }
             lower_obj[ "pubkey" ] = pubkey;
             lower_obj[ "id" ] = id;
             lower_obj[ "event_time" ] = event_time;
