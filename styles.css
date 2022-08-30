@@ -358,6 +358,8 @@ body {
     overflow: auto;
     background: url("./cartoons.png") repeat center center fixed;
     background-size: 600px;
+    overflow-y: scroll;
+    overflow-x: clip;
 }
 
 .chat .content .message-content * {
