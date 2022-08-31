@@ -26,7 +26,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] add an about section to profile pages
 * [ ] add message replies via long press or right click
 * [ ] add sticky messages
-* [ ] let channel creators blacklist posts and users (client software can optionally ignore blacklists)
+* [ ] let channel creators blacklist posts and users (blacklists are enforced client side, so client software can optionally ignore them)
 * [ ] let channel creators add admins with sticky powers and blacklisting powers
 * [ ] add sticker packs
 * [ ] make the mic button record and broadcast voice chats powered by [https://relay.nostr.info/test/chat.html](https://relay.nostr.info/test/chat.html)
