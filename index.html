@@ -402,7 +402,7 @@
                 } else {
                     otherKey = event.pubkey;
                 }
-                if ( winddow.nostr ) {
+                if ( window.nostr ) {
                     content = await window.nostr.nip04.decrypt( otherKey, content );
                 } else {
                     content = await decrypt(privKey, otherKey, content)
@@ -950,7 +950,7 @@
             var note = document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value;
             if ( !note || note == "" ) return;
             var now = Math.floor( Date.now() / 1000 );
-            if ( winddow.nostr ) {
+            if ( window.nostr ) {
                 var encrypted = await window.nostr.nip04.encrypt( pubkey, content );
             } else {
                 var encrypted = encrypt( privKey, pubkey, note );
@@ -1650,7 +1650,7 @@
     <script>
         async function checkForEncryptionErrors( privkey, pubkey, content ) {
             try {
-                if ( winddow.nostr ) {
+                if ( window.nostr ) {
                     var content = await window.nostr.nip04.decrypt( pubkey, content );
                 } else {
                     var content = await decrypt( privkey, pubkey, content );
