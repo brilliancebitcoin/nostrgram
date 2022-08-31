@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
     <meta name="viewport" content="width=device-width, user-scalable=no" />
-    <link rel="stylesheet" href="styles.css?v=32" />
+    <link rel="stylesheet" href="styles.css?v=33" />
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="manifest.json">
     <title>Anigma</title>
@@ -15,6 +15,12 @@
 </head>
 <body>
     <!-- based on this: https://github.com/YunusEmreNalbant/css-chat-interface -->
+    <script>
+        admin = false;
+        if ( window.location.href.includes( "admin=true" ) ) {
+            var admin = true;
+        }
+    </script>
     <script>
         navigator.serviceWorker && navigator.serviceWorker.register( './sw.js' ).then( function( registration ) {
             //console.log( 'Excellent, registered with scope: ', registration.scope );
@@ -223,7 +229,7 @@
                 }
             }
             if ( kind == 40 ) {
-                if ( document.getElementsByClassName( event.id )[ 0 ] ) return
+                if ( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( event.id )[ 0 ] ) return
                 var isError = checkForChannelSubscriptionErrors( content );
                 if ( isError ) {
                     showToast( "unknown error, could not add this channel -- please contact a developer for help" );
@@ -375,10 +381,33 @@
                 if ( content.length > 50 ) {
                     shortened_content = shortened_content + "...";
                 }
-                document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].innerText = shortened_content;
+                if ( !msg_cache[ parent ] ) {
+                    msg_cache[ parent ] = [];
+                }
+                //If the current message is already in the message cache, return, otherwise add to the number of unread messages
                 if ( Number( document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
+                    document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].innerText = shortened_content;
                     document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago )
                     document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestamp", event_time )
+                }
+                var messageIsKnown = false;
+                msg_cache[ parent ].forEach( function( message, index ) {
+                    if ( Object.keys( message )[ 0 ] == event.id ) {
+                        messageIsKnown = true;
+                    }
+                });
+                if ( !messageIsKnown ) {
+                    if ( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].classList.contains( "active" ) ) return
+                    var old_num_of_new_messages = Number( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].getAttribute( "data-num-of-new-messages" ) );                        
+                    new_num_of_new_messages = old_num_of_new_messages + 1;
+                    document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].setAttribute( "data-num-of-new-messages", String( new_num_of_new_messages ) );
+                    if ( new_num_of_new_messages > 0 ) {
+                        document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].getElementsByClassName( "notification" )[ 0 ].innerText = String( new_num_of_new_messages );
+                        if ( new_num_of_new_messages > 199 ) {
+                            document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].getElementsByClassName( "notification" )[ 0 ].innerText += "+";
+                        }
+                        document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].getElementsByClassName( "notification" )[ 0 ].style.display = "inline";
+                    }
                 }
             }
             //this code is for "closed dms" where you only see someone's dms if you first add them to your sidebar
@@ -403,7 +432,7 @@
                 } else {
                     otherKey = event.pubkey;
                 }
-                if ( window.nostr ) {
+                if ( !admin && window.nostr ) {
                     content = await window.nostr.nip04.decrypt( otherKey, content );
                 } else {
                     content = await decrypt(privKey, otherKey, content)
@@ -520,13 +549,49 @@
                 if ( !document.getElementsByClassName( event.pubkey.substring( 0, 20 ) )[ 0 ] && !thereAreEncryptionErrors ) {
                     addPubkeyToSidebar( event.pubkey );
                 }
+                if ( event.pubkey == pubKey ) {
+                    var otherKey = "";
+                    var i; for ( i=0; i<event.tags.length; i++ ) {
+                        if ( event[ "tags" ][ i ][ 0 ] == "p" && ( !otherKey || otherKey == "" ) ) {
+                            otherKey = event[ "tags" ][ i ][ 1 ];
+                        } else {
+                            otherKey = event.pubkey;
+                        }
+                    }
+                } else {
+                    otherKey = event.pubkey;
+                }
+                var parent = otherKey;
+                if ( !msg_cache[ parent ] ) {
+                    msg_cache[ parent ] = [];
+                }
+                //If the current message is already in the message cache, return, otherwise add to the number of unread messages
+                var messageIsKnown = false;
+                msg_cache[ parent ].forEach( function( message, index ) {
+                    if ( Object.keys( message )[ 0 ] == event.id ) {
+                        messageIsKnown = true;
+                    }
+                });
+                if ( !messageIsKnown ) {
+                    if ( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].classList.contains( "active" ) ) return
+                    var old_num_of_new_messages = Number( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].getAttribute( "data-num-of-new-messages" ) );
+                    new_num_of_new_messages = old_num_of_new_messages + 1;
+                    document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].setAttribute( "data-num-of-new-messages", String( new_num_of_new_messages ) );
+                    if ( new_num_of_new_messages > 0 ) {
+                        document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "notification" )[ 0 ].innerText = String( new_num_of_new_messages );
+                        if ( new_num_of_new_messages > 199 ) {
+                            document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "notification" )[ 0 ].innerText += "+";
+                        }
+                        document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "notification" )[ 0 ].style.display = "inline";
+                    }
+                }
             }
         }
 
         socket.addEventListener( 'message', handleMessage );
 
         async function openConnection( e ) {
-            if ( window.nostr ) {
+            if ( !admin && window.nostr ) {
                 pubKey = await window.nostr.getPublicKey();
                 privKey = "";
             }
@@ -576,7 +641,7 @@
             ];
             var eventData = JSON.stringify( eventArray );
             event.id  = sha256( eventData ).toString( 'hex' )
-            if ( window.nostr ) {
+            if ( !admin && window.nostr ) {
                 var signedEvent = await window.nostr.signEvent( event );
                 if ( typeof( signedEvent ) == "string" ) {
                     event.sig = signedEvent;
@@ -630,13 +695,14 @@
     <script>
         function displayChannel( image, name, message, id, timestamp ) {
             var html = `
-                        <li class="channel-outer ${id}" data-id="${id}" data-img="${image}" onclick="selectChannel( this );">
+                        <li class="channel-outer ${id}" data-id="${id}" data-img="${image}" data-num-of-new-messages="0" onclick="selectChannel( this );">
                             <a>
                                 <span style="background-image: url(${image})"></span>
                                 <div class="channel-inner">
                                     <div class="name">${name}</div>
                                     <div data-timestamp="${timestamp}" class="message">${message}</div>
                                 </div>
+                                <span class="notification">0</span>
                             </a>
                         </li>
             `;
@@ -645,6 +711,9 @@
     </script>
     <script>
         function selectChannel( channel ) {
+            channel.getElementsByClassName( "notification" )[ 0 ].style.display = "none";
+            channel.getElementsByClassName( "notification" )[ 0 ].innerText = "0";
+            channel.setAttribute( "data-num-of-new-messages", "0" );
             existing_messages = [];
             if ( sessionStorage[ "add-messages-subid" ] ) {
                 var closerid = sessionStorage[ "add-messages-subid" ];
@@ -946,7 +1015,7 @@
             var filter  = {
                 "kinds": [ 42 ],
                 "#e": [id],
-                "limit": 1
+                "limit": 200
             }
             var subscription = [ "REQ", subId, filter ]
             socket.send(JSON.stringify( subscription ));
@@ -975,7 +1044,7 @@
             var note = document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value;
             if ( !note || note == "" ) return;
             var now = Math.floor( Date.now() / 1000 );
-            if ( window.nostr ) {
+            if ( !admin && window.nostr ) {
                 var encrypted = await window.nostr.nip04.encrypt( pubkey, note );
             } else {
                 var encrypted = encrypt( privKey, pubkey, note );
@@ -1459,13 +1528,14 @@
     <script>
         function displayDMbox( pubkey, name, picture ) {
             var html = `
-                        <li class="dm-outer ${pubkey.substring( 0, 20 )}" data-pubkey="${pubkey}" data-img="${picture}" onclick="selectDM( '${pubkey}', '${name}', '${picture}' );">
+                        <li class="dm-outer ${pubkey.substring( 0, 20 )}" data-pubkey="${pubkey}" data-img="${picture}" data-num-of-new-messages="0" onclick="selectDM( '${pubkey}', '${name}', '${picture}' );">
                             <a>
                                 <span style="background-image: url(${picture})"></span>
                                 <div class="dm-inner">
                                     <div class="name">${name}</div>
                                     <div data-timestamp="" class="message"></div>
                                 </div>
+                                <span class="notification" style="background-color: #05e632;">0</span>
                             </a>
                         </li>
             `;
@@ -1474,6 +1544,9 @@
     </script>
     <script>
         async function selectDM( pubkey, name, picture ) {
+            document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "notification" )[ 0 ].style.display = "none";
+            document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "notification" )[ 0 ].innerText = "0";
+            document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ].setAttribute( "data-num-of-new-messages", "0" );
             existing_messages = [];
             var i; for ( i=0; i<document.getElementsByClassName( "active" ).length; i++ ) {
                 document.getElementsByClassName( "active" )[ i ].classList.remove( "active" );
@@ -1677,7 +1750,7 @@
     <script>
         async function checkForEncryptionErrors( privkey, pubkey, content ) {
             try {
-                if ( window.nostr ) {
+                if ( !admin && window.nostr ) {
                     var content = await window.nostr.nip04.decrypt( pubkey, content );
                 } else {
                     var content = await decrypt( privkey, pubkey, content );
