@@ -15,6 +15,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] on mobile, push up the chat log when a user opens their keyboard
 * [x] integrate nos2x
 * [x] fix the socket disruption -- users report if you leave the app and return to it later, you can't see messages without a hard refresh, but sending still works
+* [x] show a grey message counter in channels with messages you didn't read yet
 * [ ] private groups with shared decryption keys
 * [ ] multi select emojis before closing emoji window
 * [ ] integrate lnbits
@@ -22,7 +23,6 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] connect to at least two relays by default
 * [ ] import channels and other backed up data when you import an account
 * [ ] parse and display @[username] and @[pubkey] as links to profile pages
-* [ ] show a grey message counter in channels with messages you didn't read yet
 * [ ] show a green message counter in channels or dms where someone @'d you or dm'd you
 * [ ] add an about section to profile pages
 * [ ] add message replies via long press or right click
@@ -42,5 +42,4 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] search for channels & users
 * [ ] nip05 support (domain-based checkmarks)
 * [ ] nip07 support (likes and reactions)
-* [ ] investigate the send button -- users report it is broken on mobile when the keyboard is open, but it works for me
 * [ ] dark mode
