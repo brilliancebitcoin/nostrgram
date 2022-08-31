@@ -14,6 +14,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] make the emoji button functional
 * [x] on mobile, push up the chat log when a user opens their keyboard
 * [x] integrate nos2x
+* [ ] private groups with shared decryption keys
 * [ ] multi select emojis before closing emoji window
 * [ ] integrate lnbits
 * [ ] make an option to set and modify relays in settings
