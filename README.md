@@ -43,3 +43,4 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] nip07 support (likes and reactions)
 * [ ] investigate the send button -- users report it is broken on mobile when the keyboard is open, but it works for me
 * [ ] investigate the socket disruption -- users report if you leave the app and return to it later, you can't see messages without a hard refresh, but sending still works
+* [ ] dark mode
