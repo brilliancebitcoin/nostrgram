@@ -14,6 +14,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] make the emoji button functional
 * [x] on mobile, push up the chat log when a user opens their keyboard
 * [x] integrate nos2x
+* [x] fix the socket disruption -- users report if you leave the app and return to it later, you can't see messages without a hard refresh, but sending still works
 * [ ] private groups with shared decryption keys
 * [ ] multi select emojis before closing emoji window
 * [ ] integrate lnbits
@@ -42,5 +43,4 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] nip05 support (domain-based checkmarks)
 * [ ] nip07 support (likes and reactions)
 * [ ] investigate the send button -- users report it is broken on mobile when the keyboard is open, but it works for me
-* [ ] investigate the socket disruption -- users report if you leave the app and return to it later, you can't see messages without a hard refresh, but sending still works
 * [ ] dark mode
