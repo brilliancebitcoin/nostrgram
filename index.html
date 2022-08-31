@@ -402,7 +402,11 @@
                 } else {
                     otherKey = event.pubkey;
                 }
-                content = await decrypt(privKey, otherKey, content)
+                if ( winddow.nostr ) {
+                    content = await window.nostr.nip04.decrypt( otherKey, content );
+                } else {
+                    content = await decrypt(privKey, otherKey, content)
+                }
                 if ( !document.getElementsByClassName( otherKey.substring( 0, 20 ) )[ 0 ].classList.contains( "active" ) ) return
                 var color = "";
                 if ( isNaN( event.pubkey.substring( 0, 1 ) ) && ( event.pubkey.substring( 0, 1 ) == "e" || event.pubkey.substring( 0, 1 ) == "f" ) ) {
@@ -946,7 +950,11 @@
             var note = document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value;
             if ( !note || note == "" ) return;
             var now = Math.floor( Date.now() / 1000 );
-            var encrypted = encrypt( privKey, pubkey, note )
+            if ( winddow.nostr ) {
+                var encrypted = await window.nostr.nip04.encrypt( pubkey, content );
+            } else {
+                var encrypted = encrypt( privKey, pubkey, note );
+            }
             var event = {
                 "content"    : encrypted,
                 "created_at" : Math.floor( Date.now() / 1000 ),
@@ -1641,8 +1649,12 @@
     </script>
     <script>
         async function checkForEncryptionErrors( privkey, pubkey, content ) {
-            try {  
-                var content = await decrypt( privkey, pubkey, content );
+            try {
+                if ( winddow.nostr ) {
+                    var content = await window.nostr.nip04.decrypt( pubkey, content );
+                } else {
+                    var content = await decrypt( privkey, pubkey, content );
+                }
             } catch ( e ) {  
                 return true;  
             }
