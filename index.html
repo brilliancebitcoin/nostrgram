@@ -16,8 +16,8 @@
 <body>
     <!-- based on this: https://github.com/YunusEmreNalbant/css-chat-interface -->
     <script>
-        navigator.serviceWorker && navigator.serviceWorker.register( './sw.js ').then(function(registration) {
-            //console.log( 'Excellent, registered with scope: ', registration.scope);
+        navigator.serviceWorker && navigator.serviceWorker.register( './sw.js' ).then( function( registration ) {
+            //console.log( 'Excellent, registered with scope: ', registration.scope );
         });
     </script>
     <script>
@@ -146,7 +146,8 @@
         var existing_messages = [];
         var socket = new WebSocket( relay );
         var heartbeat = false;
-        socket.addEventListener('message', async function( message ) {
+
+        async function handleMessage( message ) {
             //heartbeat tests
             //console.log( "got a message!", message );
             heartbeat = true;
@@ -343,6 +344,14 @@
                 } else {
                     document.getElementsByClassName( "message-content" )[ 0 ].append( div );
                 }
+                var seen_messages = [];
+                var i; for ( i=0; i<document.getElementsByClassName( "bubble" ).length; i++ ) {
+                    if ( !seen_messages.includes( document.getElementsByClassName( "bubble" )[ i ].parentElement.classList[ 1 ] ) ) {
+                        seen_messages.push( document.getElementsByClassName( "bubble" )[ i ].parentElement.classList[ 1 ] )
+                    } else {
+                        document.getElementsByClassName( "bubble" )[ i ].parentElement.remove(); i = i - 1;
+                    } 
+                }
                 if ( document.getElementsByClassName( "message-header" )[ 0 ] && Number( document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
                     document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
                     document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
@@ -489,6 +498,14 @@
                 } else {
                     document.getElementsByClassName( "message-content" )[ 0 ].append( div );
                 }
+                var seen_messages = [];
+                var i; for ( i=0; i<document.getElementsByClassName( "bubble" ).length; i++ ) {
+                    if ( !seen_messages.includes( document.getElementsByClassName( "bubble" )[ i ].parentElement.classList[ 1 ] ) ) {
+                        seen_messages.push( document.getElementsByClassName( "bubble" )[ i ].parentElement.classList[ 1 ] )
+                    } else {
+                        document.getElementsByClassName( "bubble" )[ i ].parentElement.remove(); i = i - 1;
+                    } 
+                }
                 if ( document.getElementsByClassName( "message-header" )[ 0 ] && Number( document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
                     document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
                     document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
@@ -512,7 +529,9 @@
                     addPubkeyToSidebar( event.pubkey );
                 }
             }
-        })
+        }
+
+        socket.addEventListener( 'message', handleMessage );
 
         async function openConnection( e ) {
             if ( window.nostr ) {
@@ -522,7 +541,7 @@
             getUserMeta( pubKey );
             //heartbeat tests
             //console.log( "connected to " + relay );
-            heartbeat = true;
+            //heartbeat = true;
             addDmsToSidebar();
             var subId   = bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" )
             var filter  = { "ids": subscribed_channels }
@@ -539,9 +558,19 @@
             var openSubscription = [ "REQ", openSubId, openFilter ]
             var sendable = JSON.stringify( openSubscription )
             socket.send( sendable );
+            if ( document.getElementsByClassName( "active" )[ 0 ] ) {
+                if ( document.getElementsByClassName( "active" )[ 0 ].classList.contains( "channel-outer" ) ) {
+                    var id = document.getElementsByClassName( "active" )[ 0 ].getAttribute( "data-id" );
+                    setTimeout( function() {addMessages( id );}, 3000 );
+                }
+                if ( document.getElementsByClassName( "active" )[ 0 ].classList.contains( "dm-outer" ) ) {
+                    var pubkey = document.getElementsByClassName( "active" )[ 0 ].getAttribute( "data-pubkey" );
+                    addClosedDecryptedMessages( pubkey );
+                }
+            }
         }
 
-        socket.addEventListener('open', openConnection );
+        socket.addEventListener( 'open', openConnection );
 
         async function getSignedEvent(event, privateKey) {
             var eventArray = [
@@ -1018,12 +1047,14 @@
                 socket.send(JSON.stringify( closer ));
             }, 1500 );
             setTimeout( function() {
-                if ( !heartbeat ) {
+                if ( !heartbeat && socket.readyState == 3 ) {
                     //heartbeat tests
                     //showToast( "the heartbeat function needed activation" );
                     socket.removeEventListener( 'open', openConnection );
+                    socket.removeEventListener( 'message', handleMessage );
                     socket = new WebSocket( relay );
                     socket.addEventListener( 'open', openConnection );
+                    socket.addEventListener( 'message', handleMessage );
                 }
             }, 2000 );
         }
