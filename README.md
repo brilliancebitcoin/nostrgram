@@ -38,7 +38,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] if a user types /me at the start of their message their bubble should display their name inline as the first word of their message
 * [ ] search channel history
 * [ ] search for channels & users
-* [ ] nip05 support (domain-based checkmarkss)
+* [ ] nip05 support (domain-based checkmarks)
 * [ ] nip07 support (likes and reactions)
 * [ ] investigate the send button -- users report it is broken on mobile when the keyboard is open, but it works for me
 * [ ] investigate the socket disruption -- users report if you leave the app and return to it later, you can't see messages without a hard refresh, but sending still works
