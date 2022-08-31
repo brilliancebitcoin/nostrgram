@@ -153,7 +153,7 @@ body {
 
 .chat .sidebar .channels ul li a .channel-inner,
 .chat .sidebar .channels ul li a .dm-inner {
-    max-width: 80%;
+    max-width: 185px;
 }
 
 .chat .sidebar .channels ul li a .channel-inner .name,
@@ -172,14 +172,15 @@ body {
 }
 
 .chat .sidebar .channels ul li a .notification {
-    width: 18px;
-    height: 18px;
+    display: none;
+    width: 25px;
+    height: 25px;
     border-radius: 50%;
-    background-color: red;
+    background-color: #999;
     font-size: 11px;
     color: #fff;
     text-align: center;
-    line-height: 17px;
+    line-height: 25px;
     margin-left: auto;
 }
 
