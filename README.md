@@ -43,3 +43,4 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] nip05 support (domain-based checkmarks)
 * [ ] nip07 support (likes and reactions)
 * [ ] dark mode
+* [ ] investigate why new messages sometimes say they happened 12 months ago (this seems more prevalent on mobile)
