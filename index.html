@@ -1021,9 +1021,9 @@
                 if ( !heartbeat ) {
                     //heartbeat tests
                     //showToast( "the heartbeat function needed activation" );
-                    socket.removeEventListener('open', openConnection );
+                    socket.removeEventListener( 'open', openConnection );
                     socket = new WebSocket( relay );
-                    socket.addEventListener('open', openConnection );
+                    socket.addEventListener( 'open', openConnection );
                 }
             }, 2000 );
         }
@@ -1042,7 +1042,7 @@
                 getUserMeta( array_of_pubkeys[ 0 ] );
                 array_of_pubkeys.shift();
             });
-            setTimeout( function() {checkHeartbeat();}, 1000 );
+            setTimeout( function() {checkHeartbeat();}, 10000 );
             var i; for ( i=0; i<document.getElementsByClassName( "time" ).length; i++ ) {
                 var now = Math.floor( Date.now() / 1000 )
                 var event_time = document.getElementsByClassName( "time" )[ i ].getAttribute( "data-timestamp" )
