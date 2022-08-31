@@ -148,18 +148,9 @@
         var heartbeat = false;
 
         async function handleMessage( message ) {
-            //heartbeat tests
-            //console.log( "got a message!", message );
             heartbeat = true;
             var [ type, subId, event ] = JSON.parse( message.data );
             var { kind, content } = event || {}
-/*
-            if ( subId.startsWith( "00000002" ) ) {
-                if ( content ) {
-                    console.log( "heartbeat event:", event );
-                }
-            }
-*/
             if ( subId.startsWith( "00000001" ) ) {
                 if ( content && !checkForUserMetaErrors( content ) ) {
                     if ( event.pubkey == pubKey ) {
@@ -232,6 +223,7 @@
                 }
             }
             if ( kind == 40 ) {
+                if ( document.getElementsByClassName( event.id )[ 0 ] ) return
                 var isError = checkForChannelSubscriptionErrors( content );
                 if ( isError ) {
                     showToast( "unknown error, could not add this channel -- please contact a developer for help" );
@@ -539,15 +531,16 @@
                 privKey = "";
             }
             getUserMeta( pubKey );
-            //heartbeat tests
-            //console.log( "connected to " + relay );
-            //heartbeat = true;
             addDmsToSidebar();
             var subId   = bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" )
             var filter  = { "ids": subscribed_channels }
             var subscription = [ "REQ", subId, filter ]
             socket.send(JSON.stringify( subscription ));
-            //this gives users open dms
+            var i; for ( i=0; i<document.getElementsByClassName( "channel-outer" ).length; i++ ) {
+                //get latest messages for all known channels in case this is a reconnection
+                getLatestMessage( document.getElementsByClassName( "channel-outer" )[ i ].getAttribute( "data-id" ) );
+            }
+            //give users open dms
             var openSubId   = "encrypted-open-dms" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 0, 20 );
             sessionStorage[ "encrypted-open-dms" ] = openSubId;
             var openFilter  = {
