@@ -951,7 +951,7 @@
             if ( !note || note == "" ) return;
             var now = Math.floor( Date.now() / 1000 );
             if ( window.nostr ) {
-                var encrypted = await window.nostr.nip04.encrypt( pubkey, content );
+                var encrypted = await window.nostr.nip04.encrypt( pubkey, note );
             } else {
                 var encrypted = encrypt( privKey, pubkey, note );
             }
