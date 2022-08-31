@@ -448,6 +448,9 @@
                 div.classList.add( "message" );
                 div.classList.add( event.id );
                 var parent = otherKey;
+                if ( !msg_cache[ parent ] ) {
+                    msg_cache[ parent ] = [];
+                }
                 msg_cache[ parent ].forEach( function( message ) {
                     existing_messages.push( Object.keys( message ) [ 0 ] )
                 });
