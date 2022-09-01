@@ -121,6 +121,10 @@
                         }
                     }
                 }
+                if ( document.getElementsByClassName( "bubble" )[ i ].getElementsByTagName( "iframe" )[ 0 ] ) {
+                    document.getElementsByClassName( "bubble" )[ i ].parentElement.style.alignSelf = "flex-start";
+                    document.getElementsByClassName( "bubble" )[ i ].parentElement.style.maxWidth = "calc( 100vw - 60px)";
+                }
             }
             setTimeout( leftJustifyImages, 3000 );
         }
