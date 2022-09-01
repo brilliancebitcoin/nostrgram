@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
     <meta name="viewport" content="width=device-width, user-scalable=no" />
-    <link rel="stylesheet" href="styles.css?v=33" />
+    <link rel="stylesheet" href="styles.css?v=34" />
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="manifest.json">
     <title>Anigma</title>
@@ -47,16 +47,22 @@
             var html = text.replace( backticks, '<pre style="display: inline; white-space: pre-wrap; padding: 5px; background-color: #999; font-size: 12px;">$1</pre>' );
             return html;
         }
+        function youtube_parser( url ) {
+            var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+            var match = url.match( regExp );
+            return ( match && match[ 7 ].length == 11 ) ? match[ 7 ] : false;
+        }
         function urlify( text, isMine ) {
+            var ytRegex = /(http:|https:)?\/\/(www\.)?(youtube.com|youtu.be)\/(watch)?(\?v=)?(\S+)?/g
             var imgRegex = /\b(https?:\/\/\S+(?:png|jpe?g|gif|webp)\S*)\b/g;
             var urlRegex = /(https?:\/\/[^\s]+)/g;
             var returnable = "";
-            if ( !text.match( imgRegex ) ) {
+            if ( !isMine && !text.match( ytRegex ) && !text.match( imgRegex ) ) {
                 returnable = text.replace( urlRegex, ( url ) => {
                     return `<a href="${url}" target="_blank" rel="nofollow noopener" style="color: #4287f5;">${url}</a>`;
                 })                
             }
-            if ( isMine && !text.match( imgRegex ) ) {
+            if ( isMine && !text.match( ytRegex ) && !text.match( imgRegex ) ) {
                 returnable = text.replace( urlRegex, ( url ) => {
                     return `<a href="${url}" target="_blank" rel="nofollow noopener" style="color: white;">${url}</a>`;
                 })
@@ -64,6 +70,12 @@
             if ( text.match( imgRegex ) ) {
                 returnable = text.replace( imgRegex, ( img ) => {
                     return `<a href="${img}" target="_blank" rel="nofollow noopener"><img src="${img}" /></a>`;
+                })
+            }
+            if ( text.match( ytRegex ) ) {
+                returnable = text.replace( ytRegex, ( yt ) => {
+                    var vid = `<div class="youtube-wrapper"><img class="ratio" src="./16x9-transparent.png"/><iframe class="youtube-video" src="${"https://www.youtube.com/embed/" + youtube_parser( yt )}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+                    return vid;
                 })
             }
             return returnable;
@@ -572,7 +584,7 @@
                         messageIsKnown = true;
                     }
                 });
-                if ( !messageIsKnown ) {
+                if ( !messageIsKnown && document.getElementsByClassName( "channels" )[ 0 ] && document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ] ) {
                     if ( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].classList.contains( "active" ) ) return
                     var old_num_of_new_messages = Number( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].getAttribute( "data-num-of-new-messages" ) );
                     new_num_of_new_messages = old_num_of_new_messages + 1;
@@ -818,6 +830,9 @@
                 document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.display = "flex";
                 document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "flex";
                 document.getElementsByClassName( "message-header-alt" )[ 0 ].style.width = window.innerWidth - 38 + "px";
+            } else {
+                document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                document.getElementsByClassName( "note-input" )[ 0 ].select();
             }
             if ( window.innerWidth < 601 ) {
                 document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
@@ -1932,6 +1947,13 @@
             } else if ( document.getElementsByClassName( "note-input" )[ 0 ].offsetHeight < 34 ) {
                 document.getElementsByClassName( "note-input" )[ 0 ].style.lineHeight = "35px";
                 document.getElementsByClassName( "note-input" )[ 0 ].style.borderRadius = "36px";
+            }
+            if ( window.innerWidth < 601 && document.getElementsByClassName( "note-input" )[ 0 ].value && document.getElementsByClassName( "note-input" )[ 0 ].value != "" ) {
+                document.getElementsByClassName( "sound-btn" )[ 0 ].style.display = "none";
+                document.getElementsByClassName( "image-btn" )[ 0 ].style.display = "none";
+            } else {
+                document.getElementsByClassName( "sound-btn" )[ 0 ].style.display = "block";
+                document.getElementsByClassName( "image-btn" )[ 0 ].style.display = "block";
             }
         }
         setNoteInputHeight();
