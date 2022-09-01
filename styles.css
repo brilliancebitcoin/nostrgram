@@ -872,6 +872,26 @@ body {
     background-color: #999;    
 }
 
+.youtube-wrapper {
+    position:relative;
+}
+
+.ratio {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.youtube-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    max-width: 500px;
+    max-height: 400px;
+}
+
 /* mobile */
 
 @media only screen and (max-width: 600px) {
