@@ -19,6 +19,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] on laptops and desktops, automatically put the user's cursor in the text input element when they enter a channel or a dm
 * [x] fix the timestamp issue -- posts by users whose computers are slightly out of sync with one another sometimes display in the wrong order
 * [x] when a mobile user starts typing, make the mic and attach-image buttons disappear
+* [x] parse youtube video urls and display them as embedded
 * [ ] private groups with shared decryption keys
 * [ ] multi select emojis before closing emoji window
 * [ ] integrate lnbits
