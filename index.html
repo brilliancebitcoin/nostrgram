@@ -886,12 +886,20 @@
             });
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', function ( e ) {
                 if ( e.key === 'Enter' && !isShiftDown() ) {
-                  sendNote();
+                    sendNote();
+                    if ( admin && window.innerWidth < 601 ) {
+                        document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                        document.getElementsByClassName( "note-input" )[ 0 ].select();
+                    }
                 }
             });
             document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', function ( e ) {
                 keymap[ "Shift" ] = false;
                 sendNote();
+                if ( admin && window.innerWidth < 601 ) {
+                    document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                    document.getElementsByClassName( "note-input" )[ 0 ].select();
+                }
             });
             addMessages( channel.getAttribute( "data-id" ) );
         }
@@ -1688,12 +1696,20 @@
             });
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', function ( e ) {
                 if ( e.key === 'Enter' && !isShiftDown() ) {
-                  sendEncryptedNote( document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value, pubkey );
+                    sendEncryptedNote( document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value, pubkey );
+                    if ( admin && window.innerWidth < 601 ) {
+                        document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                        document.getElementsByClassName( "note-input" )[ 0 ].select();
+                    }
                 }
             });
             document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', function ( e ) {
                 keymap[ "Shift" ] = false;
                 sendEncryptedNote( document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value, pubkey );
+                if ( admin && window.innerWidth < 601 ) {
+                    document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                    document.getElementsByClassName( "note-input" )[ 0 ].select();
+                }
             });
             addClosedDecryptedMessages( pubkey );
         }
