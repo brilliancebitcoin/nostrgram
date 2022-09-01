@@ -25,8 +25,9 @@
         navigator.serviceWorker && navigator.serviceWorker.register( './sw.js' ).then( function( registration ) {
             //console.log( 'Excellent, registered with scope: ', registration.scope );
         });
+        sessionStorage[ "time-offset" ] = String( "0" );
     </script>
-    <script>
+    <script type="module">
         function getData( url ) {
             return new Promise( function( resolve, reject ) {
                 var xhttp = new XMLHttpRequest();
@@ -39,8 +40,11 @@
                 xhttp.send();
             });
         }
-        //var time = await getData( "https://worldtimeapi.org/api/ip" );
-        //var now = JSON.parse( time )[ "unixtime" ];
+        var time = await getData( "https://worldtimeapi.org/api/ip" );
+        var realnow = JSON.parse( time )[ "unixtime" ];
+        var claimednow = Math.floor( Date.now() / 1000 );
+        var offset = realnow - claimednow;
+        sessionStorage[ "time-offset" ] = offset;
     </script>
     <script>
         function bold( text ) {
@@ -283,7 +287,7 @@
                 if ( !isMine && !array_of_pubkeys.includes( event.pubkey ) ) {
                     array_of_pubkeys.push( event.pubkey );
                 }
-                var now = Math.floor( Date.now() / 1000 )
+                var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
                 var event_time = event.created_at
                 var how_long_ago = convertHMS( now - event_time )
                 var parent = "";
@@ -396,7 +400,7 @@
                 }
             }
             if ( kind == 42 && subId.includes( "latest-message" ) ) {
-                var now = Math.floor( Date.now() / 1000 )
+                var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
                 var event_time = event.created_at
                 var how_long_ago = convertHMS( now - event_time )
                 var parent = "";
@@ -445,7 +449,7 @@
                 if ( !isMine && !array_of_pubkeys.includes( event.pubkey ) ) {
                     array_of_pubkeys.push( event.pubkey );
                 }
-                var now = Math.floor( Date.now() / 1000 )
+                var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
                 var event_time = event.created_at
                 var how_long_ago = convertHMS( now - event_time )
                 if ( event.pubkey == pubKey ) {
@@ -901,7 +905,7 @@
                 var parent = msg[ Object.keys( msg )[ 0 ] ][ "parent" ];
                 var picture = msg[ Object.keys( msg )[ 0 ] ][ "picture" ];
                 var pubkey = msg[ Object.keys( msg )[ 0 ] ][ "pubkey" ];
-                var now = Math.floor( Date.now() / 1000 )
+                var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
                 var how_long_ago = convertHMS( now - event_time )
                 var div = document.createElement( "div" );
                 if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
@@ -977,7 +981,7 @@
                     var parent = msg[ Object.keys( msg )[ 0 ] ][ "parent" ];
                     var picture = msg[ Object.keys( msg )[ 0 ] ][ "picture" ];
                     var pubkey = msg[ Object.keys( msg )[ 0 ] ][ "pubkey" ];
-                    var now = Math.floor( Date.now() / 1000 )
+                    var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
                     var how_long_ago = convertHMS( now - event_time )
                     var div = document.createElement( "div" );
                     if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
@@ -1056,7 +1060,7 @@
         async function sendNote() {
             var note = document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value;
             if ( !note || note == "" ) return;
-            var now = Math.floor( Date.now() / 1000 );
+            var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
             var id = document.getElementsByClassName( "channel-outer active" )[ 0 ].getAttribute( "data-id" );
             var event = {
                 "content"    : note,
@@ -1074,7 +1078,7 @@
         async function sendEncryptedNote( note, pubkey ) {
             var note = document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value;
             if ( !note || note == "" ) return;
-            var now = Math.floor( Date.now() / 1000 );
+            var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
             if ( !admin && window.nostr ) {
                 var encrypted = await window.nostr.nip04.encrypt( pubkey, note );
             } else {
@@ -1082,7 +1086,7 @@
             }
             var event = {
                 "content"    : encrypted,
-                "created_at" : Math.floor( Date.now() / 1000 ),
+                "created_at" : now,
                 "kind"       : 4,
                 "tags"       : [ [ 'p', pubkey ] ],
                 "pubkey"     : pubKey,
@@ -1168,7 +1172,7 @@
             });
             setTimeout( function() {checkHeartbeat();}, 10000 );
             var i; for ( i=0; i<document.getElementsByClassName( "time" ).length; i++ ) {
-                var now = Math.floor( Date.now() / 1000 )
+                var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
                 var event_time = document.getElementsByClassName( "time" )[ i ].getAttribute( "data-timestamp" )
                 var how_long_ago = convertHMS( now - event_time )
                 document.getElementsByClassName( "time" )[ i ].innerText = how_long_ago;
@@ -1768,10 +1772,11 @@
             chan[ "about" ] = "";
             chan[ "name" ] = name;
             chan[ "picture" ] = img;
+            var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
             var note = JSON.stringify( chan );
             var event = {
                 "content"    : note,
-                "created_at" : Math.floor( Date.now() / 1000 ),
+                "created_at" : now,
                 "kind"       : 40,
                 "tags"       : [],
                 "pubkey"     : pubKey,
@@ -2076,10 +2081,11 @@
             obj[ "name" ] = name;
             obj[ "about" ] = about;
             obj[ "picture" ] = img;
+            var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
             var note = JSON.stringify( obj );
             var event = {
                 "content"    : note,
-                "created_at" : Math.floor( Date.now() / 1000 ),
+                "created_at" : now,
                 "kind"       : 0,
                 "tags"       : [],
                 "pubkey"     : pubKey,
