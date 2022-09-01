@@ -20,6 +20,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] fix the timestamp issue -- posts by users whose computers are slightly out of sync with one another sometimes display in the wrong order
 * [x] when a mobile user starts typing, make the mic and attach-image buttons disappear
 * [x] parse youtube video urls and display them as embedded
+* [x] keep the keyboard visible after you send a message on mobile
 * [ ] private groups with shared decryption keys
 * [ ] multi select emojis before closing emoji window
 * [ ] integrate lnbits
@@ -49,6 +50,5 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] dark mode
 * [ ] investigate why new messages sometimes say they happened 12 months ago (this seems more prevalent on mobile)
 * [ ] investigate why new messages don't always show up as the latest message in the sidebar
-* [ ] keep the keyboard visible after you send a message
 * [ ] add a "messages not read" delineating line if you go to a channel or a dm with fewer than 200 unread messages in it, separating the messages you read from the messages you didn't
 * [ ] if a "messages not read" line exists when entering a channel or a dm containing unread messages, autoscroll to that instead of to the latest message
