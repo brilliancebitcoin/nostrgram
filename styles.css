@@ -379,7 +379,6 @@ body {
 .chat .content .message-content .message {
     align-self: flex-start;
     margin-bottom: 20px;
-    max-width: 80%;
     word-break: break-word;
     position: relative;
     max-width: 50vw;
@@ -907,6 +906,18 @@ body {
 
     .chat .content .message-content .message .bubble img {
         max-width: calc( 100vw - 60px );
+    }
+
+    .chat .content .message-content .message .bubble .youtube-wrapper {
+        max-width: calc( 100vw - 60px ) !important;
+    }
+
+    .chat .content .message-content .message .bubble .ratio {
+        max-width: calc( 100vw - 60px ) !important;
+    }
+
+    .chat .content .message-content .message .bubble .youtube-video {
+        max-width: calc( 100vw - 60px ) !important;
     }
 
     .chat .content .message-form {
