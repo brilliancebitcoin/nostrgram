@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
     <meta name="viewport" content="width=device-width, user-scalable=no" />
-    <link rel="stylesheet" href="styles.css?v=34" />
+    <link rel="stylesheet" href="styles.css?v=35" />
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="manifest.json">
     <title>Anigma</title>
@@ -1647,6 +1647,9 @@
             if ( window.innerWidth < 601 ) {
                 document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
                 document.getElementsByClassName( "content" )[ 0 ].style.display = "flex";
+            } else {
+                document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                document.getElementsByClassName( "note-input" )[ 0 ].select();
             }
             if ( document.getElementsByClassName( "sidebar_arrow" )[ 0 ] ) {
                 document.getElementsByClassName( "sidebar_arrow" )[ 0 ].addEventListener( "click", function() {
@@ -1948,12 +1951,14 @@
                 document.getElementsByClassName( "note-input" )[ 0 ].style.lineHeight = "35px";
                 document.getElementsByClassName( "note-input" )[ 0 ].style.borderRadius = "36px";
             }
-            if ( window.innerWidth < 601 && document.getElementsByClassName( "note-input" )[ 0 ].value && document.getElementsByClassName( "note-input" )[ 0 ].value != "" ) {
+            if ( window.innerWidth < 601 && document.getElementsByClassName( "note-input" )[ 0 ] && document.getElementsByClassName( "note-input" )[ 0 ].value && document.getElementsByClassName( "note-input" )[ 0 ].value != "" ) {
                 document.getElementsByClassName( "sound-btn" )[ 0 ].style.display = "none";
                 document.getElementsByClassName( "image-btn" )[ 0 ].style.display = "none";
             } else {
-                document.getElementsByClassName( "sound-btn" )[ 0 ].style.display = "block";
-                document.getElementsByClassName( "image-btn" )[ 0 ].style.display = "block";
+                if ( document.getElementsByClassName( "sound-btn" )[ 0 ] && document.getElementsByClassName( "image-btn" )[ 0 ] ) {
+                    document.getElementsByClassName( "sound-btn" )[ 0 ].style.display = "block";
+                    document.getElementsByClassName( "image-btn" )[ 0 ].style.display = "block";
+                }
             }
         }
         setNoteInputHeight();
