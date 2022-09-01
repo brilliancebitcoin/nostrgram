@@ -281,8 +281,7 @@
                 if ( !isMine && !array_of_pubkeys.includes( event.pubkey ) ) {
                     array_of_pubkeys.push( event.pubkey );
                 }
-                var time = await getData( "https://worldtimeapi.org/api/ip" );
-                var now = JSON.parse( time )[ "unixtime" ];
+                var now = Math.floor( Date.now() / 1000 )
                 var event_time = event.created_at
                 var how_long_ago = convertHMS( now - event_time )
                 var parent = "";
@@ -395,8 +394,7 @@
                 }
             }
             if ( kind == 42 && subId.includes( "latest-message" ) ) {
-                var time = await getData( "https://worldtimeapi.org/api/ip" );
-                var now = JSON.parse( time )[ "unixtime" ];
+                var now = Math.floor( Date.now() / 1000 )
                 var event_time = event.created_at
                 var how_long_ago = convertHMS( now - event_time )
                 var parent = "";
@@ -445,8 +443,7 @@
                 if ( !isMine && !array_of_pubkeys.includes( event.pubkey ) ) {
                     array_of_pubkeys.push( event.pubkey );
                 }
-                var time = await getData( "https://worldtimeapi.org/api/ip" );
-                var now = JSON.parse( time )[ "unixtime" ];
+                var now = Math.floor( Date.now() / 1000 )
                 var event_time = event.created_at
                 var how_long_ago = convertHMS( now - event_time )
                 if ( event.pubkey == pubKey ) {
@@ -893,7 +890,7 @@
         function addMessages( id ) {
             var cached_messages = msg_cache[ id ];
             var time_for_since = 0;
-            cached_messages.forEach( async function( msg, i ) {
+            cached_messages.forEach( function( msg, i ) {
                 var color = msg[ Object.keys( msg )[ 0 ] ][ "color" ];
                 var content = msg[ Object.keys( msg )[ 0 ] ][ "content" ];
                 var event_time = msg[ Object.keys( msg )[ 0 ] ][ "event_time" ];                
@@ -902,8 +899,7 @@
                 var parent = msg[ Object.keys( msg )[ 0 ] ][ "parent" ];
                 var picture = msg[ Object.keys( msg )[ 0 ] ][ "picture" ];
                 var pubkey = msg[ Object.keys( msg )[ 0 ] ][ "pubkey" ];
-                var time = await getData( "https://worldtimeapi.org/api/ip" );
-                var now = JSON.parse( time )[ "unixtime" ];
+                var now = Math.floor( Date.now() / 1000 )
                 var how_long_ago = convertHMS( now - event_time )
                 var div = document.createElement( "div" );
                 if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
@@ -970,7 +966,7 @@
             if ( msg_cache[ pubkey ] ) {
                 var cached_messages = msg_cache[ pubkey ];
                 var time_for_since = 0;
-                cached_messages.forEach( async function( msg, i ) {
+                cached_messages.forEach( function( msg, i ) {
                     var color = msg[ Object.keys( msg )[ 0 ] ][ "color" ];
                     var content = msg[ Object.keys( msg )[ 0 ] ][ "content" ];
                     var event_time = msg[ Object.keys( msg )[ 0 ] ][ "event_time" ];                
@@ -979,8 +975,7 @@
                     var parent = msg[ Object.keys( msg )[ 0 ] ][ "parent" ];
                     var picture = msg[ Object.keys( msg )[ 0 ] ][ "picture" ];
                     var pubkey = msg[ Object.keys( msg )[ 0 ] ][ "pubkey" ];
-                    var time = await getData( "https://worldtimeapi.org/api/ip" );
-                    var now = JSON.parse( time )[ "unixtime" ];
+                    var now = Math.floor( Date.now() / 1000 )
                     var how_long_ago = convertHMS( now - event_time )
                     var div = document.createElement( "div" );
                     if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
@@ -1059,8 +1054,7 @@
         async function sendNote() {
             var note = document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value;
             if ( !note || note == "" ) return;
-            var time = await getData( "https://worldtimeapi.org/api/ip" );
-            var now = JSON.parse( time )[ "unixtime" ];
+            var now = Math.floor( Date.now() / 1000 );
             var id = document.getElementsByClassName( "channel-outer active" )[ 0 ].getAttribute( "data-id" );
             var event = {
                 "content"    : note,
@@ -1078,8 +1072,7 @@
         async function sendEncryptedNote( note, pubkey ) {
             var note = document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value;
             if ( !note || note == "" ) return;
-            var time = await getData( "https://worldtimeapi.org/api/ip" );
-            var now = JSON.parse( time )[ "unixtime" ];
+            var now = Math.floor( Date.now() / 1000 );
             if ( !admin && window.nostr ) {
                 var encrypted = await window.nostr.nip04.encrypt( pubkey, note );
             } else {
@@ -1087,7 +1080,7 @@
             }
             var event = {
                 "content"    : encrypted,
-                "created_at" : now,
+                "created_at" : Math.floor( Date.now() / 1000 ),
                 "kind"       : 4,
                 "tags"       : [ [ 'p', pubkey ] ],
                 "pubkey"     : pubKey,
@@ -1166,15 +1159,14 @@
         }
     </script>
     <script>
-        async function doBackgroundTasks() {
+        function doBackgroundTasks() {
             array_of_pubkeys.forEach( function() {
                 getUserMeta( array_of_pubkeys[ 0 ] );
                 array_of_pubkeys.shift();
             });
             setTimeout( function() {checkHeartbeat();}, 10000 );
             var i; for ( i=0; i<document.getElementsByClassName( "time" ).length; i++ ) {
-                var time = await getData( "https://worldtimeapi.org/api/ip" );
-                var now = JSON.parse( time )[ "unixtime" ];
+                var now = Math.floor( Date.now() / 1000 )
                 var event_time = document.getElementsByClassName( "time" )[ i ].getAttribute( "data-timestamp" )
                 var how_long_ago = convertHMS( now - event_time )
                 document.getElementsByClassName( "time" )[ i ].innerText = how_long_ago;
@@ -1774,12 +1766,10 @@
             chan[ "about" ] = "";
             chan[ "name" ] = name;
             chan[ "picture" ] = img;
-            var time = await getData( "https://worldtimeapi.org/api/ip" );
-            var now = JSON.parse( time )[ "unixtime" ];
             var note = JSON.stringify( chan );
             var event = {
                 "content"    : note,
-                "created_at" : now,
+                "created_at" : Math.floor( Date.now() / 1000 ),
                 "kind"       : 40,
                 "tags"       : [],
                 "pubkey"     : pubKey,
@@ -2084,12 +2074,10 @@
             obj[ "name" ] = name;
             obj[ "about" ] = about;
             obj[ "picture" ] = img;
-            var time = await getData( "https://worldtimeapi.org/api/ip" );
-            var now = JSON.parse( time )[ "unixtime" ];
             var note = JSON.stringify( obj );
             var event = {
                 "content"    : note,
-                "created_at" : now,
+                "created_at" : Math.floor( Date.now() / 1000 ),
                 "kind"       : 0,
                 "tags"       : [],
                 "pubkey"     : pubKey,
