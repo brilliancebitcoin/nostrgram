@@ -16,6 +16,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] integrate nos2x
 * [x] fix the socket disruption -- users report if you leave the app and return to it later, you can't see messages without a hard refresh, but sending still works
 * [x] show a grey message counter in channels with messages you didn't read yet
+* [x] on laptops and desktops, automatically put the user's cursor in the text input element when they enter a channel or a dm
 * [ ] private groups with shared decryption keys
 * [ ] multi select emojis before closing emoji window
 * [ ] integrate lnbits
@@ -48,4 +49,3 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] keep the keyboard visible after you send a message
 * [ ] add a "messages not read" delineating line if you go to a channel or a dm with fewer than 200 unread messages in it, separating the messages you read from the messages you didn't
 * [ ] if a "messages not read" line exists when entering a channel or a dm containing unread messages, autoscroll to that instead of to the latest message
-* [ ] on laptops and desktops, automatically put the user's cursor in the text input element when they enter a channel or a dm
