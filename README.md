@@ -58,3 +58,4 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] fix the big that makes stuff disappear below the fold when images and videos expand
 * [ ] the anigma browser tab should show a notification when new messages arrive
 * [ ] print the total messages that are in a channels in the channel about div
+* [ ] if a user is not near the bottom of the chat log, don't scroll to the bottom when they open up the keyboard
