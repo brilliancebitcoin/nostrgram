@@ -21,8 +21,8 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] when a mobile user starts typing, make the mic and attach-image buttons disappear
 * [x] parse youtube video urls and display them as embedded
 * [x] keep the keyboard visible after you send a message on mobile
+* [x] multi select emojis before closing emoji window
 * [ ] private groups with shared decryption keys
-* [ ] multi select emojis before closing emoji window
 * [ ] integrate lnbits
 * [ ] make an option to set and modify relays in settings
 * [ ] connect to at least two relays by default
