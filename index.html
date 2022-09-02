@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
     <meta name="viewport" content="width=device-width, user-scalable=no" />
-    <link rel="stylesheet" href="styles.css?v=38" />
+    <link rel="stylesheet" href="styles.css?v=39" />
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="manifest.json">
     <title>Anigma</title>
@@ -94,7 +94,7 @@
             }
             if ( text.match( ytRegex ) ) {
                 returnable = text.replace( ytRegex, ( yt ) => {
-                    var vid = `<div class="youtube-wrapper"><img class="ratio" src="./16x9-transparent.png"/><iframe class="youtube-video" src="${"https://www.youtube.com/embed/" + youtube_parser( yt )}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+                    var vid = `<div class="youtube-wrapper" onclick='console.log( "test" );'><img class="ratio" src="./16x9-transparent.png"/><iframe class="youtube-video" src="${"https://www.youtube.com/embed/" + youtube_parser( yt )}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><span class="p-in-p" onclick='moveVid( this.previousElementSibling );'>Picture-in-picture</span>`;
                     return vid;
                 })
             }
@@ -118,6 +118,13 @@
                     if ( isLoaded ) {
                         if ( document.getElementsByClassName( "bubble" )[ i ].getElementsByTagName( "img" )[ 0 ] && ( document.getElementsByClassName( "bubble" )[ i ].offsetWidth > ( window.innerWidth / 2 ) + 100 ) ) {
                             document.getElementsByClassName( "bubble" )[ i ].parentElement.style.alignSelf = "flex-start";
+                        }
+                        if ( sessionStorage[ "scrolled" ] == false ) {
+                            sessionStorage[ "scrolled" ] = true;
+                            document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
+                            if ( document.getElementsByClassName( "bubble" ).length > 0 ) {
+                                document.getElementsByClassName( "bubble" )[ document.getElementsByClassName( "bubble" ).length - 1 ].scrollIntoView();
+                            }
                         }
                     }
                 }
@@ -747,6 +754,7 @@
     </script>
     <script>
         function selectChannel( channel ) {
+            sessionStorage[ "scrolled" ] = false;
             channel.getElementsByClassName( "notification" )[ 0 ].style.display = "none";
             channel.getElementsByClassName( "notification" )[ 0 ].innerText = "0";
             channel.setAttribute( "data-num-of-new-messages", "0" );
@@ -1184,7 +1192,7 @@
                 getUserMeta( array_of_pubkeys[ 0 ] );
                 array_of_pubkeys.shift();
             });
-            checkHeartbeat();
+            setTimeout( checkHeartbeat, 3000 );
             var i; for ( i=0; i<document.getElementsByClassName( "time" ).length; i++ ) {
                 var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
                 var event_time = document.getElementsByClassName( "time" )[ i ].getAttribute( "data-timestamp" )
@@ -1593,6 +1601,7 @@
     </script>
     <script>
         async function selectDM( pubkey, name, picture ) {
+            sessionStorage[ "scrolled" ] = false;
             document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "notification" )[ 0 ].style.display = "none";
             document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "notification" )[ 0 ].innerText = "0";
             document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ].setAttribute( "data-num-of-new-messages", "0" );
@@ -1966,6 +1975,20 @@
     </div>
     <div class="message-header-alt">
     </div>
+    <div id="vidDiv">
+        <div id="vidDivheader">
+            <a class="mover">
+                <i class="fa fa-arrows"></i>
+            </a>
+            <a class="xer" onclick='document.getElementsByClassName( "inner-vid" )[ 0 ].innerHTML = "";document.getElementById( "vidDiv" ).style.display = "none";'>
+                <i class="fa fa-xmark"></i>
+            </a>
+            <a class="minmax" onclick='if ( document.getElementsByClassName( "inner-vid" )[ 0 ].getElementsByClassName( "ratio" )[ 0 ].offsetWidth > 200 ) {document.getElementsByClassName( "inner-vid" )[ 0 ].getElementsByClassName( "ratio" )[ 0 ].style.maxWidth = "190px";} else {document.getElementsByClassName( "inner-vid" )[ 0 ].getElementsByClassName( "ratio" )[ 0 ].style.maxWidth = "500px";}'>
+                <i class="fa fa-window-maximize"></i>
+            </a>
+        </div>
+        <div class="inner-vid"></div>
+    </div>
     <script>
         document.getElementsByClassName( "hotdog" )[ 0 ].addEventListener( "click", function() {
             showSettings();
@@ -2230,6 +2253,61 @@
         function modalVanish() {
             document.getElementById( "black-bg" ).style.display = "none";
             document.getElementById( "modal" ).style.display = "none";
+        }
+    </script>
+    <script>
+        dragElement(document.getElementById("vidDiv"));
+
+        function dragElement(elmnt) {
+          var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+          if (document.getElementById(elmnt.id + "header")) {
+            // if present, the header is where you move the DIV from:
+            document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+          } else {
+            // otherwise, move the DIV from anywhere inside the DIV:
+            elmnt.onmousedown = dragMouseDown;
+          }
+
+          function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // get the mouse cursor position at startup:
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            // call a function whenever the cursor moves:
+            document.onmousemove = elementDrag;
+          }
+
+          function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // calculate the new cursor position:
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            // set the element's new position:
+            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+            document.getElementById("vidDiv").style.bottom = "auto";
+            document.getElementById("vidDiv").style.right = "auto";
+          }
+
+          function closeDragElement() {
+            // stop moving when mouse button is released:
+            document.onmouseup = null;
+            document.onmousemove = null;
+          }
+        }
+    </script>
+    <script>
+        function moveVid( wrapper ) {
+            wrapper.getElementsByTagName( "iframe" )[ 0 ].src = wrapper.getElementsByTagName( "iframe" )[ 0 ].src;
+            //document.getElementById( "vidDiv" ).getElementsByTagName( "div" )[ 0 ].innerHTML += `<div>Test</div>`;
+            document.getElementById( "vidDiv" ).getElementsByTagName( "div" )[ 1 ].innerHTML += document.getElementsByClassName( "youtube-wrapper" )[ 2 ].innerHTML;
+            document.getElementById( "vidDiv" ).getElementsByClassName( "ratio" )[ 0 ].style.maxWidth = "500px";
+            document.getElementById( "vidDiv" ).style.display = "inline-block";
         }
     </script>
 </body>
