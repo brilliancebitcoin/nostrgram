@@ -55,7 +55,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] if a "messages not read" line exists when entering a channel or a dm containing unread messages, autoscroll to that instead of to the latest message
 * [ ] create a mini player for youtube videos so you can leave the channel and keep the video playing
 * [ ] if that's not possible, at least make videos not scroll up when someone posts a message while a video is playing
-* [ ] fix the big that makes stuff disappear below the fold when images and videos expand
+* [ ] fix the bug that makes stuff disappear below the fold when images and videos expand
 * [ ] the anigma browser tab should show a notification when new messages arrive
 * [ ] print the total messages that are in a channels in the channel about div
 * [ ] if a user is not near the bottom of the chat log, don't scroll to the bottom when they open up the keyboard
