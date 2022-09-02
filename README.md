@@ -24,6 +24,8 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] multi select emojis before closing emoji window
 * [x] create a mini player for youtube videos so you can leave the channel and keep the video playing
 * [x] if that's not possible, at least make videos not scroll up when someone posts a message while a video is playing
+* [ ] fix error where picture-in-picture youtube videos go to the top of the channel on mobile and cannot be moved
+* [ ] fix error where picture-in-picture youtube videos cannot be moved on mobile
 * [ ] private groups with shared decryption keys
 * [ ] integrate lnbits
 * [ ] make an option to set and modify relays in settings
