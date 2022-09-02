@@ -842,6 +842,33 @@ body {
     text-align: center;
 }
 
+.emoji-input {
+    margin-top: 20px;
+    display: inline-block;
+    width: calc( 100% - 130px );
+    box-sizing: border-box;
+    height: 36px;
+    border: 1px solid #ddd;
+    border-radius: 36px;
+    font-size: 14px;
+    padding: 0 15px
+}
+
+.emoji-submit {
+    display: inline-block;
+    width: 80px;
+    box-sizing: border-box;
+    height: 36px;
+    border: 1px solid #ddd;
+    border-radius: 36px;
+    font-size: 14px;
+    padding: 0 15px;
+    background-color: #ddd;
+    cursor: pointer;
+    margin-top: 20px;
+    margin-left: 20px;
+}
+
 .emoji-in-modal {
     display: inline-block;
     padding: 7px;
