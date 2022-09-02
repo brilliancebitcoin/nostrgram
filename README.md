@@ -26,6 +26,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] if that's not possible, at least make videos not scroll up when someone posts a message while a video is playing
 * [ ] fix bug where picture-in-picture youtube videos go to the bottom of the channel on mobile instead of wherever you clicked
 * [ ] fix bug where picture-in-picture youtube videos move weirdly on mobile
+* [ ] fix bug where if you watch a picture-in-picture youtube video on mobile and open the sidebar, the sidebar becomes too long 
 * [ ] private groups with shared decryption keys
 * [ ] integrate lnbits
 * [ ] make an option to set and modify relays in settings
