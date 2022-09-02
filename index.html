@@ -2308,6 +2308,11 @@
             document.getElementById( "vidDiv" ).getElementsByTagName( "div" )[ 1 ].innerHTML += document.getElementsByClassName( "youtube-wrapper" )[ 2 ].innerHTML;
             document.getElementById( "vidDiv" ).getElementsByClassName( "ratio" )[ 0 ].style.maxWidth = "500px";
             document.getElementById( "vidDiv" ).style.display = "inline-block";
+            if ( window.innerWidth < 601 ) {
+                document.getElementById( "vidDiv" ).style.position = "absolute";
+                document.getElementById( "vidDiv" ).style.top = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight - 500 + "px";
+                document.getElementById( "vidDiv" ).style.left = "100px";
+            }
         }
     </script>
 </body>
