@@ -918,6 +918,56 @@ body {
     max-height: 400px;
 }
 
+#vidDiv {
+    display: none;
+    position: absolute;
+    bottom: 50%;
+    right: 50%;
+    z-index: 9;
+    min-width: 200px;
+    max-width: 500px;
+}
+
+#vidDivheader {
+    position: relative;
+    box-sizing: border-box;
+    z-index: 10;
+    color: #fff;
+}
+
+#vidDivheader .mover,
+#vidDivheader .minmax,
+#vidDivheader .xer {
+    display: inline-block;
+    text-align: center;
+    width: 20px;
+    cursor: move;
+    padding: 10px;
+    background-color: #4287f5;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    vertical-align: top;
+}
+
+#vidDivheader .xer {
+    cursor: pointer;
+}
+
+#vidDivheader .minmax {
+    cursor: pointer;
+}
+
+.p-in-p {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.inner-vid {
+    position: relative;
+    z-index: 11;
+    background-color: black;
+}
+
 /* mobile */
 
 @media only screen and (max-width: 600px) {
