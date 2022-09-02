@@ -22,6 +22,8 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] parse youtube video urls and display them as embedded
 * [x] keep the keyboard visible after you send a message on mobile
 * [x] multi select emojis before closing emoji window
+* [x] create a mini player for youtube videos so you can leave the channel and keep the video playing
+* [x] if that's not possible, at least make videos not scroll up when someone posts a message while a video is playing
 * [ ] private groups with shared decryption keys
 * [ ] integrate lnbits
 * [ ] make an option to set and modify relays in settings
@@ -53,8 +55,6 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] investigate why new messages don't always show up as the latest message in the sidebar
 * [ ] add a "messages not read" delineating line if you go to a channel or a dm with fewer than 200 unread messages in it, separating the messages you read from the messages you didn't
 * [ ] if a "messages not read" line exists when entering a channel or a dm containing unread messages, autoscroll to that instead of to the latest message
-* [ ] create a mini player for youtube videos so you can leave the channel and keep the video playing
-* [ ] if that's not possible, at least make videos not scroll up when someone posts a message while a video is playing
 * [ ] fix the bug that makes stuff disappear below the fold when images and videos expand
 * [ ] the anigma browser tab should show a notification when new messages arrive
 * [ ] print the total messages that are in a channels in the channel about div
