@@ -2304,8 +2304,7 @@
     <script>
         function moveVid( wrapper ) {
             wrapper.getElementsByTagName( "iframe" )[ 0 ].src = wrapper.getElementsByTagName( "iframe" )[ 0 ].src;
-            //document.getElementById( "vidDiv" ).getElementsByTagName( "div" )[ 0 ].innerHTML += `<div>Test</div>`;
-            document.getElementById( "vidDiv" ).getElementsByTagName( "div" )[ 1 ].innerHTML += document.getElementsByClassName( "youtube-wrapper" )[ 2 ].innerHTML;
+            document.getElementById( "vidDiv" ).getElementsByTagName( "div" )[ 1 ].innerHTML += wrapper.innerHTML;
             document.getElementById( "vidDiv" ).getElementsByClassName( "ratio" )[ 0 ].style.maxWidth = "500px";
             document.getElementById( "vidDiv" ).style.display = "inline-block";
             if ( window.innerWidth < 601 ) {
