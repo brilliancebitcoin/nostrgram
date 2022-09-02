@@ -59,3 +59,5 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] the anigma browser tab should show a notification when new messages arrive
 * [ ] print the total messages that are in a channels in the channel about div
 * [ ] if a user is not near the bottom of the chat log, don't scroll to the bottom when they open up the keyboard
+* [ ] users who click or tap the back button should not close the app. They should go to the previous page
+* [ ] users who go from a channel to a profile should have a button to go back to the channel. The button that seems most obvious currently takes them to the sidebar
