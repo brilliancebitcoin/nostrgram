@@ -65,3 +65,4 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] users who click or tap the back button should not close the app. They should go to the previous page
 * [ ] users who go from a channel to a profile should have a button to go back to the channel. The button that seems most obvious currently takes them to the sidebar
 * [ ] let users add a pubkey to their dms similar to how they can add channels
+* [ ] load new messages into msg_cache during getLatestMessage() rather than waiting for add-message
