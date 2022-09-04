@@ -50,7 +50,6 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] if a user types /me at the start of their message their bubble should display their name inline as the first word of their message
 * [ ] search channel history
 * [ ] search for channels & users
-* [ ] add user to dms by pubkey
 * [ ] nip05 support (domain-based checkmarks)
 * [ ] nip07 support (likes and reactions)
 * [ ] dark mode
@@ -66,3 +65,4 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] users who go from a channel to a profile should have a button to go back to the channel. The button that seems most obvious currently takes them to the sidebar
 * [ ] let users add a pubkey to their dms similar to how they can add channels
 * [ ] load new messages into msg_cache during getLatestMessage() rather than waiting for add-message
+* [ ] add support for nos2x's relay list
