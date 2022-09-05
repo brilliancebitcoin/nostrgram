@@ -66,3 +66,4 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] users who go from a channel to a profile should have a button to go back to the channel. The button that seems most obvious currently takes them to the sidebar
 * [ ] let users add a pubkey to their dms similar to how they can add channels
 * [ ] add support for nos2x's relay list
+* [ ] fix bug where unread messages get marked as read upon refresh due to being in the message cache
