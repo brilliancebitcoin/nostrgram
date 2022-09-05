@@ -972,6 +972,10 @@ body {
 
 @media only screen and (max-width: 600px) {
 
+    .chat {
+        overflow-x: hidden;
+    }
+
     .chat .content .message-content .message {
         max-width: calc( 100vw - 50px );
     }
