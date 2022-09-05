@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
     <meta name="viewport" content="width=device-width, user-scalable=no" />
-    <link rel="stylesheet" href="styles.css?v=39" />
+    <link rel="stylesheet" href="styles.css?v=40" />
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="manifest.json">
     <title>Anigma</title>
@@ -122,8 +122,8 @@
                         if ( sessionStorage[ "scrolled" ] == false ) {
                             sessionStorage[ "scrolled" ] = true;
                             document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                            if ( document.getElementsByClassName( "bubble" ).length > 0 ) {
-                                document.getElementsByClassName( "bubble" )[ document.getElementsByClassName( "bubble" ).length - 1 ].scrollIntoView();
+                            if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {
+                                document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();
                             }
                         }
                     }
@@ -292,22 +292,21 @@
                 var closer = [ "CLOSE", subId ];
                 socket.send(JSON.stringify( closer ));
             }
-            if ( kind == 42 && subId.includes( "add-messages" ) ) {
-                if ( document.getElementsByClassName( event.id )[ 0 ] ) return
-                var isMine = ( event.pubkey == pubKey );
-                if ( !isMine && !array_of_pubkeys.includes( event.pubkey ) ) {
-                    array_of_pubkeys.push( event.pubkey );
-                }
+            if ( kind == 42 && subId.includes( "latest-message" ) ) {
                 var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
                 var event_time = event.created_at
                 var how_long_ago = convertHMS( now - event_time )
+                var isMine = ( event.pubkey == pubKey );
                 var parent = "";
                 var i; for ( i=0; i<event.tags.length; i++ ) {
                     if ( event[ "tags" ][ i ][ 0 ] == "e" && ( !parent || parent == "" ) ) {
                         parent = event[ "tags" ][ i ][ 1 ];
                     }
                 }
-                if ( !document.getElementsByClassName( parent )[ 0 ].classList.contains( "active" ) ) return
+                var shortened_content = content.replace( /\n/g, " " ).substring( 0, 50 );
+                if ( content.length > 50 ) {
+                    shortened_content = shortened_content + "...";
+                }
                 var color = "";
                 if ( isNaN( event.pubkey.substring( 0, 1 ) ) && ( event.pubkey.substring( 0, 1 ) == "e" || event.pubkey.substring( 0, 1 ) == "f" ) ) {
                     color = "red";
@@ -344,13 +343,41 @@
                 }
                 content = content.replace( /&/g, "&#38;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
                 content = markdownify( content, isMine );
+                if ( !msg_cache[ parent ] ) {
+                    msg_cache[ parent ] = [];
+                }
+                if ( Number( document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
+                    document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].innerText = shortened_content;
+                    document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago )
+                    document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestamp", event_time )
+                }
+                //If the current message is not already in the message cache, add it, and also add to the number of unread messages
+                var messageIsKnown = false;
+                msg_cache[ parent ].forEach( function( message, index ) {
+                    if ( Object.keys( message )[ 0 ] == event.id ) {
+                        messageIsKnown = true;
+                    }
+                });
+                if ( !messageIsKnown ) {
+                    addMessageToCache( event.pubkey, event.id, event_time, parent, color, name, picture, content );
+                    if ( !document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].classList.contains( "active" ) ) {
+                        var old_num_of_new_messages = Number( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].getAttribute( "data-num-of-new-messages" ) );                        
+                        new_num_of_new_messages = old_num_of_new_messages + 1;
+                        document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].setAttribute( "data-num-of-new-messages", String( new_num_of_new_messages ) );
+                        if ( new_num_of_new_messages > 0 ) {
+                            document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].getElementsByClassName( "notification" )[ 0 ].innerText = String( new_num_of_new_messages );
+                            if ( new_num_of_new_messages > 199 ) {
+                                document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].getElementsByClassName( "notification" )[ 0 ].innerText += "+";
+                            }
+                            document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].getElementsByClassName( "notification" )[ 0 ].style.display = "inline";
+                        }
+                    }
+                }
+                //if you are currently looking at the channel, add the message to the channel
+                if ( !document.getElementsByClassName( parent )[ 0 ].classList.contains( "active" ) ) return;
                 var div = document.createElement( "div" );
                 div.classList.add( "message" );
                 div.classList.add( event.id );
-                msg_cache[ parent ].forEach( function( message ) {
-                    existing_messages.push( Object.keys( message ) [ 0 ] )
-                });
-                addMessageToCache( event.pubkey, event.id, event_time, parent, color, name, picture, content );
                 if ( isMine ) {
                     div.setAttribute( "data-author", event.pubkey );
                     div.classList.add( "me" );
@@ -363,94 +390,23 @@
                     `;
                     div.innerHTML = html;
                 }
-                if ( now - event_time > 15 ) {
-                    if ( existing_messages.includes( event.id ) ) {
-                        document.getElementsByClassName( "message-content" )[ 0 ].prepend( div );
-                    } else {
-                        document.getElementsByClassName( "message-content" )[ 0 ].append( div );
-                        var last_200_messages = [];
-                        var i; for ( i=0; i<document.getElementsByClassName( "bubble" ).length; i++ ) {
-                            last_200_messages.push( document.getElementsByClassName( "bubble" )[ i ].parentElement );
-                        }
-                        last_200_messages.sort(function( a, b ) {return b.getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) - a.getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" )});
-                        var i; for ( i=0; i<document.getElementsByClassName( "bubble" ).length; i++ ) {
-                            document.getElementsByClassName( "bubble" )[ i ].parentElement.remove();
-                            i = i - 1;
-                        }
-                        last_200_messages.reverse();
-                        last_200_messages.forEach( function( item ) {
-                            document.getElementsByClassName( "message-content" )[ 0 ].append( item );
-                        });
-                    }
-                } else {
-                    document.getElementsByClassName( "message-content" )[ 0 ].append( div );
-                }
-                var seen_messages = [];
+                document.getElementsByClassName( "message-content" )[ 0 ].append( div );
+                var last_200_messages = [];
                 var i; for ( i=0; i<document.getElementsByClassName( "bubble" ).length; i++ ) {
-                    if ( !seen_messages.includes( document.getElementsByClassName( "bubble" )[ i ].parentElement.classList[ 1 ] ) ) {
-                        seen_messages.push( document.getElementsByClassName( "bubble" )[ i ].parentElement.classList[ 1 ] )
-                    } else {
-                        document.getElementsByClassName( "bubble" )[ i ].parentElement.remove(); i = i - 1;
-                    } 
+                    last_200_messages.push( document.getElementsByClassName( "bubble" )[ i ].parentElement );
                 }
-                if ( document.getElementsByClassName( "message-header" )[ 0 ] && Number( document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
-                    document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
-                    document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
+                last_200_messages.sort(function( a, b ) {return b.getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) - a.getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" )});
+                var i; for ( i=0; i<document.getElementsByClassName( "bubble" ).length; i++ ) {
+                    document.getElementsByClassName( "bubble" )[ i ].parentElement.remove();
+                    i = i - 1;
                 }
-                if ( window.innerWidth < 601 && Number( document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
-                    document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
-                    document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
-                }
-                if ( Number( document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
-                    document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestamp", event_time );
-                    document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago );
-                }
-                document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                if ( document.getElementsByClassName( "bubble" ).length > 0 ) {
-                    document.getElementsByClassName( "bubble" )[ document.getElementsByClassName( "bubble" ).length - 1 ].scrollIntoView();
-                }
-            }
-            if ( kind == 42 && subId.includes( "latest-message" ) ) {
-                var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
-                var event_time = event.created_at
-                var how_long_ago = convertHMS( now - event_time )
-                var parent = "";
-                var i; for ( i=0; i<event.tags.length; i++ ) {
-                    if ( event[ "tags" ][ i ][ 0 ] == "e" && ( !parent || parent == "" ) ) {
-                        parent = event[ "tags" ][ i ][ 1 ];
-                    }
-                }
-                var shortened_content = content.replace( /\n/g, " " ).substring( 0, 50 );
-                if ( content.length > 50 ) {
-                    shortened_content = shortened_content + "...";
-                }
-                if ( !msg_cache[ parent ] ) {
-                    msg_cache[ parent ] = [];
-                }
-                //If the current message is already in the message cache, return, otherwise add to the number of unread messages
-                if ( Number( document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
-                    document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].innerText = shortened_content;
-                    document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago )
-                    document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestamp", event_time )
-                }
-                var messageIsKnown = false;
-                msg_cache[ parent ].forEach( function( message, index ) {
-                    if ( Object.keys( message )[ 0 ] == event.id ) {
-                        messageIsKnown = true;
-                    }
+                last_200_messages.reverse();
+                last_200_messages.forEach( function( item ) {
+                    document.getElementsByClassName( "message-content" )[ 0 ].append( item );
                 });
-                if ( !messageIsKnown ) {
-                    if ( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].classList.contains( "active" ) ) return
-                    var old_num_of_new_messages = Number( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].getAttribute( "data-num-of-new-messages" ) );                        
-                    new_num_of_new_messages = old_num_of_new_messages + 1;
-                    document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].setAttribute( "data-num-of-new-messages", String( new_num_of_new_messages ) );
-                    if ( new_num_of_new_messages > 0 ) {
-                        document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].getElementsByClassName( "notification" )[ 0 ].innerText = String( new_num_of_new_messages );
-                        if ( new_num_of_new_messages > 199 ) {
-                            document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].getElementsByClassName( "notification" )[ 0 ].innerText += "+";
-                        }
-                        document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].getElementsByClassName( "notification" )[ 0 ].style.display = "inline";
-                    }
+                document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
+                if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {
+                    document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();
                 }
             }
             //this code is for "closed dms" where you only see someone's dms if you first add them to your sidebar
@@ -583,8 +539,8 @@
                     document.getElementsByClassName( otherKey.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago );
                 }
                 document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                if ( document.getElementsByClassName( "bubble" ).length > 0 ) {
-                    document.getElementsByClassName( "bubble" )[ document.getElementsByClassName( "bubble" ).length - 1 ].scrollIntoView();
+                if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {
+                    document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();
                 }
             }
             if ( kind === 4 && subId.includes( "encrypted-open-dms" ) ) {
@@ -758,11 +714,6 @@
             channel.getElementsByClassName( "notification" )[ 0 ].style.display = "none";
             channel.getElementsByClassName( "notification" )[ 0 ].innerText = "0";
             channel.setAttribute( "data-num-of-new-messages", "0" );
-            existing_messages = [];
-            if ( sessionStorage[ "add-messages-subid" ] ) {
-                var closerid = sessionStorage[ "add-messages-subid" ];
-                var closer = [ "CLOSE", closerid ];
-            }
             socket.send(JSON.stringify( closer ));
             var i; for ( i=0; i<document.getElementsByClassName( "active" ).length; i++ ) {
                 document.getElementsByClassName( "active" )[ i ].classList.remove( "active" );
@@ -806,7 +757,7 @@
                             </a>
                         </li>
                         <li class="input">
-                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;setTimeout( function() {if ( document.getElementsByClassName( "bubble" ).length > 0 ) {document.getElementsByClassName( "bubble" )[ document.getElementsByClassName( "bubble" ).length - 1 ].scrollIntoView();}}, 800 );'></textarea>
+                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;setTimeout( function() {if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();}}, 800 );'></textarea>
                         </li>
                         <li class="send-btn">
                             <a>
@@ -870,8 +821,8 @@
                 document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
                 document.getElementsByClassName( "content" )[ 0 ].style.display = "block";
                 document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                if ( document.getElementsByClassName( "bubble" ).length > 0 ) {
-                    document.getElementsByClassName( "bubble" )[ document.getElementsByClassName( "bubble" ).length - 1 ].scrollIntoView();
+                if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {
+                    document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();
                 }
                 document.getElementsByClassName( "message-header" )[ 0 ].remove();
             }
@@ -969,23 +920,10 @@
                     document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago );
                 }
                 document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                if ( document.getElementsByClassName( "bubble" ).length > 0 ) {
-                    document.getElementsByClassName( "bubble" )[ document.getElementsByClassName( "bubble" ).length - 1 ].scrollIntoView();
-                }
-                if ( i == cached_messages.length - 1 ) {
-                    time_for_since = event_time - 5;
+                if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {
+                    document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();
                 }
             });
-            var subId   = "add-messages" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 0, 20 );
-            sessionStorage[ "add-messages-subid" ] = subId;
-            var filter  = {
-                "kinds": [ 42 ],
-                "#e": [id],
-                "since": time_for_since,
-                "limit": 200
-            }
-            var subscription = [ "REQ", subId, filter ]
-            socket.send(JSON.stringify( subscription ));
         }
     </script>
     <script>
@@ -1045,9 +983,9 @@
                         document.getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago );
                     }
                     document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                    if ( document.getElementsByClassName( "bubble" ).length > 0 ) {
-                        document.getElementsByClassName( "bubble" )[ document.getElementsByClassName( "bubble" ).length - 1 ].scrollIntoView();
-                    }
+                if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {
+                    document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();
+                }
                     if ( i == cached_messages.length - 1 ) {
                         time_for_since = event_time - 5;
                     }
@@ -1639,7 +1577,7 @@
                             </a>
                         </li>
                         <li class="input">
-                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;setTimeout( function() {if ( document.getElementsByClassName( "bubble" ).length > 0 ) {document.getElementsByClassName( "bubble" )[ document.getElementsByClassName( "bubble" ).length - 1 ].scrollIntoView();}}, 800 );'></textarea>
+                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;setTimeout( function() {if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();}}, 800 );'></textarea>
                         </li>
                         <li class="send-btn">
                             <a>
