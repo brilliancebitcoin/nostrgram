@@ -277,10 +277,6 @@
                 if ( isError ) {
                     showToast( "unknown error, could not add this channel -- please contact a developer for help" );
                 } else {
-                    var i; for ( i=0; i<document.getElementsByClassName( "dm-outer" ).length; i++ ) {
-                        document.getElementsByClassName( "dm-outer" )[ i ].remove();
-                        i = i - 1;
-                    }
                     document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayChannel( JSON.parse( content )[ "picture" ], JSON.parse( content )[ "name" ], "", event.id, event.created_at );
                     getLatestMessage( event.id );
                     addDmsToSidebar();
@@ -561,6 +557,13 @@
                     otherKey = event.pubkey;
                 }
                 var parent = otherKey;
+                if ( sessionStorage[ parent + "-counter" ] ) {
+                    var messagecounter = Number( sessionStorage[ parent + "-counter" ] );
+                } else {
+                    var messagecounter = 0;
+                }
+                messagecounter = messagecounter + 1;
+                sessionStorage[ parent + "-counter" ] = String( messagecounter );
                 if ( !msg_cache[ parent ] ) {
                     msg_cache[ parent ] = [];
                 }
@@ -693,15 +696,20 @@
     </script>
     <script>
         function displayChannel( image, name, message, id, timestamp ) {
+            var old_num_of_new_messages = 0;
+            if ( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( id )[ 0 ] ) {
+                old_num_of_new_messages = document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( id )[ 0 ].getAttribute( "data-num-of-new-messages" );
+                old_num_of_new_messages = Number( old_num_of_new_messages );
+            }
             var html = `
-                        <li class="channel-outer ${id}" data-id="${id}" data-img="${image}" data-num-of-new-messages="0" onclick="selectChannel( this );">
+                        <li class="channel-outer ${id}" data-id="${id}" data-img="${image}" data-num-of-new-messages="${String( old_num_of_new_messages )}" onclick="selectChannel( this );">
                             <a>
                                 <span style="background-image: url(${image})"></span>
                                 <div class="channel-inner">
                                     <div class="name">${name}</div>
                                     <div data-timestamp="${timestamp}" class="message">${message}</div>
                                 </div>
-                                <span class="notification">0</span>
+                                <span class="notification">${String( old_num_of_new_messages )}</span>
                             </a>
                         </li>
             `;
@@ -1520,16 +1528,28 @@
         }
     </script>
     <script>
-        function displayDMbox( pubkey, name, picture ) {
+        function displayDMbox( pubkey, name, picture, num_of_new_messages ) {
+            var old_num_of_new_messages = 0;
+            if ( num_of_new_messages > 0 ) {
+                old_num_of_new_messages = num_of_new_messages;
+            }
+            if ( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ] ) {
+                old_num_of_new_messages = document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ].getAttribute( "data-num-of-new-messages" );
+                old_num_of_new_messages = Number( old_num_of_new_messages );
+            }
+            var displayer = "";
+            if ( old_num_of_new_messages > 0 ) {
+                displayer = 'display: inline;'
+            }
             var html = `
-                        <li class="dm-outer ${pubkey.substring( 0, 20 )}" data-pubkey="${pubkey}" data-img="${picture}" data-num-of-new-messages="0" onclick="selectDM( '${pubkey}', '${name}', '${picture}' );">
+                        <li class="dm-outer ${pubkey.substring( 0, 20 )}" data-pubkey="${pubkey}" data-img="${picture}" data-num-of-new-messages="${String( old_num_of_new_messages )}" onclick="selectDM( '${pubkey}', '${name}', '${picture}' );">
                             <a>
                                 <span style="background-image: url(${picture})"></span>
                                 <div class="dm-inner">
                                     <div class="name">${name}</div>
                                     <div data-timestamp="" class="message"></div>
                                 </div>
-                                <span class="notification" style="background-color: #05e632;">0</span>
+                                <span class="notification" style="background-color: #05e632;${displayer}">${String( old_num_of_new_messages )}</span>
                             </a>
                         </li>
             `;
@@ -1538,6 +1558,7 @@
     </script>
     <script>
         async function selectDM( pubkey, name, picture ) {
+            sessionStorage[ pubkey + "-counter" ] = String( 0 );
             sessionStorage[ "scrolled" ] = false;
             document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "notification" )[ 0 ].style.display = "none";
             document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "notification" )[ 0 ].innerText = "0";
@@ -2040,7 +2061,7 @@
             getUserMeta( pubkey );
             setTimeout( function() {
                 if ( !document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ] ) {
-                    document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( pubkey, name, picture );
+                    document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( pubkey, name, picture, 1 );
                 }
             }, 1000 );
         }
@@ -2088,7 +2109,16 @@
     </script>
     <script>
         function addDmsToSidebar() {
-            Object.keys(dms_info).forEach( function( pubkey ) {
+            var i; for ( i=0; i<document.getElementsByClassName( "dm-outer" ).length; i++ ) {
+                document.getElementsByClassName( "dm-outer" )[ i ].remove();
+                i = i - 1;
+            }
+            Object.keys( dms_info ).forEach( function( pubkey ) {
+                if ( sessionStorage[ pubkey + "-counter" ] ) {
+                    var messagecounter = Number( sessionStorage[ pubkey + "-counter" ] );
+                } else {
+                    var messagecounter = 0;
+                }
                 var name = dms_info[ pubkey ][ "name" ];
                 var picture = dms_info[ pubkey ][ "picture" ];
                 if ( namemap[ pubkey ] && namemap[ pubkey ] != "none" ) {
@@ -2099,8 +2129,9 @@
                     picture = imagemap[ pubkey ];
                     dms_info[ pubkey ][ "picture" ] = picture;
                 }
+                var num_of_new_messages = messagecounter;
                 if ( !document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ] ) {
-                    document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( pubkey, name, picture );
+                    document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( pubkey, name, picture, messagecounter );
                 }
             });
         }
