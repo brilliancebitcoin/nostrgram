@@ -714,7 +714,6 @@
             channel.getElementsByClassName( "notification" )[ 0 ].style.display = "none";
             channel.getElementsByClassName( "notification" )[ 0 ].innerText = "0";
             channel.setAttribute( "data-num-of-new-messages", "0" );
-            socket.send(JSON.stringify( closer ));
             var i; for ( i=0; i<document.getElementsByClassName( "active" ).length; i++ ) {
                 document.getElementsByClassName( "active" )[ i ].classList.remove( "active" );
             }
