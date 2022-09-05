@@ -294,6 +294,9 @@
                 var event_time = event.created_at
                 var how_long_ago = convertHMS( now - event_time )
                 var isMine = ( event.pubkey == pubKey );
+                if ( !isMine && !array_of_pubkeys.includes( event.pubkey ) ) {
+                    array_of_pubkeys.push( event.pubkey );
+                }
                 var parent = "";
                 var i; for ( i=0; i<event.tags.length; i++ ) {
                     if ( event[ "tags" ][ i ][ 0 ] == "e" && ( !parent || parent == "" ) ) {
