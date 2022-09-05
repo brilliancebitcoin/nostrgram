@@ -33,6 +33,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] make an option to set and modify relays in settings
 * [ ] connect to at least two relays by default
 * [ ] import channels and other backed up data when you import an account
+* [ ] when a user imports a private key, automatically replace their username, about, and picture on the settings page 
 * [ ] parse and display @[username] and @[pubkey] as links to profile pages
 * [ ] show a green message counter in channels or dms where someone @'d you or dm'd you
 * [ ] add an about section to profile pages
