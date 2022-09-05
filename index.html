@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
     <meta name="viewport" content="width=device-width, user-scalable=no" />
-    <link rel="stylesheet" href="styles.css?v=42" />
+    <link rel="stylesheet" href="styles.css?v=43" />
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="manifest.json">
     <title>Anigma</title>
@@ -27,7 +26,7 @@
         });
         sessionStorage[ "time-offset" ] = String( "0" );
     </script>
-    <script type="module">
+    <script>
         function getData( url ) {
             return new Promise( function( resolve, reject ) {
                 var xhttp = new XMLHttpRequest();
@@ -40,6 +39,8 @@
                 xhttp.send();
             });
         }
+    </script>
+    <script type="module">
         var time = await getData( "https://worldtimeapi.org/api/ip" );
         var realnow = JSON.parse( time )[ "unixtime" ];
         var claimednow = Math.floor( Date.now() / 1000 );
@@ -1951,7 +1952,6 @@
             <div class="message-header">
                 <div class="channel-info">
                     <span style="background-image: url('./anigma-logo.png')"></span>
-                    <!-- <span class="plus-circle">A</span> -->
                     <div class="channel-wrapper">
                         <div class="name">Anigma</div>
                         <div class="message">Talk to people</div>
