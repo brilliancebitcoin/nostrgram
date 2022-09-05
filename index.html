@@ -2322,10 +2322,10 @@
             document.getElementById( "vidDiv" ).style.display = "inline-block";
             if ( window.innerWidth < 601 ) {
 
-                document.getElementsByClassName( "minmax" )[ 0 ].click();
+                document.getElementsByClassName( "inner-vid" )[ 0 ].getElementsByClassName( "ratio" )[ 0 ].style.maxWidth = "190px";
                 document.getElementsByClassName( "minmax" )[ 0 ].remove();
                 document.getElementById( "vidDiv" ).style.position = "absolute";
-                document.getElementById( "vidDiv" ).style.top = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight - 500 + "px";
+                //document.getElementById( "vidDiv" ).style.top = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight - 500 + "px";
                 document.getElementById( "vidDiv" ).style.left = "100px";
             }
         }
