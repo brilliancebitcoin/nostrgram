@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
     <meta name="viewport" content="width=device-width, user-scalable=no" />
-    <link rel="stylesheet" href="styles.css?v=40" />
+    <link rel="stylesheet" href="styles.css?v=41" />
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="manifest.json">
     <title>Anigma</title>
@@ -2321,6 +2321,9 @@
             document.getElementById( "vidDiv" ).getElementsByClassName( "ratio" )[ 0 ].style.maxWidth = "500px";
             document.getElementById( "vidDiv" ).style.display = "inline-block";
             if ( window.innerWidth < 601 ) {
+
+                document.getElementsByClassName( "minmax" )[ 0 ].click();
+                document.getElementsByClassName( "minmax" )[ 0 ].remove();
                 document.getElementById( "vidDiv" ).style.position = "absolute";
                 document.getElementById( "vidDiv" ).style.top = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight - 500 + "px";
                 document.getElementById( "vidDiv" ).style.left = "100px";
