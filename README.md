@@ -68,3 +68,5 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] add support for nos2x's relay list
 * [ ] fix bug where unread messages get marked as read upon refresh due to being in the message cache
 * [ ] bring back the minmax button on the pip frame for mobile users. When clicked once, the video should anchor to the top. Twice and it should anchor to the bottom. Three times and it should vanish, leaving only the buttons floating there. Four times and it should get "big" again (I put that in quotes because it should still have a maximum width of 190 pixels).
+* [ ] give people a link to view their public profile
+* [ ] display your profile picture on the settings page
