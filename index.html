@@ -557,16 +557,51 @@
                     otherKey = event.pubkey;
                 }
                 var parent = otherKey;
-                if ( sessionStorage[ parent + "-counter" ] ) {
-                    var messagecounter = Number( sessionStorage[ parent + "-counter" ] );
-                } else {
-                    var messagecounter = 0;
-                }
-                messagecounter = messagecounter + 1;
-                sessionStorage[ parent + "-counter" ] = String( messagecounter );
                 if ( !msg_cache[ parent ] ) {
                     msg_cache[ parent ] = [];
                 }
+                var event_time = event.created_at;
+                var color = "";
+                if ( isNaN( event.pubkey.substring( 0, 1 ) ) && ( event.pubkey.substring( 0, 1 ) == "e" || event.pubkey.substring( 0, 1 ) == "f" ) ) {
+                    color = "red";
+                }
+                if ( isNaN( event.pubkey.substring( 0, 1 ) ) && ( event.pubkey.substring( 0, 1 ) == "c" || event.pubkey.substring( 0, 1 ) == "d" ) ) {
+                    color = "pink";
+                };
+                if ( isNaN( event.pubkey.substring( 0, 1 ) ) && ( event.pubkey.substring( 0, 1 ) == "a" || event.pubkey.substring( 0, 1 ) == "b" ) ) {
+                    color = "orange";
+                };
+                if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 10 ) {
+                    color = "yellow";
+                };
+                if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 8 ) {
+                    color = "green";
+                };
+                if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 6 ) {
+                    color = "lightblue";
+                };
+                if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 4 ) {
+                    color = "blue";
+                };
+                if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 2 ) {
+                    color = "purple";
+                };
+                var name = event.pubkey.substring( 0, 15 ) + "...";
+                //var picture = "https://hashvatar.vercel.app/" + event.pubkey;
+                var picture = "https://www.gravatar.com/avatar/" + event.pubkey + "?s=128&d=retro";
+                if ( event.pubkey in namemap && namemap[ event.pubkey ] != "none" ) {
+                    name = namemap[ event.pubkey ];
+                }
+                if ( event.pubkey in imagemap && imagemap[ event.pubkey ] != "none" ) {
+                    picture = imagemap[ event.pubkey ];
+                }
+                if ( !admin && window.nostr ) {
+                    content = await window.nostr.nip04.decrypt( otherKey, content );
+                } else {
+                    content = await decrypt(privKey, otherKey, content)
+                }
+                content = content.replace( /&/g, "&#38;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
+                content = markdownify( content, isMine );
                 //If the current message is already in the message cache, return, otherwise add to the number of unread messages
                 var messageIsKnown = false;
                 msg_cache[ parent ].forEach( function( message, index ) {
@@ -574,6 +609,16 @@
                         messageIsKnown = true;
                     }
                 });
+                if ( !messageIsKnown ) {
+                    addMessageToCache( event.pubkey, event.id, event_time, parent, color, name, picture, content );
+                    if ( sessionStorage[ parent + "-counter" ] ) {
+                        var messagecounter = Number( sessionStorage[ parent + "-counter" ] );
+                    } else {
+                        var messagecounter = 0;
+                    }
+                    messagecounter = messagecounter + 1;
+                    sessionStorage[ parent + "-counter" ] = String( messagecounter );
+                }
                 if ( !messageIsKnown && document.getElementsByClassName( "channels" )[ 0 ] && document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ] ) {
                     if ( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].classList.contains( "active" ) ) return
                     var old_num_of_new_messages = Number( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent.substring( 0, 20 ) )[ 0 ].getAttribute( "data-num-of-new-messages" ) );
