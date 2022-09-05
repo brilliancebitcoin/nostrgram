@@ -67,3 +67,4 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] let users add a pubkey to their dms similar to how they can add channels
 * [ ] add support for nos2x's relay list
 * [ ] fix bug where unread messages get marked as read upon refresh due to being in the message cache
+* [ ] bring back the minmax button on the pip frame for mobile users. When clicked, the video should fully vanish, leaving only the buttons for moving it, x-ing out, and making it visible again
