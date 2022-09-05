@@ -24,9 +24,10 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] multi select emojis before closing emoji window
 * [x] create a mini player for youtube videos so you can leave the channel and keep the video playing
 * [x] if that's not possible, at least make videos not scroll up when someone posts a message while a video is playing
-* [ ] fix bug where picture-in-picture youtube videos go to the bottom of the channel on mobile instead of wherever you clicked
-* [ ] fix bug where picture-in-picture youtube videos move weirdly on mobile
-* [ ] fix bug where if you watch a picture-in-picture youtube video on mobile and open the sidebar, the sidebar becomes too long 
+* [x] fix bug where picture-in-picture youtube videos go to the bottom of the channel on mobile instead of wherever you clicked
+* [x] fix bug where picture-in-picture youtube videos move weirdly on mobile
+* [x] fix bug where if you watch a picture-in-picture youtube video on mobile and open the sidebar, the sidebar becomes too long 
+* [x] load new messages into msg_cache during getLatestMessage() rather than waiting for add-message
 * [ ] private groups with shared decryption keys
 * [ ] integrate lnbits
 * [ ] make an option to set and modify relays in settings
@@ -64,5 +65,4 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] users who click or tap the back button should not close the app. They should go to the previous page
 * [ ] users who go from a channel to a profile should have a button to go back to the channel. The button that seems most obvious currently takes them to the sidebar
 * [ ] let users add a pubkey to their dms similar to how they can add channels
-* [ ] load new messages into msg_cache during getLatestMessage() rather than waiting for add-message
 * [ ] add support for nos2x's relay list
