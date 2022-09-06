@@ -28,14 +28,18 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] fix bug where picture-in-picture youtube videos move weirdly on mobile
 * [x] fix bug where if you watch a picture-in-picture youtube video on mobile and open the sidebar, the sidebar becomes too long 
 * [x] load new messages into msg_cache during getLatestMessage() rather than waiting for add-message
+* [x] when a user imports a private key, automatically replace their username, about, and picture on the settings page 
+* [x] show a green message coutner in dms
+* [x] if a user is not near the bottom of the chat log, don't scroll to the bottom when they open up the keyboard
+* [x] display your profile picture on the settings page
+* [x] when dming a user, clicking their profile pic in the header should take you to their profile
 * [ ] private groups with shared decryption keys
 * [ ] integrate lnbits
 * [ ] make an option to set and modify relays in settings
 * [ ] connect to at least two relays by default
 * [ ] import channels and other backed up data when you import an account
-* [ ] when a user imports a private key, automatically replace their username, about, and picture on the settings page 
 * [ ] parse and display @[username] and @[pubkey] as links to profile pages
-* [ ] show a green message counter in channels or dms where someone @'d you or dm'd you
+* [ ] show a green message counter in channels where someone @'d you or dm'd you or replied to you
 * [ ] add an about section to profile pages
 * [ ] add message replies via long press or right click
 * [ ] add sticky messages
@@ -60,9 +64,8 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] add a "messages not read" delineating line if you go to a channel or a dm with fewer than 200 unread messages in it, separating the messages you read from the messages you didn't
 * [ ] if a "messages not read" line exists when entering a channel or a dm containing unread messages, autoscroll to that instead of to the latest message
 * [ ] fix the bug that makes stuff disappear below the fold when images and videos expand
-* [ ] the anigma browser tab should show a notification when new messages arrive
+* [ ] the anigma browser tab should show a notification when new dms, @'s, or replies arrive
 * [ ] print the total messages that are in a channels in the channel about div
-* [ ] if a user is not near the bottom of the chat log, don't scroll to the bottom when they open up the keyboard
 * [ ] users who click or tap the back button should not close the app. They should go to the previous page
 * [ ] users who go from a channel to a profile should have a button to go back to the channel. The button that seems most obvious currently takes them to the sidebar
 * [ ] let users add a pubkey to their dms similar to how they can add channels
@@ -70,9 +73,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] fix bug where unread messages get marked as read upon refresh due to being in the message cache
 * [ ] bring back the minmax button on the pip frame for mobile users. When clicked once, the video should anchor to the top. Twice and it should anchor to the bottom. Three times and it should vanish, leaving only the buttons floating there. Four times and it should get "big" again (I put that in quotes because it should still have a maximum width of 190 pixels).
 * [ ] give people a link to view their public profile
-* [ ] display your profile picture on the settings page
-* [ ] fix metadata bug. The function updateUserMeta() does not modify the onclick parameter of profile pictures in a channel until you refresh, so when someone clicks a profile picture to view them, they see their auto-generated avatar and pubkey instead of their custom profile picture and username
 * [ ] show link to user's profile above Manage Channels
-* [ ] when dming a user, clicking their profile pic in the header should take you to their profile
+* [ ] fix metadata bug. The function updateUserMeta() does not modify the onclick parameter of profile pictures in a channel until you refresh, so when someone clicks a profile picture to view them, they see their auto-generated avatar and pubkey instead of their custom profile picture and username
 * [ ] investigate possible heartbeat errors that are especially prevalent on mobile -- users report seeing and sending duplicate posts, possibly this is caused by having multiple socket connections open, which is possibly caused by the heartbeat
 * [ ] write a function that checks if the penultimate message was by the same person as the most recent message, and if so, reduce the margin between them and only display the profile picture of the "top" post in the chain
