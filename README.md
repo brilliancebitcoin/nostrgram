@@ -74,3 +74,5 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] fix metadata bug. The function updateUserMeta() does not modify the onclick parameter of profile pictures in a channel until you refresh, so when someone clicks a profile picture to view them, they see their auto-generated avatar and pubkey instead of their custom profile picture and username
 * [ ] show link to user's profile above Manage Channels
 * [ ] when dming a user, clicking their profile pic in the header should take you to their profile
+* [ ] investigate possible heartbeat errors that are especially prevalent on mobile -- users report seeing and sending duplicate posts, possibly this is caused by having multiple socket connections open, which is possibly caused by the heartbeat
+* [ ] write a function that checks if the penultimate message was by the same person as the most recent message, and if so, reduce the margin between them and only display the profile picture of the "top" post in the chain
