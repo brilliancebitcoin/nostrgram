@@ -72,3 +72,5 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] give people a link to view their public profile
 * [ ] display your profile picture on the settings page
 * [ ] fix metadata bug. The function updateUserMeta() does not modify the onclick parameter of profile pictures in a channel until you refresh, so when someone clicks a profile picture to view them, they see their auto-generated avatar and pubkey instead of their custom profile picture and username
+* [ ] show link to user's profile above Manage Channels
+* [ ] when dming a user, clicking their profile pic in the header should take you to their profile
