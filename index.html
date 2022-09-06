@@ -1904,12 +1904,13 @@
                 showToast( "your private key is not hex" );
                 return;
             }
-            var pubkey = nobleSecp256k1.getPublicKey( privkey, true )
+            var pubkey = nobleSecp256k1.getPublicKey( privkey, true );
             pubkey = pubkey.substring( 2 );
             privKey = privkey;
             pubKey = pubkey;
             document.getElementsByClassName( "public-key" )[ 0 ].value = pubKey;
             document.getElementsByClassName( "private-key" )[ 0 ].value = privKey;
+            forceUpdateUserMeta( pubKey );
             var stuff_to_backup = {}
             stuff_to_backup[ "privkey" ] = privKey;
             stuff_to_backup[ "pubkey" ] = pubKey;
