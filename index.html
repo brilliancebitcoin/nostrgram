@@ -375,6 +375,7 @@
                 }
                 //if you are currently looking at the channel, add the message to the channel
                 if ( !document.getElementsByClassName( parent )[ 0 ].classList.contains( "active" ) ) return;
+                if ( document.getElementsByClassName( event.id )[ 0 ] ) return;
                 var div = document.createElement( "div" );
                 div.classList.add( "message" );
                 div.classList.add( event.id );
