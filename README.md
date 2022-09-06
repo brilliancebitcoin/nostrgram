@@ -29,7 +29,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] fix bug where if you watch a picture-in-picture youtube video on mobile and open the sidebar, the sidebar becomes too long 
 * [x] load new messages into msg_cache during getLatestMessage() rather than waiting for add-message
 * [x] when a user imports a private key, automatically replace their username, about, and picture on the settings page 
-* [x] show a green message coutner in dms
+* [x] show a green message counter in dms
 * [x] if a user is not near the bottom of the chat log, don't scroll to the bottom when they open up the keyboard
 * [x] display your profile picture on the settings page
 * [x] when dming a user, clicking their profile pic in the header should take you to their profile
