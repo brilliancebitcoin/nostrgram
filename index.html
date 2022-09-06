@@ -1628,7 +1628,7 @@
             var html = `
                 <div class="message-header">
                     <div class="channel-info">
-                        <span style="background-image: url(${picture})"></span>
+                        <span style="background-image: url(${picture}); cursor: pointer;" onclick="showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
                         <div class="channel-wrapper">
                             <div class="name">${name}</div>
                             <div class="time"></div>
