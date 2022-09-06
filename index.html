@@ -814,7 +814,7 @@
                             </a>
                         </li>
                         <li class="input">
-                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='if ( window.innerWidth < 601 ) {document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;setTimeout( function() {if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();}}, 800 );}'></textarea>
+                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='if ( window.innerWidth < 601 && ( document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight - document.getElementsByClassName( "message-content" )[ 0 ].scrollTop ) < 1500 ) {document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;setTimeout( function() {if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();}}, 800 );}'></textarea>
                         </li>
                         <li class="send-btn">
                             <a>
@@ -1373,6 +1373,12 @@
                     var picture = "";
                 }
             }
+            var picture_to_show = picture;
+            //var autoavatar = "https://hashvatar.vercel.app/" + event.pubkey;
+            var autoavatar = "https://www.gravatar.com/avatar/" + pubKey + "?s=128&d=retro";
+            if ( !picture_to_show || picture_to_show == "" ) {
+                picture_to_show = autoavatar;
+            }
             var html = `
                 <div class="message-header">
                     <div class="channel-info">
@@ -1394,6 +1400,7 @@
                 </div>
                 <div class="message-content">
                     <h2>Your info</h2>
+                    <img class="big-picture" src="${picture_to_show}" />
                     <input class="display-name" type="text" placeholder="display name" value="${name}" />
                     <textarea class="about-input" type="text" rows="5" cols="70" placeholder="enter info about yourself">${about}</textarea>
                     <input class="user-picture" type="text" placeholder="user picture e.g. https://i.ibb.co/Q8X9cQL/bitcoin-chess.png" value="${picture}" />
@@ -1647,7 +1654,7 @@
                             </a>
                         </li>
                         <li class="input">
-                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='if ( window.innerWidth < 601 ) {document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;setTimeout( function() {if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();}}, 800 );}'></textarea>
+                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='if ( window.innerWidth < 601 && ( document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight - document.getElementsByClassName( "message-content" )[ 0 ].scrollTop ) < 1500 ) {document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;setTimeout( function() {if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();}}, 800 );}'></textarea>
                         </li>
                         <li class="send-btn">
                             <a>
