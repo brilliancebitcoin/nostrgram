@@ -95,7 +95,7 @@
             }
             if ( text.match( ytRegex ) ) {
                 returnable = text.replace( ytRegex, ( yt ) => {
-                    var vid = `<div class="youtube-wrapper" onclick='console.log( "test" );'><img class="ratio" src="./16x9-transparent.png"/><iframe class="youtube-video" src="${"https://www.youtube.com/embed/" + youtube_parser( yt )}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><span class="p-in-p" onclick='moveVid( this.previousElementSibling );'>Picture-in-picture</span>`;
+                    var vid = `<div class="youtube-wrapper"><img class="ratio" src="./16x9-transparent.png"/><iframe class="youtube-video" src="${"https://www.youtube-nocookie.com/embed/" + youtube_parser( yt )}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><span class="p-in-p" onclick='moveVid( this.previousElementSibling );'>Picture-in-picture</span>`;
                     return vid;
                 })
             }
@@ -2331,6 +2331,19 @@
                 document.getElementById( "vidDiv" ).style.left = "100px";
             }
         }
+    </script>
+    <script>
+/*
+        var mywallet = await getData( "https://legend.lnbits.com/wallet?nme=test" )
+        var key1prep = mywallet.split( "Wallet ID:" )
+        var wallet_id = key1prep[ 1 ].substring( 14, 46 )
+        var key2prep = mywallet.split( "Admin key:" )
+        var adminkey = key2prep[ 1 ].substring( 14, 46 )
+        var key3prep = mywallet.split( "Invoice/read key:" )
+        var readkey = key3prep[ 1 ].substring( 14, 46 )
+        var key4prep = mywallet.split( "<qrcode" )
+        var wallet_url = key4prep[ 2 ].split( "'" )[ 1 ] + key4prep[ 2 ].split( "'" )[ 3 ]
+*/
     </script>
 </body>
 </html>
