@@ -1769,9 +1769,7 @@
             }
             var i; for ( i=0; i<subscribed_channels.length; i++ ) {
                 if ( subscribed_channels[ i ] == id ) {
-                    console.log( id, subscribed_channels );
-                    subscribed_channels.pop( i );
-                    console.log( id, subscribed_channels );
+                    subscribed_channels.splice( i, 1 );
                 }
             }
             var stuff_to_backup = {}
