@@ -203,6 +203,7 @@
             var { kind, content } = event || {}
             if ( subId.startsWith( "00000001" ) ) {
                 if ( content && !checkForUserMetaErrors( content ) ) {
+                    //path if I am updating my own info
                     if ( event.pubkey == pubKey ) {
                         var myMetaInfo = {}
                         if ( "name" in JSON.parse( content ) ) {
@@ -225,21 +226,37 @@
                         }
                         localStorage[ "my-meta-info" ] = JSON.stringify( myMetaInfo );
                     }
+                    //path if I am updating someone else's info
                     if ( "name" in JSON.parse( content ) && !( !JSON.parse( content )[ "name" ] || JSON.parse( content )[ "name" ] == "" ) ) {
                         namemap[ event.pubkey ] = JSON.parse( content )[ "name" ];
                         localStorage[ "namemap" ] = JSON.stringify( namemap );
                         var i; for ( i=0; i<document.getElementsByClassName( event.pubkey ).length; i++ ) {
                             document.getElementsByClassName( event.pubkey )[ i ].innerText = JSON.parse( content )[ "name" ];
                         }
+                        if ( document.getElementsByClassName( "profile-name" )[ 0 ] ) {
+                            document.getElementsByClassName( "profile-name" )[ 0 ].innerText = JSON.parse( content )[ "name" ];
+                        }
+                        if ( document.getElementsByClassName( "profile-pubkey-title" )[ 0 ] ) {
+                            document.getElementsByClassName( "profile-pubkey-title" )[ 0 ].innerText = JSON.parse( content )[ "name" ] + "'s public key";
+                        }
                     } else {
                         namemap[ event.pubkey ] = "none";
                         localStorage[ "namemap" ] = JSON.stringify( namemap );
+                    }
+                    if ( "about" in JSON.parse( content ) && !( !JSON.parse( content )[ "about" ] || JSON.parse( content )[ "about" ] == "" ) ) {
+                        if ( document.getElementsByClassName( "profile-about" )[ 0 ] ) {
+                            document.getElementsByClassName( "profile-about" )[ 0 ].innerText = JSON.parse( content )[ "about" ];
+                            document.getElementsByClassName( "profile-about" )[ 0 ].style.display = "block";
+                        }
                     }
                     if ( "picture" in JSON.parse( content ) && !( !JSON.parse( content )[ "picture" ] || JSON.parse( content )[ "picture" ] == "" ) ) {
                         imagemap[ event.pubkey ] = JSON.parse( content )[ "picture" ];
                         localStorage[ "imagemap" ] = JSON.stringify( imagemap );
                         var i; for ( i=0; i<document.getElementsByClassName( event.pubkey ).length; i++ ) {
                             document.getElementsByClassName( event.pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + JSON.parse( content )[ "picture" ] + ")";
+                        }
+                        if ( document.getElementsByClassName( "big-picture" )[ 0 ] && document.getElementsByClassName( "channel-wrapper" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerText != "Settings" ) {
+                            document.getElementsByClassName( "big-picture" )[ 0 ].src = JSON.parse( content )[ "picture" ];
                         }
                     } else {
                         imagemap[ event.pubkey ] = "none";
@@ -1489,6 +1506,7 @@
     </script>
     <script>
         async function showProfile( pubkey, name, picture ) {
+            forceUpdateUserMeta( pubkey );
             var i; for ( i=0; i<document.getElementsByClassName( "active" ).length; i++ ) {
                 document.getElementsByClassName( "active" )[ i ].classList.remove( "active" );
             }
@@ -1513,9 +1531,9 @@
                 </div>
                 <div class="message-content">
                     <img class="big-picture" src="${picture}" />
-                    <h2>${name}</h2>
+                    <h2 class="profile-name">${name}</h2>
                     <p class="profile-about" style="display: none;">${name} lives in an abandoned warehouse on top of a mountain in a jungle. Surviving only on bananas and leftover car parts, ${name} roams the wild horizon of the amazon, looking on and on for something not yet grokked</p>
-                    <h2 style="margin-top: 20px;">${name}'s public key</h2>
+                    <h2 style="margin-top: 20px;" class="profile-pubkey-title">${name}'s public key</h2>
                     <p class="profile-pubkey">${pubkey}</p>
                     <button class="dm" onclick="dmThisUser( '${pubkey}', '${name}', '${picture}' )">Direct message this user</button>
                 </div>
@@ -1702,6 +1720,7 @@
                 document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "flex";
                 document.getElementsByClassName( "message-header-alt" )[ 0 ].style.width = window.innerWidth - 38 + "px";
             }
+            forceUpdateUserMeta( pubkey );
             if ( window.innerWidth < 601 ) {
                 document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
                 document.getElementsByClassName( "content" )[ 0 ].style.display = "flex";
@@ -2353,6 +2372,50 @@
         var key4prep = mywallet.split( "<qrcode" )
         var wallet_url = key4prep[ 2 ].split( "'" )[ 1 ] + key4prep[ 2 ].split( "'" )[ 3 ]
 */
+    </script>
+    <script>
+        function convertRGBtoHex( rgb ) {
+            var a = rgb.split("(")[1].split(")")[0];
+            a = a.split(",");
+            var b = a.map(function(x){             //For each array element
+                x = parseInt(x).toString(16);      //Convert to a base16 string
+                return (x.length==1) ? "0"+x : x;  //Add zero if we get only one character
+            })
+            b = "#"+b.join("");
+            return b.substring( 0, 7 );
+        }
+        function padZero(str, len) {
+            len = len || 2;
+            var zeros = new Array(len).join('0');
+            return (zeros + str).slice(-len);
+        }
+        function invertColor(hex, bw) {
+            if (hex.indexOf('#') === 0) {
+                hex = hex.slice(1);
+            }
+            // convert 3-digit hex to 6-digits.
+            if (hex.length === 3) {
+                hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+            }
+            if (hex.length !== 6) {
+                throw new Error('Invalid HEX color.');
+            }
+            var r = parseInt(hex.slice(0, 2), 16),
+                g = parseInt(hex.slice(2, 4), 16),
+                b = parseInt(hex.slice(4, 6), 16);
+            if (bw) {
+                // https://stackoverflow.com/a/3943023/112731
+                return (r * 0.299 + g * 0.587 + b * 0.114) > 186
+                    ? '#000000'
+                    : '#FFFFFF';
+            }
+            // invert color components
+            r = (255 - r).toString(16);
+            g = (255 - g).toString(16);
+            b = (255 - b).toString(16);
+            // pad each with zeros and return
+            return "#" + padZero(r) + padZero(g) + padZero(b);
+        }
     </script>
 </body>
 </html>
