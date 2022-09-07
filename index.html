@@ -245,7 +245,7 @@
                     }
                     if ( "about" in JSON.parse( content ) && !( !JSON.parse( content )[ "about" ] || JSON.parse( content )[ "about" ] == "" ) ) {
                         if ( document.getElementsByClassName( "profile-about" )[ 0 ] ) {
-                            document.getElementsByClassName( "profile-about" )[ 0 ].innerText = JSON.parse( content )[ "about" ];
+                            document.getElementsByClassName( "profile-about" )[ 0 ].innerHTML = markdownify( JSON.parse( content )[ "about" ] );
                             document.getElementsByClassName( "profile-about" )[ 0 ].style.display = "block";
                         }
                     }
