@@ -33,6 +33,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] if a user is not near the bottom of the chat log, don't scroll to the bottom when they open up the keyboard
 * [x] display your profile picture on the settings page
 * [x] when dming a user, clicking their profile pic in the header should take you to their profile
+* [x] add an about section to profile pages
 * [ ] private groups with shared decryption keys
 * [ ] integrate lnbits
 * [ ] make an option to set and modify relays in settings
@@ -40,7 +41,6 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] import channels and other backed up data when you import an account
 * [ ] parse and display @[username] and @[pubkey] as links to profile pages
 * [ ] show a green message counter in channels where someone @'d you or dm'd you or replied to you
-* [ ] add an about section to profile pages
 * [ ] add message replies via long press or right click
 * [ ] add sticky messages
 * [ ] let channel creators blacklist posts and users (blacklists are enforced client side, so client software can optionally ignore them)
