@@ -1132,6 +1132,9 @@
     </script>
     <script>
         function convertHMS(value) {
+            if ( value < 0 ) {
+                value = 0;
+            }
             const sec = parseInt(value, 10); // convert value to number if it's string
             let years   = Math.floor(sec / 31536000); // get years
             let months  = Math.floor((sec - (years * 31536000)) / 2592000); // get months
