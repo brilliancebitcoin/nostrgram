@@ -194,9 +194,8 @@ body {
     border-left: 1px solid #ddd;
     display: flex;
     flex-direction: column;
-    background-image: url("./cartoons.png");
-    background-repeat: repeat;
-    background-size: 900px;
+    background: url("./cartoons.png") repeat center center fixed;
+    background-size: 600px;
 }
 
 .chat .content .message-header {
@@ -700,7 +699,7 @@ body {
     padding-bottom: 25px;
 }
 
-.public-key, .private-key {
+.public-key, .private-key, .admin-key, .read-key, .wallet-url {
     margin-top: 20px;
     display: inline-block;
     width: 80%;
@@ -716,7 +715,7 @@ body {
     font-family: monospace;
 }
 
-.copy-pubkey-btn, .copy-privkey-btn, .dm {
+.copy-pubkey-btn, .copy-privkey-btn, .dm, .copy-walleturl-btn, .copy-adminkey-btn, .copy-readkey-btn {
     display: inline-block;
     width: 100px;
     box-sizing: border-box;
@@ -734,7 +733,7 @@ body {
     width: auto;
 }
 
-.import-privkey-input, .display-name, .user-picture {
+.import-privkey-input, .display-name, .user-picture, .import-lnbits-endpoint, .import-lnbits-port, .import-lnbits-adminkey {
     margin-top: 20px;
     display: inline-block;
     width: 80%;
@@ -750,7 +749,7 @@ body {
     width: 100%;
 }
 
-.import-privkey-btn, .submit-user-info {
+.import-privkey-btn, .submit-user-info, .import-lnbits-btn {
     display: inline-block;
     width: 100px;
     box-sizing: border-box;
