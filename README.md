@@ -79,3 +79,5 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] write a function that checks if the penultimate message was by the same person as the most recent message, and if so, reduce the margin between them and only display the profile picture of the "top" post in the chain
 * [ ] add support for replaceable events (nip16) and use them to sync account-specific private data across devices
 * [ ] add support for ephemeral events (nip16) and use them to display "typing..." indicators
+* [ ] change the default channel from bitcoin to nostr
+* [ ] add several hard coded channels in a hidden way and expose them via the search bar
