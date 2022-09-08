@@ -395,7 +395,7 @@
                     var response = JSON.parse( response );
                     lud06 = response[ "lnurl" ];
                     submitUserInfo();
-                } else {
+                } else if ( JSON.parse( message[ "data" ] )[ 0 ] != "EOSE" ) {
                     i_should_create_a_new_wallet = false;
                     var thisevent = JSON.parse( message[ "data" ] )[ 2 ];
                     if ( thisevent[ "pubkey" ] != pubKey ) {
@@ -1319,7 +1319,9 @@
             var heartbeatsubId   = "00000002" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 )
             var heartbeatfilter  = { "ids": [ "41ce9bc50da77dda5542f020370ecc2b056d8f2be93c1cedf1bf57efcab095b0" ] }
             var heartbeatsub     = [ "REQ", heartbeatsubId, heartbeatfilter ];
-            socket.send(JSON.stringify( heartbeatsub ));
+            if ( socket && socket.readyState != 0 ) {
+                socket.send( JSON.stringify( heartbeatsub ) );
+            }
             setTimeout( function() {
                 var closer = [ "CLOSE", heartbeatsubId ];
                 socket.send(JSON.stringify( closer ));
