@@ -715,7 +715,7 @@ body {
     font-family: monospace;
 }
 
-.copy-pubkey-btn, .copy-privkey-btn, .dm, .copy-walleturl-btn, .copy-adminkey-btn, .copy-readkey-btn {
+.copy-pubkey-btn, .copy-privkey-btn, .dm, .copy-walleturl-btn, .copy-adminkey-btn, .copy-readkey-btn, .tipper {
     display: inline-block;
     width: 100px;
     box-sizing: border-box;
@@ -729,7 +729,7 @@ body {
     margin-top: 20px;
 }
 
-.dm {
+.dm, .tipper {
     width: auto;
 }
 
