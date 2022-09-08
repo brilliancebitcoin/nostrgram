@@ -35,8 +35,11 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] when dming a user, clicking their profile pic in the header should take you to their profile
 * [x] add an about section to profile pages
 * [x] investigate why new messages sometimes say they happened 12 months ago (this seems more prevalent on mobile)
+* [x] integrate lnbits
+* [x] fix metadata bug. The function updateUserMeta() does not modify the onclick parameter of profile pictures in a channel until you refresh, so when someone clicks a profile picture to view them, they see their auto-generated avatar and pubkey instead of their custom profile picture and username
+* [x] change the default channel from bitcoin to nostr
+* [x] fix the emoji modal bug where the select bar gets cleared when you view the next page of emojis
 * [ ] private groups with shared decryption keys
-* [ ] integrate lnbits
 * [ ] make an option to set and modify relays in settings
 * [ ] connect to at least two relays by default
 * [ ] import channels and other backed up data when you import an account
@@ -72,13 +75,9 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] add support for nos2x's relay list
 * [ ] fix bug where unread messages get marked as read upon refresh due to being in the message cache
 * [ ] bring back the minmax button on the pip frame for mobile users. When clicked once, the video should anchor to the top. Twice and it should anchor to the bottom. Three times and it should vanish, leaving only the buttons floating there. Four times and it should get "big" again (I put that in quotes because it should still have a maximum width of 190 pixels).
-* [ ] give people a link to view their public profile
-* [ ] show link to user's profile above Manage Channels
-* [ ] fix metadata bug. The function updateUserMeta() does not modify the onclick parameter of profile pictures in a channel until you refresh, so when someone clicks a profile picture to view them, they see their auto-generated avatar and pubkey instead of their custom profile picture and username
+* [ ] give people a link to view their public profile above Manage Channels
 * [ ] investigate possible heartbeat errors that are especially prevalent on mobile -- users report seeing and sending duplicate posts, possibly this is caused by having multiple socket connections open, which is possibly caused by the heartbeat
 * [ ] write a function that checks if the penultimate message was by the same person as the most recent message, and if so, reduce the margin between them and only display the profile picture of the "top" post in the chain
 * [ ] add support for replaceable events (nip16) and use them to sync account-specific private data across devices
 * [ ] add support for ephemeral events (nip16) and use them to display "typing..." indicators
-* [ ] change the default channel from bitcoin to nostr
 * [ ] add several hard coded channels in a hidden way and expose them via the search bar
-* [ ] fix the emoji modal bug where the select bar gets cleared when you view the next page of emojis
