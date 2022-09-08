@@ -39,6 +39,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] fix metadata bug. The function updateUserMeta() does not modify the onclick parameter of profile pictures in a channel until you refresh, so when someone clicks a profile picture to view them, they see their auto-generated avatar and pubkey instead of their custom profile picture and username
 * [x] change the default channel from bitcoin to nostr
 * [x] fix the emoji modal bug where the select bar gets cleared when you view the next page of emojis
+* [x] give people a link to view their public profile above Manage Channels
 * [ ] private groups with shared decryption keys
 * [ ] make an option to set and modify relays in settings
 * [ ] connect to at least two relays by default
@@ -75,7 +76,6 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] add support for nos2x's relay list
 * [ ] fix bug where unread messages get marked as read upon refresh due to being in the message cache
 * [ ] bring back the minmax button on the pip frame for mobile users. When clicked once, the video should anchor to the top. Twice and it should anchor to the bottom. Three times and it should vanish, leaving only the buttons floating there. Four times and it should get "big" again (I put that in quotes because it should still have a maximum width of 190 pixels).
-* [ ] give people a link to view their public profile above Manage Channels
 * [ ] investigate possible heartbeat errors that are especially prevalent on mobile -- users report seeing and sending duplicate posts, possibly this is caused by having multiple socket connections open, which is possibly caused by the heartbeat
 * [ ] write a function that checks if the penultimate message was by the same person as the most recent message, and if so, reduce the margin between them and only display the profile picture of the "top" post in the chain
 * [ ] add support for replaceable events (nip16) and use them to sync account-specific private data across devices
