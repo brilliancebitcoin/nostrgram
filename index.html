@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, user-scalable=no" />
-    <link rel="stylesheet" href="styles.css?v=44" />
+    <link rel="stylesheet" href="styles.css?v=45" />
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="manifest.json">
     <title>Anigma</title>
     <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
     <script src="https://bundle.run/browserify-cipher@1.0.1"></script>
+    <script src="https://supertestnet.github.io/bitcoin-chess/js/qrcode.js"></script>
 </head>
 <body>
     <!-- based on this: https://github.com/YunusEmreNalbant/css-chat-interface -->
@@ -27,7 +28,7 @@
         sessionStorage[ "time-offset" ] = String( "0" );
     </script>
     <script>
-        function getData( url ) {
+        function getData( url, apikey ) {
             return new Promise( function( resolve, reject ) {
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
@@ -36,7 +37,26 @@
                     };
                 }
                 xhttp.open( "GET", url, true );
+                if ( apikey ) {
+                    xhttp.setRequestHeader( "X-Api-Key", apikey );                    
+                }
                 xhttp.send();
+            });
+        }
+    </script>
+    <script>
+        function postJson( url, apikey, json ) {
+            return new Promise( function( resolve, reject ) {
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                    if ( this.readyState == 4 && ( this.status >= 200 && this.status < 300 ) ) {
+                        resolve( xhttp.responseText );
+                    };
+                }
+                xhttp.open( "POST", url, true );
+                xhttp.setRequestHeader( "Content-type", "application/json" );
+                xhttp.setRequestHeader( "X-Api-Key", apikey );
+                xhttp.send ( json );
             });
         }
     </script>
@@ -138,6 +158,18 @@
         }
     </script>
     <script>
+        async function importWalletFromNostrOrMakeOne( alterpubkey ) {
+            var importWalletSubId   = "00000003" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 )
+            var importWalletFilter  = { "#p": [ alterpubkey ] }
+            var importWalletSub     = [ "REQ", importWalletSubId, importWalletFilter ];
+            socket.send( JSON.stringify( importWalletSub ) );
+            setTimeout( function() {
+                var closer = [ "CLOSE", importWalletSubId ];
+                socket.send(JSON.stringify( closer ));
+            }, 1500 );
+        }
+    </script>
+    <script>
         if ( window.location.href.includes( "brilliancebitcoin.github.io/nostrgram" ) && !window.location.href.includes( "brilliancebitcoin.github.io/nostrgram-test" ) ) {
             window.location.href = "https://anigma.io/";
         }
@@ -156,7 +188,7 @@
             var privKey = keypair.privateKey.toString( "hex" )
             var pubKey  = keypair.publicKey.toString( "hex" )
             pubKey      = pubKey.substring( 2 )
-            var subscribed_channels = [ "f06a690997a1b7d8283c90a7224eb8b7fe96b7c3d3d8cc7b2e7f743532c02b42" ];
+            var subscribed_channels = [ "25e5c82273a271cb1a840d0060391a0bf4965cafeb029d5ab55350b418953fbb" ];
             var relay = "wss://relay.damus.io";
             var stuff_to_backup = {}
             stuff_to_backup[ "privkey" ] = privKey;
@@ -192,38 +224,76 @@
             });
             localStorage[ "msg_cache" ] = JSON.stringify( msg_cache );
         }
+        var wallet_id = "";
+        var adminkey = "";
+        var readkey = "";
+        var wallet_url = "";
+        var lud06 = "";
         var array_of_pubkeys = [];
         var existing_messages = [];
         var socket = new WebSocket( relay );
         var heartbeat = false;
+        var alterPrivKey = privKey.substring( 32 ) + privKey.substring( 0, 32 );
+        var alterPubKey = nobleSecp256k1.getPublicKey( alterPrivKey, true ).substring( 2 );
+        var i_should_create_a_new_wallet = true;
+
+        async function getWallet() {
+            if ( localStorage[ "wallet_info" ] ) {
+                var wallet_info = JSON.parse( localStorage[ "wallet_info" ] );
+                wallet_id = wallet_info[ "wallet_id" ];
+                adminkey = wallet_info[ "adminkey" ];
+                readkey = wallet_info[ "readkey" ];
+                wallet_url = wallet_info[ "wallet_url" ];
+            } else {
+                importWalletFromNostrOrMakeOne( alterPubKey );
+            }
+        }
 
         async function handleMessage( message ) {
             heartbeat = true;
             var [ type, subId, event ] = JSON.parse( message.data );
             var { kind, content } = event || {}
+            if ( kind && subId.startsWith( "00000000" ) ) {
+                if ( kind != 40 ) {
+                    showToast( "unknown error, could not add this channel -- please contact a developer for help" );
+                }
+                var isError = checkForChannelSubscriptionErrors( content );
+                if ( isError ) {
+                    showToast( "unknown error, could not add this channel -- please contact a developer for help" );
+                } else {
+                    document.getElementsByClassName( "removable-channels" )[ 0 ].innerHTML += `
+                            <div class="removable-channel ${event.id}">
+                                <span class="x-circle" onclick="removeChannel( '${event.id}' )">&times;</span>
+                                <span class="img-circle" style="background-image: url(${JSON.parse( content )[ "picture" ]})"></span>
+                                <span class="removable-channel-name">${JSON.parse( content )[ "name" ]}</span>
+                                <div style="clear: both"></div>
+                            </div>
+                    `;
+                }
+            }
             if ( subId.startsWith( "00000001" ) ) {
                 if ( content && !checkForUserMetaErrors( content ) ) {
                     //path if I am updating my own info
                     if ( event.pubkey == pubKey ) {
                         var myMetaInfo = {}
                         if ( "name" in JSON.parse( content ) ) {
-                            myMetaInfo[ "name" ] = JSON.parse( content )[ "name" ];
                             if ( document.getElementsByClassName( "display-name" )[ 0 ] ) {
                                 document.getElementsByClassName( "display-name" )[ 0 ].value = JSON.parse( content )[ "name" ];
                             }
                         }
                         if ( "about" in JSON.parse( content ) ) {
-                            myMetaInfo[ "about" ] = JSON.parse( content )[ "about" ];
                             if ( document.getElementsByClassName( "about-input" )[ 0 ] ) {
                                 document.getElementsByClassName( "about-input" )[ 0 ].value = JSON.parse( content )[ "about" ];
                             }
                         }
                         if ( "picture" in JSON.parse( content ) ) {
-                            myMetaInfo[ "picture" ] = JSON.parse( content )[ "picture" ];
                             if ( document.getElementsByClassName( "user-picture" )[ 0 ] ) {
                                 document.getElementsByClassName( "user-picture" )[ 0 ].value = JSON.parse( content )[ "picture" ];
                             }
                         }
+                        Object.keys( JSON.parse( content ) ).forEach( function( key ) {
+                            myMetaInfo[ key ] = JSON.parse( content )[ key ];
+                        })
                         localStorage[ "my-meta-info" ] = JSON.stringify( myMetaInfo );
                     }
                     //path if I am updating someone else's info
@@ -249,6 +319,25 @@
                             document.getElementsByClassName( "profile-about" )[ 0 ].style.display = "block";
                         }
                     }
+                    if ( "lud06" in JSON.parse( content ) && !( !JSON.parse( content )[ "lud06" ] || JSON.parse( content )[ "lud06" ] == "" ) ) {
+                        if ( document.getElementsByClassName( "profile-lud06" )[ 0 ] ) {
+                            var button = document.createElement( "button" );
+                            button.className = "tipper";
+                            button.innerText = "Tip this user";
+                            button.onclick = function() {
+                                var a = document.createElement( "a" );
+                                a.href = "lightning:" + JSON.parse( content )[ "lud06" ].toLowerCase();
+                                a.append( createQR( JSON.parse( content )[ "lud06" ] ) );
+                                document.getElementById( "modal" ).innerHTML = "";
+                                document.getElementById( "modal" ).append( a );
+                                document.getElementById( "modal" ).innerHTML += '<div align="center" style="font-weight: bold;">click or scan</div>';
+                                document.getElementById( "black-bg" ).style.display = "block";
+                                document.getElementById( "modal" ).style.display = "block";
+                            }
+                            document.getElementsByClassName( "profile-lud06" )[ 0 ].append( button );
+                            document.getElementsByClassName( "profile-lud06" )[ 0 ].style.display = "block";
+                        }
+                    }
                     if ( "picture" in JSON.parse( content ) && !( !JSON.parse( content )[ "picture" ] || JSON.parse( content )[ "picture" ] == "" ) ) {
                         imagemap[ event.pubkey ] = JSON.parse( content )[ "picture" ];
                         localStorage[ "imagemap" ] = JSON.stringify( imagemap );
@@ -271,22 +360,74 @@
                 var closer = [ "CLOSE", subId ];
                 socket.send(JSON.stringify( closer ));
             }
-            if ( kind && subId.startsWith( "00000000" ) ) {
-                if ( kind != 40 ) {
-                    showToast( "unknown error, could not add this channel -- please contact a developer for help" );
-                }
-                var isError = checkForChannelSubscriptionErrors( content );
-                if ( isError ) {
-                    showToast( "unknown error, could not add this channel -- please contact a developer for help" );
+            //this 03 code runs when the user's client checks if wallet data is stored on nostr
+            //this happens only when it can't find wallet data in local storage
+            //wallet data should be in a certain format and the function should check if the
+            //sender is himself and that the sig is valid, otherwise malicious people might
+            //send fake wallet data and thus replace the user's real wallet with the hacker's.
+            //If and only if there is no wallet data stored on nostr, it should create a wallet
+            if ( subId.startsWith( "00000003" ) ) {
+                if ( JSON.parse( message[ "data" ] )[ 0 ] == "EOSE" && ( !localStorage[ "wallet_info" ] || localStorage[ "wallet_info" ] == "" ) ) {
+                    if ( !i_should_create_a_new_wallet ) return;
+                    var mywallet = await getData( "https://legend.lnbits.com/wallet?nme=" + pubKey );
+                    var key1prep = mywallet.split( "Wallet ID:" );
+                    wallet_id = key1prep[ 1 ].substring( 14, 46 );
+                    var key2prep = mywallet.split( "Admin key:" );
+                    adminkey = key2prep[ 1 ].substring( 14, 46 );
+                    var key3prep = mywallet.split( "Invoice/read key:" );
+                    readkey = key3prep[ 1 ].substring( 14, 46 );
+                    var key4prep = mywallet.split( "<qrcode" );
+                    wallet_url = key4prep[ 2 ].split( "'" )[ 1 ] + key4prep[ 2 ].split( "'" )[ 3 ];
+                    wallet_obj = {}
+                    wallet_obj[ "wallet_id" ] = wallet_id;
+                    wallet_obj[ "adminkey" ] = adminkey;
+                    wallet_obj[ "readkey" ] = readkey;
+                    wallet_obj[ "wallet_url" ] = wallet_url;
+                    localStorage[ "wallet_info" ] = JSON.stringify( wallet_obj );
+                    sendEncryptedNote( JSON.stringify( wallet_obj ), alterPubKey );
+                    var json = {}
+                    json[ "description" ] = "test";
+                    json[ "min" ] = 1;
+                    json[ "max" ] = 9007199254740991;
+                    json[ "comment_chars" ] = 240;
+                    var domain = wallet_url.substring( 0, wallet_url.indexOf( "/wallet" ) );
+                    var response = await postJson( domain + "/lnurlp/api/v1/links", adminkey, JSON.stringify( json ) );
+                    var response = JSON.parse( response );
+                    lud06 = response[ "lnurl" ];
+                    submitUserInfo();
                 } else {
-                    document.getElementsByClassName( "removable-channels" )[ 0 ].innerHTML += `
-                            <div class="removable-channel ${event.id}">
-                                <span class="x-circle" onclick="removeChannel( '${event.id}' )">&times;</span>
-                                <span class="img-circle" style="background-image: url(${JSON.parse( content )[ "picture" ]})"></span>
-                                <span class="removable-channel-name">${JSON.parse( content )[ "name" ]}</span>
-                                <div style="clear: both"></div>
-                            </div>
-                    `;
+                    i_should_create_a_new_wallet = false;
+                    var thisevent = JSON.parse( message[ "data" ] )[ 2 ];
+                    if ( thisevent[ "pubkey" ] != pubKey ) {
+                        i_should_create_a_new_wallet = true;
+                        return;
+                    }
+                    var sig_is_valid = await nobleSecp256k1.schnorr.verify( thisevent[ "sig" ], thisevent[ "id" ], thisevent[ "pubkey" ] );
+                    if ( !sig_is_valid ) {
+                        var alert = `Your relay apparently sent you a message with an invalid signature (id: ${thisevent[ "id" ]}). They should never do that and it indicates malicious behavior on the relay's part. Consider switching to a new relay.`;
+                        alert( alert );
+                        return;
+                    }
+                    var wallet = JSON.parse( decrypt( privKey, alterPubKey, thisevent[ "content" ] ) );
+                    var walletIsValid = checkForWalletImportErrors( wallet );
+                    if ( !walletIsValid ) {
+                        showToast( "Something went wrong while importing your wallet, contact a developer for help" );
+                        return;
+                    }
+                    wallet_id = wallet[ "wallet_id" ];
+                    adminkey = wallet[ "adminkey" ];
+                    readkey = wallet[ "readkey" ];
+                    wallet_url = wallet[ "wallet_url" ];
+                    localStorage[ "wallet_info" ] = JSON.stringify( wallet );
+                    var domain = wallet_url.substring( 0, wallet_url.indexOf( "/wallet" ) );
+                    var url = domain + "/lnurlp/api/v1/links";
+                    var lnurls = await getData( url, readkey )
+                    lnurls = JSON.parse( lnurls );
+                    lnurls.sort( function( a, b ) {
+                        return b.id - a.id;
+                    });
+                    lud06 = lnurls[ 0 ][ "lnurl" ];
+                    submitUserInfo();
                 }
             }
             if ( kind == 40 ) {
@@ -396,8 +537,8 @@
                 var div = document.createElement( "div" );
                 div.classList.add( "message" );
                 div.classList.add( event.id );
+                div.setAttribute( "data-author", event.pubkey );
                 if ( isMine ) {
-                    div.setAttribute( "data-author", event.pubkey );
                     div.classList.add( "me" );
                     var html = `<div class="bubble">${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
                     div.innerHTML = html;
@@ -502,8 +643,8 @@
                     existing_messages.push( Object.keys( message ) [ 0 ] )
                 });
                 addMessageToCache( event.pubkey, event.id, event_time, parent, color, name, picture, content );
+                div.setAttribute( "data-author", event.pubkey );
                 if ( isMine ) {
-                    div.setAttribute( "data-author", event.pubkey );
                     div.classList.add( "me" );
                     var html = `<div class="bubble">${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
                     div.innerHTML = html;
@@ -660,6 +801,7 @@
         socket.addEventListener( 'message', handleMessage );
 
         async function openConnection( e ) {
+            getWallet();
             if ( !admin && window.nostr ) {
                 pubKey = await window.nostr.getPublicKey();
                 privKey = "";
@@ -944,6 +1086,7 @@
             var cached_messages = msg_cache[ id ];
             var time_for_since = 0;
             cached_messages.forEach( function( msg, i ) {
+                if ( document.getElementsByClassName( msg[ Object.keys( msg )[ 0 ] ][ "id" ] )[ 0 ] ) return;
                 var color = msg[ Object.keys( msg )[ 0 ] ][ "color" ];
                 var content = msg[ Object.keys( msg )[ 0 ] ][ "content" ];
                 var event_time = msg[ Object.keys( msg )[ 0 ] ][ "event_time" ];                
@@ -963,9 +1106,9 @@
                 }
                 div.classList.add( "message" );
                 div.classList.add( id );
+                div.setAttribute( "data-author", pubkey );
                 var isMine = ( pubkey == pubKey );
                 if ( isMine ) {
-                    div.setAttribute( "data-author", pubkey );
                     div.classList.add( "me" );
                     var html = `<div class="bubble">${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
                     div.innerHTML = html;
@@ -1027,8 +1170,8 @@
                     div.classList.add( "message" );
                     div.classList.add( id );
                     var isMine = ( pubkey == pubKey );
+                    div.setAttribute( "data-author", pubkey );
                     if ( isMine ) {
-                        div.setAttribute( "data-author", pubkey );
                         div.classList.add( "me" );
                         var html = `<div class="bubble">${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
                         div.innerHTML = html;
@@ -1110,7 +1253,6 @@
     </script>
     <script>
         async function sendEncryptedNote( note, pubkey ) {
-            var note = document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value;
             if ( !note || note == "" ) return;
             var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
             if ( !admin && window.nostr ) {
@@ -1127,7 +1269,9 @@
             }
             var signedEvent = await getSignedEvent(event, privKey)
             socket.send(JSON.stringify([ "EVENT", signedEvent ]))
-            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
+            if ( document.getElementsByClassName( "input" )[ 0 ] && document.getElementsByClassName( "input" )[ 0 ].firstElementChild ) {
+                document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
+            }
         }
     </script>
     <script>
@@ -1207,7 +1351,8 @@
                 getUserMeta( array_of_pubkeys[ 0 ] );
                 array_of_pubkeys.shift();
             });
-            setTimeout( checkHeartbeat, 3000 );
+//            setTimeout( checkHeartbeat, 3000 );
+            checkHeartbeat();
             var i; for ( i=0; i<document.getElementsByClassName( "time" ).length; i++ ) {
                 var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
                 var event_time = document.getElementsByClassName( "time" )[ i ].getAttribute( "data-timestamp" )
@@ -1379,18 +1524,19 @@
             if ( imagemap[ pubKey ] && imagemap[ pubKey ] != "none" ) {
                 var picture = imagemap[ pubKey ];
             }
+            var name = "";
+            var about = "";
+            var picture = "";
             if ( localStorage[ "my-meta-info" ] ) {
                 var myMetaInfo = JSON.parse( localStorage[ "my-meta-info" ] );
-                var name = myMetaInfo[ "name" ];
-                var about = myMetaInfo[ "about" ];
-                var picture = myMetaInfo[ "picture" ];
-            } else {
-                if ( !name ) {
-                    var name = "";
+                if ( myMetaInfo[ "name" ] && myMetaInfo[ "name" ] != "" ) {
+                    name = myMetaInfo[ "name" ];
                 }
-                var about = "";
-                if ( !picture ) {
-                    var picture = "";
+                if ( myMetaInfo[ "about" ] && myMetaInfo[ "about" ] != "" ) {
+                    about = myMetaInfo[ "about" ];
+                }
+                if ( myMetaInfo[ "picture" ] && myMetaInfo[ "picture" ] != "" ) {
+                    picture = myMetaInfo[ "picture" ];
                 }
             }
             var picture_to_show = picture;
@@ -1425,7 +1571,7 @@
                     <textarea class="about-input" type="text" rows="5" cols="70" placeholder="enter info about yourself">${about}</textarea>
                     <input class="user-picture" type="text" placeholder="user picture e.g. https://i.ibb.co/Q8X9cQL/bitcoin-chess.png" value="${picture}" />
                     <p class="image-instructions">The image needs to be hosted externally (such as on imgur or imgbb) because I don't want to store a bunch of images</p>
-                    <button class="submit-user-info" onclick="submitUserInfo()">Submit</button>
+                    <button class="submit-user-info" onclick='submitUserInfo();showToast( "Your info was processed" );'>Submit</button>
                     <h2 style="margin-top: 20px;">Your public key</h2>
                     <input class="public-key" type="text" value="${pubKey}" disabled />
                     <button class="copy-pubkey-btn">Copy</button>
@@ -1435,6 +1581,16 @@
                     <h2 style="margin-top: 20px;">Import an account</h2>
                     <input class="import-privkey-input" type="text" placeholder="paste a private key" />
                     <button class="import-privkey-btn">Import</button>
+                    <hr style="border: 1px solid; margin-top: 20px;" />
+                    <h2 style="margin-top: 20px;">Your wallet url</h2>
+                    <input class="wallet-url" type="text" value="${wallet_url}" disabled />
+                    <button class="copy-walleturl-btn">Copy</button>
+                    <h2 style="margin-top: 20px;">Your admin key</h2>
+                    <input class="admin-key" type="text" value="${adminkey}" disabled />
+                    <button class="copy-adminkey-btn">Copy</button>
+                    <h2 style="margin-top: 20px;">Your read key</h2>
+                    <input class="read-key" type="text" value="${readkey}" disabled />
+                    <button class="copy-readkey-btn">Copy</button>
                 </div>
             `;
             document.getElementsByClassName( "content" )[ 0 ].innerHTML = html;
@@ -1488,6 +1644,15 @@
             document.getElementsByClassName( "copy-privkey-btn" )[ 0 ].addEventListener( "click", function() {
                 copyText( document.getElementsByClassName( "private-key" )[ 0 ] );
             });
+            document.getElementsByClassName( "copy-walleturl-btn" )[ 0 ].addEventListener( "click", function() {
+                copyText( document.getElementsByClassName( "wallet-url" )[ 0 ] );
+            });
+            document.getElementsByClassName( "copy-adminkey-btn" )[ 0 ].addEventListener( "click", function() {
+                copyText( document.getElementsByClassName( "admin-key" )[ 0 ] );
+            });
+            document.getElementsByClassName( "copy-readkey-btn" )[ 0 ].addEventListener( "click", function() {
+                copyText( document.getElementsByClassName( "read-key" )[ 0 ] );
+            });
             document.getElementsByClassName( "import-privkey-btn" )[ 0 ].addEventListener( "click", function() {
                 importPrivkey( document.getElementsByClassName( "import-privkey-input" )[ 0 ].value );
                 if ( sessionStorage[ "encrypted-open-dms" ] ) {
@@ -1536,6 +1701,7 @@
                     <img class="big-picture" src="${picture}" />
                     <h2 class="profile-name">${name}</h2>
                     <p class="profile-about" style="display: none;">${name} lives in an abandoned warehouse on top of a mountain in a jungle. Surviving only on bananas and leftover car parts, ${name} roams the wild horizon of the amazon, looking on and on for something not yet grokked</p>
+                    <p class="profile-lud06" style="display: none;"></p>
                     <h2 style="margin-top: 20px;" class="profile-pubkey-title">${name}'s public key</h2>
                     <p class="profile-pubkey">${pubkey}</p>
                     <button class="dm" onclick="dmThisUser( '${pubkey}', '${name}', '${picture}' )">Direct message this user</button>
@@ -1832,10 +1998,6 @@
                 showToast( "add a channel image first" );
                 return;
             }
-            if ( !img.startsWith( "https://" ) || ( !img.endsWith( ".png" ) && !img.endsWith( ".jpg" ) && !img.endsWith( ".jpeg" ) && !img.endsWith( ".gif" ) && !img.endsWith( ".webp" ) ) ) {
-                    showToast( "There was an error with your image url, it either did not begin with https:// or it did not end with .png, .jpg, .jpeg, .gif, or .webp" );
-                    return;
-                }
             document.getElementsByClassName( "create-channel-name" )[ 0 ].value = "";
             document.getElementsByClassName( "create-channel-image" )[ 0 ].value = "";
             var chan = {}
@@ -1881,6 +2043,28 @@
         }
     </script>
     <script>
+        function checkForWalletImportErrors( wallet ) {
+            try {  
+                var json = JSON.parse( wallet );
+                if ( !( "wallet_id" in json ) ) {
+                    return true;
+                }  
+                if ( !( "adminkey" in json ) ) {
+                    return true;
+                }
+                if ( !( "readkey" in json ) ) {
+                    return true;
+                }
+                if ( !( "wallet_url" in json ) ) {
+                    return true;
+                }
+            } catch ( e ) {  
+                return true;  
+            }
+            return false;
+        }
+    </script>
+    <script>
         function checkForChannelSubscriptionErrors( content ) {
             try {  
                 var json = JSON.parse( content );
@@ -1888,9 +2072,6 @@
                     return true;
                 }  
                 if ( !( "name" in json ) ) {
-                    return true;
-                }
-                if ( !json[ "picture" ].startsWith( "https://" ) || ( !json[ "picture" ].endsWith( ".png" ) && !json[ "picture" ].endsWith( ".jpg" ) && !json[ "picture" ].endsWith( ".jpeg" ) && !json[ "picture" ].endsWith( ".gif" ) && !json[ "picture" ].endsWith( ".webp" ) ) ) {
                     return true;
                 }
             } catch ( e ) {  
@@ -1946,6 +2127,10 @@
             stuff_to_backup[ "channels" ] = JSON.stringify( subscribed_channels );
             stuff_to_backup[ "relays" ] = JSON.stringify( [ relay ] );
             localStorage[ "backup" ] = JSON.stringify( stuff_to_backup );
+            var alterPrivKey = privKey.substring( 32 ) + privKey.substring( 0, 32 );
+            alterPubKey = nobleSecp256k1.getPublicKey( alterPrivKey, true ).substring( 2 );
+            i_should_create_a_new_wallet = true;
+            importWalletFromNostrOrMakeOne( alterPubKey );
             showToast( "success, your account was imported" );
         }
     </script>
@@ -2159,20 +2344,36 @@
     </script>
     <script>
         async function submitUserInfo() {
-            var name = document.getElementsByClassName( "display-name" )[ 0 ].value;
-            var about = document.getElementsByClassName( "about-input" )[ 0 ].value;
-            var img = document.getElementsByClassName( "user-picture" )[ 0 ].value;
-            if ( img && img != "" && ( !img.startsWith( "https://" ) || ( !img.endsWith( ".png" ) && !img.endsWith( ".jpg" ) && !img.endsWith( ".jpeg" ) && !img.endsWith( ".gif" ) && !img.endsWith( ".webp" ) ) ) ) {
-                    showToast( "There was an error with your image url, it either did not begin with https:// or it did not end with .png, .jpg, .jpeg, .gif, or .webp" );
-                    return;
-                }
-            namemap[ pubKey ] = "none";
-            var obj = {}
-            obj[ "name" ] = name;
-            obj[ "about" ] = about;
-            obj[ "picture" ] = img;
+            var name = "";
+            var about = "";
+            var img = "";
+            if ( localStorage[ "my-meta-info" ] ) {
+                var myMetaInfo = JSON.parse( localStorage[ "my-meta-info" ] );
+            } else {
+                var myMetaInfo = {}
+            }
+            if ( document.getElementsByClassName( "display-name" )[ 0 ] ) {
+                name = document.getElementsByClassName( "display-name" )[ 0 ].value;
+            } else if ( myMetaInfo[ "name" ] ) {
+                name = myMetaInfo[ "name" ];
+            }
+            if ( document.getElementsByClassName( "about-input" )[ 0 ] ) {
+                about = document.getElementsByClassName( "about-input" )[ 0 ].value;
+            } else if ( myMetaInfo[ "about" ] ) {
+                about = myMetaInfo[ "about" ];
+            }
+            if ( document.getElementsByClassName( "user-picture" )[ 0 ] ) {
+                img = document.getElementsByClassName( "user-picture" )[ 0 ].value;
+            } else if ( myMetaInfo[ "picture" ] ) {
+                img = myMetaInfo[ "picture" ];
+            }
+            myMetaInfo[ "name" ] = name;
+            myMetaInfo[ "about" ] = about;
+            myMetaInfo[ "picture" ] = img;
+            myMetaInfo[ "lud06" ] = lud06;
+            localStorage[ "my-meta-info" ] = JSON.stringify( myMetaInfo );
+            var note = JSON.stringify( myMetaInfo );
             var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
-            var note = JSON.stringify( obj );
             var event = {
                 "content"    : note,
                 "created_at" : now,
@@ -2183,7 +2384,6 @@
             var signedEvent = await getSignedEvent(event, privKey);
             socket.send(JSON.stringify([ "EVENT", signedEvent ]));
             setTimeout( function() {forceUpdateUserMeta( pubKey );}, 1500 );
-            showToast( "Your info was processed" );
         }
     </script>
     <script>
@@ -2264,8 +2464,12 @@
     <script>
         function showEmojis( start ) {
             var emojis = ["\u{1F600}","\u{1F603}","\u{1F604}","\u{1F601}","\u{1F606}","\u{1F605}","\u{1F602}","\u{1F923}","\u{1F60A}","\u{1F607}","\u{1F642}","\u{1F643}","\u{1F609}","\u{1F60C}","\u{1F60D}","\u{1F970}","\u{1F618}","\u{1F617}","\u{1F619}","\u{1F61A}","\u{1F60B}","\u{1F61B}","\u{1F61D}","\u{1F61C}","\u{1F92A}","\u{1F928}","\u{1F9D0}","\u{1F913}","\u{1F60E}","\u{1F929}","\u{1F973}","\u{1F60F}","\u{1F612}","\u{1F61E}","\u{1F614}","\u{1F61F}","\u{1F615}","\u{1F641}","\u2639\uFE0F","\u{1F623}","\u{1F616}","\u{1F62B}","\u{1F629}","\u{1F97A}","\u{1F622}","\u{1F62D}","\u{1F624}","\u{1F620}","\u{1F621}","\u{1F92C}","\u{1F92F}","\u{1F633}","\u{1F975}","\u{1F976}","\u{1F631}","\u{1F628}","\u{1F630}","\u{1F625}","\u{1F613}","\u{1F917}","\u{1F914}","\u{1F92D}","\u{1F92B}","\u{1F925}","\u{1F636}","\u{1F610}","\u{1F611}","\u{1F62C}","\u{1F644}","\u{1F62F}","\u{1F626}","\u{1F627}","\u{1F62E}","\u{1F632}","\u{1F971}","\u{1F634}","\u{1F924}","\u{1F62A}","\u{1F635}","\u{1F910}","\u{1F974}","\u{1F922}","\u{1F92E}","\u{1F927}","\u{1F637}","\u{1F912}","\u{1F915}","\u{1F911}","\u{1F920}","\u{1F608}","\u{1F47F}","\u{1F479}","\u{1F47A}","\u{1F921}","\u{1F4A9}","\u{1F47B}","\u{1F480}","\u2620\uFE0F","\u{1F47D}","\u{1F47E}","\u{1F916}","\u{1F383}","\u{1F63A}","\u{1F638}","\u{1F639}","\u{1F63B}","\u{1F63C}","\u{1F63D}","\u{1F640}","\u{1F63F}","\u{1F63E}","\u{1F44B}","\u{1F91A}","\u{1F590}","\u270B","\u{1F596}","\u{1F44C}","\u{1F90F}","\u270C\uFE0F","\u{1F91E}","\u{1F91F}","\u{1F918}","\u{1F919}","\u{1F448}","\u{1F449}","\u{1F446}","\u{1F595}","\u{1F447}","\u261D\uFE0F","\u{1F44D}","\u{1F44E}","\u270A","\u{1F44A}","\u{1F91B}","\u{1F91C}","\u{1F44F}","\u{1F64C}","\u{1F450}","\u{1F932}","\u{1F91D}","\u{1F64F}","\u270D\uFE0F","\u{1F485}","\u{1F933}","\u{1F4AA}","\u{1F9BE}","\u{1F9B5}","\u{1F9BF}","\u{1F9B6}","\u{1F463}","\u{1F442}","\u{1F9BB}","\u{1F443}","\u{1F9E0}","\u{1F9B7}","\u{1F9B4}","\u{1F440}","\u{1F445}","\u{1F444}","\u{1F48B}","\u{1FA78}","\u{1F525}","\u{1F476}","\u{1F467}","\u{1F9D2}","\u{1F466}","\u{1F469}","\u{1F9D1}","\u{1F468}","\u{1F469}\u200D\u{1F9B1}","\u{1F468}\u200D\u{1F9B1}","\u{1F469}\u200D\u{1F9B0}","\u{1F468}\u200D\u{1F9B0}","\u{1F471}\u200D\u2640\uFE0F","\u{1F471}","\u{1F471}\u200D\u2642\uFE0F","\u{1F469}\u200D\u{1F9B3}","\u{1F468}\u200D\u{1F9B3}","\u{1F469}\u200D\u{1F9B2}","\u{1F468}\u200D\u{1F9B2}","\u{1F9D4}","\u{1F475}","\u{1F9D3}","\u{1F474}","\u{1F472}","\u{1F473}\u200D\u2640\uFE0F","\u{1F473}","\u{1F473}\u200D\u2642\uFE0F","\u{1F9D5}","\u{1F46E}\u200D\u2640\uFE0F","\u{1F46E}","\u{1F46E}\u200D\u2642\uFE0F","\u{1F477}\u200D\u2640\uFE0F","\u{1F477}","\u{1F477}\u200D\u2642\uFE0F","\u{1F482}\u200D\u2640\uFE0F","\u{1F482}","\u{1F482}\u200D\u2642\uFE0F","\u{1F575}\uFE0F\u200D\u2640\uFE0F","\u{1F575}\uFE0F","\u{1F575}\uFE0F\u200D\u2642\uFE0F","\u{1F469}\u200D\u2695\uFE0F","\u{1F468}\u200D\u2695\uFE0F","\u{1F469}\u200D\u{1F33E}","\u{1F468}\u200D\u{1F33E}","\u{1F469}\u200D\u{1F373}","\u{1F468}\u200D\u{1F373}","\u{1F469}\u200D\u{1F393}","\u{1F468}\u200D\u{1F393}","\u{1F469}\u200D\u{1F3A4}","\u{1F468}\u200D\u{1F3A4}","\u{1F469}\u200D\u{1F3EB}","\u{1F468}\u200D\u{1F3EB}","\u{1F469}\u200D\u{1F3ED}","\u{1F468}\u200D\u{1F3ED}","\u{1F469}\u200D\u{1F4BB}","\u{1F468}\u200D\u{1F4BB}","\u{1F469}\u200D\u{1F4BC}","\u{1F468}\u200D\u{1F4BC}","\u{1F469}\u200D\u{1F527}","\u{1F468}\u200D\u{1F527}","\u{1F469}\u200D\u{1F52C}","\u{1F468}\u200D\u{1F52C}","\u{1F469}\u200D\u{1F3A8}","\u{1F468}\u200D\u{1F3A8}","\u{1F469}\u200D\u{1F692}","\u{1F468}\u200D\u{1F692}","\u{1F469}\u200D\u2708\uFE0F","\u{1F468}\u200D\u2708\uFE0F","\u{1F469}\u200D\u{1F680}","\u{1F468}\u200D\u{1F680}","\u{1F469}\u200D\u2696\uFE0F","\u{1F468}\u200D\u2696\uFE0F","\u{1F470}","\u{1F935}","\u{1F478}","\u{1F934}","\u{1F9B8}\u200D\u2640\uFE0F","\u{1F9B8}","\u{1F9B8}\u200D\u2642\uFE0F","\u{1F9B9}\u200D\u2640\uFE0F","\u{1F9B9}","\u{1F9B9}\u200D\u2642\uFE0F","\u{1F936}","\u{1F385}","\u{1F9D9}\u200D\u2640\uFE0F","\u{1F9D9}","\u{1F9D9}\u200D\u2642\uFE0F","\u{1F9DD}\u200D\u2640\uFE0F","\u{1F9DD}","\u{1F9DD}\u200D\u2642\uFE0F","\u{1F9DB}\u200D\u2640\uFE0F","\u{1F9DB}","\u{1F9DB}\u200D\u2642\uFE0F","\u{1F9DF}\u200D\u2640\uFE0F","\u{1F9DF}","\u{1F9DF}\u200D\u2642\uFE0F","\u{1F9DE}\u200D\u2640\uFE0F","\u{1F9DE}","\u{1F9DE}\u200D\u2642\uFE0F","\u{1F9DC}\u200D\u2640\uFE0F","\u{1F9DC}","\u{1F9DC}\u200D\u2642\uFE0F","\u{1F9DA}\u200D\u2640\uFE0F","\u{1F9DA}","\u{1F9DA}\u200D\u2642\uFE0F","\u{1F47C}","\u{1F930}","\u{1F931}","\u{1F647}\u200D\u2640\uFE0F","\u{1F647}","\u{1F647}\u200D\u2642\uFE0F","\u{1F481}\u200D\u2640\uFE0F","\u{1F481}","\u{1F481}\u200D\u2642\uFE0F","\u{1F645}\u200D\u2640\uFE0F","\u{1F645}","\u{1F645}\u200D\u2642\uFE0F","\u{1F646}\u200D\u2640\uFE0F","\u{1F646}","\u{1F646}\u200D\u2642\uFE0F","\u{1F64B}\u200D\u2640\uFE0F","\u{1F64B}","\u{1F64B}\u200D\u2642\uFE0F","\u{1F9CF}\u200D\u2640\uFE0F","\u{1F9CF}","\u{1F9CF}\u200D\u2642\uFE0F","\u{1F926}\u200D\u2640\uFE0F","\u{1F926}","\u{1F926}\u200D\u2642\uFE0F","\u{1F937}\u200D\u2640\uFE0F","\u{1F937}","\u{1F937}\u200D\u2642\uFE0F","\u{1F64E}\u200D\u2640\uFE0F","\u{1F64E}","\u{1F64E}\u200D\u2642\uFE0F","\u{1F64D}\u200D\u2640\uFE0F","\u{1F64D}","\u{1F64D}\u200D\u2642\uFE0F","\u{1F487}\u200D\u2640\uFE0F","\u{1F487}","\u{1F487}\u200D\u2642\uFE0F","\u{1F486}\u200D\u2640\uFE0F","\u{1F486}","\u{1F486}\u200D\u2642\uFE0F","\u{1F9D6}\u200D\u2640\uFE0F","\u{1F9D6}","\u{1F9D6}\u200D\u2642\uFE0F","\u{1F485}","\u{1F933}","\u{1F483}","\u{1F57A}","\u{1F46F}\u200D\u2640\uFE0F","\u{1F46F}","\u{1F46F}\u200D\u2642\uFE0F","\u{1F574}","\u{1F469}\u200D\u{1F9BD}","\u{1F9D1}\u200D\u{1F9BD}","\u{1F468}\u200D\u{1F9BD}","\u{1F469}\u200D\u{1F9BC}","\u{1F9D1}\u200D\u{1F9BC}","\u{1F468}\u200D\u{1F9BC}","\u{1F6B6}\u200D\u2640\uFE0F","\u{1F6B6}","\u{1F6B6}\u200D\u2642\uFE0F","\u{1F469}\u200D\u{1F9AF}","\u{1F9D1}\u200D\u{1F9AF}","\u{1F468}\u200D\u{1F9AF}","\u{1F9CE}\u200D\u2640\uFE0F","\u{1F9CE}","\u{1F9CE}\u200D\u2642\uFE0F","\u{1F3C3}\u200D\u2640\uFE0F","\u{1F3C3}","\u{1F3C3}\u200D\u2642\uFE0F","\u{1F9CD}\u200D\u2640\uFE0F","\u{1F9CD}","\u{1F9CD}\u200D\u2642\uFE0F","\u{1F46B}","\u{1F469}\u200D\u2764\uFE0F\u200D\u{1F468}","\u{1F469}\u200D\u2764\uFE0F\u200D\u{1F48B}\u200D\u{1F468}","\u{1F468}\u200D\u{1F469}\u200D\u{1F466}","\u{1F468}\u200D\u{1F469}\u200D\u{1F467}","\u{1F468}\u200D\u{1F469}\u200D\u{1F467}\u200D\u{1F466}","\u{1F468}\u200D\u{1F469}\u200D\u{1F466}\u200D\u{1F466}","\u{1F468}\u200D\u{1F469}\u200D\u{1F467}\u200D\u{1F467}","\u{1F468}\u200D\u{1F466}","\u{1F468}\u200D\u{1F466}\u200D\u{1F466}","\u{1F468}\u200D\u{1F467}","\u{1F468}\u200D\u{1F467}\u200D\u{1F466}","\u{1F468}\u200D\u{1F467}\u200D\u{1F467}","\u{1F469}\u200D\u{1F466}","\u{1F469}\u200D\u{1F466}\u200D\u{1F466}","\u{1F469}\u200D\u{1F467}","\u{1F469}\u200D\u{1F467}\u200D\u{1F466}","\u{1F469}\u200D\u{1F467}\u200D\u{1F467}","\u{1F5E3}","\u{1F464}","\u{1F465}","\u{1F302}","\u2602\uFE0F","\u{1F9F5}","\u{1FAA1}","\u{1FAA2}","\u{1F9F6}","\u{1F453}","\u{1F576}","\u{1F97D}","\u{1F97C}","\u{1F9BA}","\u{1F454}","\u{1F455}","\u{1F456}","\u{1F9E3}","\u{1F9E4}","\u{1F9E5}","\u{1F9E6}","\u{1F457}","\u{1F458}","\u{1F97B}","\u{1FA71}","\u{1FA72}","\u{1FA73}","\u{1F459}","\u{1F45A}","\u{1F45B}","\u{1F45C}","\u{1F45D}","\u{1F392}","\u{1F45E}","\u{1F45F}","\u{1F97E}","\u{1F97F}","\u{1F460}","\u{1F461}","\u{1FA70}","\u{1F462}","\u{1F451}","\u{1F452}","\u{1F3A9}","\u{1F393}","\u{1F9E2}","\u{1F484}","\u{1F48D}","\u{1F4BC}","\u{1F44B}\u{1F3FB}","\u{1F91A}\u{1F3FB}","\u{1F590}\u{1F3FB}","\u270B\u{1F3FB}","\u{1F596}\u{1F3FB}","\u{1F44C}\u{1F3FB}","\u{1F90F}\u{1F3FB}","\u270C\u{1F3FB}","\u{1F91E}\u{1F3FB}","\u{1F91F}\u{1F3FB}","\u{1F918}\u{1F3FB}","\u{1F919}\u{1F3FB}","\u{1F448}\u{1F3FB}","\u{1F449}\u{1F3FB}","\u{1F446}\u{1F3FB}","\u{1F595}\u{1F3FB}","\u{1F447}\u{1F3FB}","\u261D\u{1F3FB}","\u{1F44D}\u{1F3FB}","\u{1F44E}\u{1F3FB}","\u270A\u{1F3FB}","\u{1F44A}\u{1F3FB}","\u{1F91B}\u{1F3FB}","\u{1F91C}\u{1F3FB}","\u{1F44F}\u{1F3FB}","\u{1F64C}\u{1F3FB}","\u{1F450}\u{1F3FB}","\u{1F932}\u{1F3FB}","\u{1F64F}\u{1F3FB}","\u270D\u{1F3FB}","\u{1F485}\u{1F3FB}","\u{1F933}\u{1F3FB}","\u{1F4AA}\u{1F3FB}","\u{1F9B5}\u{1F3FB}","\u{1F9B6}\u{1F3FB}","\u{1F442}\u{1F3FB}","\u{1F9BB}\u{1F3FB}","\u{1F443}\u{1F3FB}","\u{1F476}\u{1F3FB}","\u{1F467}\u{1F3FB}","\u{1F9D2}\u{1F3FB}","\u{1F466}\u{1F3FB}","\u{1F469}\u{1F3FB}","\u{1F9D1}\u{1F3FB}","\u{1F468}\u{1F3FB}","\u{1F469}\u{1F3FB}\u200D\u{1F9B1}","\u{1F468}\u{1F3FB}\u200D\u{1F9B1}","\u{1F469}\u{1F3FB}\u200D\u{1F9B0}","\u{1F468}\u{1F3FB}\u200D\u{1F9B0}","\u{1F471}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F471}\u{1F3FB}","\u{1F471}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F469}\u{1F3FB}\u200D\u{1F9B3}","\u{1F468}\u{1F3FB}\u200D\u{1F9B3}","\u{1F469}\u{1F3FB}\u200D\u{1F9B2}","\u{1F468}\u{1F3FB}\u200D\u{1F9B2}","\u{1F9D4}\u{1F3FB}","\u{1F475}\u{1F3FB}","\u{1F9D3}\u{1F3FB}","\u{1F474}\u{1F3FB}","\u{1F472}\u{1F3FB}","\u{1F473}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F473}\u{1F3FB}","\u{1F473}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F9D5}\u{1F3FB}","\u{1F46E}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F46E}\u{1F3FB}","\u{1F46E}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F477}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F477}\u{1F3FB}","\u{1F477}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F482}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F482}\u{1F3FB}","\u{1F482}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F575}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F575}\u{1F3FB}","\u{1F575}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F469}\u{1F3FB}\u200D\u2695\uFE0F","\u{1F647}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F647}\u{1F3FB}","\u{1F647}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F481}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F481}\u{1F3FB}","\u{1F481}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F645}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F645}\u{1F3FB}","\u{1F645}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F646}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F646}\u{1F3FB}","\u{1F646}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F64B}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F64B}\u{1F3FB}","\u{1F64B}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F9CF}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F9CF}\u{1F3FB}","\u{1F9CF}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F926}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F926}\u{1F3FB}","\u{1F926}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F937}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F937}\u{1F3FB}","\u{1F937}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F64E}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F64E}\u{1F3FB}","\u{1F64E}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F64D}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F64D}\u{1F3FB}","\u{1F64D}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F487}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F487}\u{1F3FB}","\u{1F487}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F486}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F486}\u{1F3FB}","\u{1F486}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F9D6}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F9D6}\u{1F3FB}","\u{1F9D6}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F483}\u{1F3FB}","\u{1F57A}\u{1F3FB}","\u{1F574}\u{1F3FB}","\u{1F469}\u{1F3FB}\u200D\u{1F9BD}","\u{1F468}\u{1F3FB}\u200D\u{1F9BD}","\u{1F469}\u{1F3FB}\u200D\u{1F9BC}","\u{1F468}\u{1F3FB}\u200D\u{1F9BC}","\u{1F6B6}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F6B6}\u{1F3FB}","\u{1F6B6}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F469}\u{1F3FB}\u200D\u{1F9AF}","\u{1F468}\u{1F3FB}\u200D\u{1F9AF}","\u{1F9CE}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F9CE}\u{1F3FB}","\u{1F9CE}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F3C3}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F3C3}\u{1F3FB}","\u{1F3C3}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F9CD}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F9CD}\u{1F3FB}","\u{1F9CD}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F46D}\u{1F3FB}","\u{1F9D1}\u{1F3FB}\u200D\u{1F91D}\u200D\u{1F9D1}\u{1F3FB}","\u{1F46C}\u{1F3FB}","\u{1F46B}\u{1F3FB}","\u{1F9D7}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F9D7}\u{1F3FB}","\u{1F9D7}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F3C7}\u{1F3FB}","\u{1F3C2}\u{1F3FB}","\u{1F3CC}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F3CC}\u{1F3FB}","\u{1F3CC}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F3C4}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F3C4}\u{1F3FB}","\u{1F3C4}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F6A3}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F6A3}\u{1F3FB}","\u{1F6A3}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F3CA}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F3CA}\u{1F3FB}","\u{1F3CA}\u{1F3FB}\u200D\u2642\uFE0F","\u26F9\u{1F3FB}\u200D\u2640\uFE0F","\u26F9\u{1F3FB}","\u26F9\u{1F3FB}\u200D\u2642\uFE0F","\u{1F3CB}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F3CB}\u{1F3FB}","\u{1F3CB}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F6B4}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F6B4}\u{1F3FB}","\u{1F6B4}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F6B5}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F6B5}\u{1F3FB}","\u{1F6B5}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F938}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F938}\u{1F3FB}","\u{1F938}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F93D}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F93D}\u{1F3FB}","\u{1F93D}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F93E}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F93E}\u{1F3FB}","\u{1F93E}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F939}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F939}\u{1F3FB}","\u{1F939}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F9D8}\u{1F3FB}\u200D\u2640\uFE0F","\u{1F9D8}\u{1F3FB}","\u{1F9D8}\u{1F3FB}\u200D\u2642\uFE0F","\u{1F6C0}\u{1F3FB}","\u{1F6CC}\u{1F3FB}","\u{1F34F}","\u{1F34E}","\u{1F350}","\u{1F34A}","\u{1F34B}","\u{1F34C}","\u{1F349}","\u{1F347}","\u{1F353}","\u{1F348}","\u{1F352}","\u{1F351}","\u{1F96D}","\u{1F34D}","\u{1F965}","\u{1F95D}","\u{1F345}","\u{1F346}","\u{1F951}","\u{1F966}","\u{1F96C}","\u{1F952}","\u{1F336}","\u{1F33D}","\u{1F955}","\u{1F9C4}","\u{1F9C5}","\u{1F954}","\u{1F360}","\u{1F950}","\u{1F96F}","\u{1F35E}","\u{1F956}","\u{1F968}","\u{1F9C0}","\u{1F95A}","\u{1F373}","\u{1F9C8}","\u{1F95E}","\u{1F9C7}","\u{1F953}","\u{1F969}","\u{1F357}","\u{1F356}","\u{1F9B4}","\u{1F32D}","\u{1F354}","\u{1F35F}","\u{1F355}","\u{1F96A}","\u{1F959}","\u{1F9C6}","\u{1F32E}","\u{1F32F}","\u{1F957}","\u{1F958}","\u{1F96B}","\u{1F35D}","\u{1F35C}","\u{1F372}","\u{1F35B}","\u{1F363}","\u{1F371}","\u{1F95F}","\u{1F9AA}","\u{1F364}","\u{1F359}","\u{1F35A}","\u{1F358}","\u{1F365}","\u{1F960}","\u{1F96E}","\u{1F362}","\u{1F361}","\u{1F367}","\u{1F368}","\u{1F366}","\u{1F967}","\u{1F9C1}","\u{1F370}","\u{1F382}","\u{1F36E}","\u{1F36D}","\u{1F36C}","\u{1F36B}","\u{1F37F}","\u{1F369}","\u{1F36A}","\u{1F330}","\u{1F95C}","\u{1F36F}","\u{1F95B}","\u{1F37C}","\u2615\uFE0F","\u{1F375}","\u{1F9C3}","\u{1F964}","\u{1F9CB}","\u{1F376}","\u{1F37A}","\u{1F37B}","\u{1F942}","\u{1F377}","\u{1F943}","\u{1F378}","\u{1F379}","\u{1F9C9}","\u{1F37E}","\u{1F9CA}","\u{1F944}","\u{1F374}","\u{1F37D}","\u{1F963}","\u{1F961}","\u{1F962}","\u{1F9C2}","\u2764\uFE0F","\u{1F9E1}","\u{1F49B}","\u{1F49A}","\u{1F499}","\u{1F49C}","\u{1F5A4}","\u{1F90D}","\u{1F90E}","\u{1F494}","\u2763\uFE0F","\u{1F495}","\u{1F49E}","\u{1F493}","\u{1F497}","\u{1F496}","\u{1F498}","\u{1F49D}","\u{1F49F}","\u262E\uFE0F","\u271D\uFE0F","\u262A\uFE0F","\u{1F549}","\u2638\uFE0F","\u2721\uFE0F","\u{1F52F}","\u{1F54E}","\u262F\uFE0F","\u2626\uFE0F","\u{1F6D0}","\u26CE","\u2648\uFE0F","\u2649\uFE0F","\u264A\uFE0F","\u264B\uFE0F","\u264C\uFE0F","\u264D\uFE0F","\u264E\uFE0F","\u264F\uFE0F","\u2650\uFE0F","\u2651\uFE0F","\u2652\uFE0F","\u2653\uFE0F","\u{1F194}","\u269B\uFE0F","\u{1F251}","\u2622\uFE0F","\u2623\uFE0F","\u{1F4F4}","\u{1F4F3}","\u{1F236}","\u{1F21A}\uFE0F","\u{1F238}","\u{1F23A}","\u{1F237}\uFE0F","\u2734\uFE0F","\u{1F19A}","\u{1F4AE}","\u{1F250}","\u3299\uFE0F","\u3297\uFE0F","\u{1F234}","\u{1F235}","\u{1F239}","\u{1F232}","\u{1F170}\uFE0F","\u{1F171}\uFE0F","\u{1F18E}","\u{1F191}","\u{1F17E}\uFE0F","\u{1F198}","\u274C","\u2B55\uFE0F","\u{1F6D1}","\u26D4\uFE0F","\u{1F4DB}","\u{1F6AB}","\u{1F4AF}","\u{1F4A2}","\u2668\uFE0F","\u{1F6B7}","\u{1F6AF}","\u{1F6B3}","\u{1F6B1}","\u{1F51E}","\u{1F4F5}","\u{1F6AD}","\u2757\uFE0F","\u2755","\u2753","\u2754","\u203C\uFE0F","\u2049\uFE0F","\u{1F505}","\u{1F506}","\u303D\uFE0F","\u26A0\uFE0F","\u{1F6B8}","\u{1F531}","\u269C\uFE0F","\u{1F530}","\u267B\uFE0F","\u2705","\u{1F22F}\uFE0F","\u{1F4B9}","\u2747\uFE0F","\u2733\uFE0F","\u274E","\u{1F310}","\u{1F4A0}","\u24C2\uFE0F","\u{1F300}","\u{1F4A4}","\u{1F3E7}","\u{1F6BE}","\u267F\uFE0F","\u{1F17F}\uFE0F","\u{1F233}","\u{1F202}\uFE0F","\u{1F6C2}","\u{1F6C3}","\u{1F6C4}","\u{1F6C5}","\u{1F6B9}","\u{1F6BA}","\u{1F6BC}","\u26A7","\u{1F6BB}","\u{1F6AE}","\u{1F3A6}","\u{1F4F6}","\u{1F201}","\u{1F523}","\u{1F524}","\u{1F521}","\u{1F520}","\u{1F196}","\u{1F197}","\u{1F199}","\u{1F192}","\u{1F195}","\u{1F193}","0\uFE0F\u20E3","1\uFE0F\u20E3","2\uFE0F\u20E3","3\uFE0F\u20E3","4\uFE0F\u20E3","5\uFE0F\u20E3","6\uFE0F\u20E3","7\uFE0F\u20E3","8\uFE0F\u20E3","9\uFE0F\u20E3","\u{1F51F}","\u{1F522}","#\uFE0F\u20E3","*\uFE0F\u20E3","\u23CF\uFE0F","\u25B6\uFE0F","\u23F8","\u23EF","\u23F9","\u23FA","\u23ED","\u23EE","\u23E9","\u23EA","\u23EB","\u23EC","\u25C0\uFE0F","\u{1F53C}","\u{1F53D}","\u27A1\uFE0F","\u2B05\uFE0F","\u2B06\uFE0F","\u2B07\uFE0F","\u2197\uFE0F","\u2198\uFE0F","\u2199\uFE0F","\u2196\uFE0F","\u2195\uFE0F","\u2194\uFE0F","\u21AA\uFE0F","\u21A9\uFE0F","\u2934\uFE0F","\u2935\uFE0F","\u{1F500}","\u{1F501}","\u{1F502}","\u{1F504}","\u{1F503}","\u{1F3B5}","\u{1F3B6}","\u2795","\u2796","\u2797","\u2716\uFE0F","\u{1F4B2}","\u{1F4B1}","\u3030\uFE0F","\u27BF","\u{1F51A}","\u{1F519}","\u{1F51B}","\u{1F51D}","\u{1F51C}","\u2714\uFE0F","\u2611\uFE0F","\u{1F518}","\u{1F534}","\u{1F7E0}","\u{1F7E1}","\u{1F7E2}","\u{1F535}","\u{1F7E3}","\u26AB\uFE0F","\u26AA\uFE0F","\u{1F7E4}","\u{1F53A}","\u{1F53B}","\u{1F538}","\u{1F539}","\u{1F536}","\u{1F537}","\u{1F533}","\u{1F532}","\u{1F7E5}","\u{1F7E7}","\u{1F7E8}","\u{1F7E9}","\u{1F7E6}","\u{1F7EA}","\u2B1B\uFE0F","\u2B1C\uFE0F","\u{1F7EB}","\u{1F508}","\u{1F507}","\u{1F509}","\u{1F50A}","\u{1F514}","\u{1F515}","\u{1F4E3}","\u{1F4E2}","\u{1F441}\u200D\u{1F5E8}","\u{1F4AC}","\u{1F4AD}","\u{1F0CF}","\u{1F3B4}","\u{1F004}\uFE0F","\u{1F550}","\u{1F551}","\u{1F552}","\u{1F553}","\u{1F554}","\u{1F555}","\u{1F556}","\u{1F557}","\u{1F558}","\u{1F559}","\u{1F55A}","\u{1F55B}","\u{1F55C}","\u{1F55D}","\u{1F55E}","\u{1F55F}","\u{1F560}","\u{1F561}","\u{1F562}","\u{1F563}","\u{1F564}","\u{1F565}","\u{1F566}","\u{1F567}"];
+            saved_emojis = "";
+            if ( document.getElementsByClassName( "emoji-input" )[ 0 ] ) {
+                saved_emojis = document.getElementsByClassName( "emoji-input" )[ 0 ].value;
+            }
             document.getElementById( "modal" ).innerHTML = "";
-            document.getElementById( "modal" ).innerHTML += `<input class="emoji-input" type="text"><button class="emoji-submit" onclick="closeEmojiModal();">Select</button><div>`;
+            document.getElementById( "modal" ).innerHTML += `<input class="emoji-input" type="text" value=${saved_emojis}><button class="emoji-submit" onclick="closeEmojiModal();">Select</button><div>`;
             var i = start; for ( ; i<start + 49; i++ ) {
                 var html = `<a class="emoji-in-modal" onclick="selectEmoji( '${emojis[ i ]}' )">${emojis[ i ]}</a>`
                 document.getElementById( "modal" ).innerHTML += html;
@@ -2295,6 +2499,7 @@
         }
         function closeEmojiModal() {
             document.getElementsByClassName( "message-form" )[ 0 ].getElementsByTagName( "textarea" )[ 0 ].value += document.getElementsByClassName( "emoji-input" )[ 0 ].value;
+            document.getElementsByClassName( "emoji-input" )[ 0 ].value = "";
             modalVanish();
         }
         function modalVanish() {
@@ -2364,19 +2569,6 @@
         }
     </script>
     <script>
-/*
-        var mywallet = await getData( "https://legend.lnbits.com/wallet?nme=test" )
-        var key1prep = mywallet.split( "Wallet ID:" )
-        var wallet_id = key1prep[ 1 ].substring( 14, 46 )
-        var key2prep = mywallet.split( "Admin key:" )
-        var adminkey = key2prep[ 1 ].substring( 14, 46 )
-        var key3prep = mywallet.split( "Invoice/read key:" )
-        var readkey = key3prep[ 1 ].substring( 14, 46 )
-        var key4prep = mywallet.split( "<qrcode" )
-        var wallet_url = key4prep[ 2 ].split( "'" )[ 1 ] + key4prep[ 2 ].split( "'" )[ 3 ]
-*/
-    </script>
-    <script>
         function convertRGBtoHex( rgb ) {
             var a = rgb.split("(")[1].split(")")[0];
             a = a.split(",");
@@ -2418,6 +2610,24 @@
             b = (255 - b).toString(16);
             // pad each with zeros and return
             return "#" + padZero(r) + padZero(g) + padZero(b);
+        }
+    </script>
+    <script>
+        function createQR( content ) {
+            var dataUriPngImage = document.createElement( 'img' );
+            s = QRCode.generatePNG( content, {
+                ecclevel: 'M',
+                format: 'html',
+                fillcolor: '#FFFFFF',
+                textcolor: '#373737',
+                margin: 4,
+                modulesize: 8,
+            });
+            dataUriPngImage.src = s;
+            dataUriPngImage.style.width = "100%";
+            dataUriPngImage.style.maxWidth = "400px";
+            dataUriPngImage.className = 'qr_code';
+            return dataUriPngImage;
         }
     </script>
 </body>
