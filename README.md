@@ -81,3 +81,4 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] add support for ephemeral events (nip16) and use them to display "typing..." indicators
 * [ ] change the default channel from bitcoin to nostr
 * [ ] add several hard coded channels in a hidden way and expose them via the search bar
+* [ ] fix the emoji modal bug where the select bar gets cleared when you view the next page of emojis
