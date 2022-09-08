@@ -244,6 +244,7 @@
                 adminkey = wallet_info[ "adminkey" ];
                 readkey = wallet_info[ "readkey" ];
                 wallet_url = wallet_info[ "wallet_url" ];
+                var domain = wallet_url.substring( 0, wallet_url.indexOf( "/wallet" ) );
                 var url = domain + "/lnurlp/api/v1/links";
                 var lnurls = await getData( url, readkey )
                 lnurls = JSON.parse( lnurls );
@@ -251,9 +252,12 @@
                     return b.id - a.id;
                 });
                 if ( lnurls[ 0 ] && lnurls[ 0 ][ "lnurl" ] ) {
+                    var prevlud06 = lud06;
                     lud06 = lnurls[ 0 ][ "lnurl" ];
                 }
-                submitUserInfo();
+                if ( prevlud06 != lud06 ) {
+                    submitUserInfo();
+                }
             } else {
                 importWalletFromNostrOrMakeOne( alterPubKey );
             }
