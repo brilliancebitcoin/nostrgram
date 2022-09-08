@@ -1606,12 +1606,12 @@
                     <h2 style="margin-top: 20px;">Your wallet url</h2>
                     <input class="wallet-url" type="text" value="${wallet_url}" disabled />
                     <button class="copy-walleturl-btn">Copy</button>
-                    <h2 style="margin-top: 20px;">Your admin key</h2>
-                    <input class="admin-key" type="text" value="${adminkey}" disabled />
-                    <button class="copy-adminkey-btn">Copy</button>
-                    <h2 style="margin-top: 20px;">Your read key</h2>
-                    <input class="read-key" type="text" value="${readkey}" disabled />
-                    <button class="copy-readkey-btn">Copy</button>
+                    <h2 style="margin-top: 20px; display: none;">Your admin key</h2>
+                    <input style="display: none;" class="admin-key" type="text" value="${adminkey}" disabled />
+                    <button style="display: none;" class="copy-adminkey-btn">Copy</button>
+                    <h2 style="margin-top: 20px; display: none;">Your read key</h2>
+                    <input style="display: none;" class="read-key" type="text" value="${readkey}" disabled />
+                    <button style="display: none;" class="copy-readkey-btn">Copy</button>
                 </div>
             `;
             document.getElementsByClassName( "content" )[ 0 ].innerHTML = html;
