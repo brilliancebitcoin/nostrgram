@@ -326,10 +326,10 @@
                         var i; for ( i=0; i<document.getElementsByClassName( event.pubkey ).length; i++ ) {
                             document.getElementsByClassName( event.pubkey )[ i ].innerText = JSON.parse( content )[ "name" ];
                         }
-                        if ( document.getElementsByClassName( "profile-name" )[ 0 ] ) {
+                        if ( document.getElementsByClassName( "profile-name" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText == event.pubkey ) {
                             document.getElementsByClassName( "profile-name" )[ 0 ].innerText = JSON.parse( content )[ "name" ];
                         }
-                        if ( document.getElementsByClassName( "profile-pubkey-title" )[ 0 ] ) {
+                        if ( document.getElementsByClassName( "profile-pubkey-title" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText == event.pubkey ) {
                             document.getElementsByClassName( "profile-pubkey-title" )[ 0 ].innerText = JSON.parse( content )[ "name" ] + "'s public key";
                         }
                     } else {
@@ -337,13 +337,13 @@
                         localStorage[ "namemap" ] = JSON.stringify( namemap );
                     }
                     if ( "about" in JSON.parse( content ) && !( !JSON.parse( content )[ "about" ] || JSON.parse( content )[ "about" ] == "" ) ) {
-                        if ( document.getElementsByClassName( "profile-about" )[ 0 ] ) {
+                        if ( document.getElementsByClassName( "profile-about" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText == event.pubkey ) {
                             document.getElementsByClassName( "profile-about" )[ 0 ].innerHTML = markdownify( JSON.parse( content )[ "about" ] );
                             document.getElementsByClassName( "profile-about" )[ 0 ].style.display = "block";
                         }
                     }
                     if ( "lud06" in JSON.parse( content ) && !( !JSON.parse( content )[ "lud06" ] || JSON.parse( content )[ "lud06" ] == "" ) ) {
-                        if ( document.getElementsByClassName( "profile-lud06" )[ 0 ] && !document.getElementsByClassName( "tipper" )[ 0 ] ) {
+                        if ( document.getElementsByClassName( "profile-lud06" )[ 0 ] && !document.getElementsByClassName( "tipper" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText == event.pubkey ) {
                             var button = document.createElement( "button" );
                             button.className = "tipper";
                             button.innerText = "Tip this user";
@@ -368,7 +368,7 @@
                         var i; for ( i=0; i<document.getElementsByClassName( event.pubkey ).length; i++ ) {
                             document.getElementsByClassName( event.pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + JSON.parse( content )[ "picture" ] + ")";
                         }
-                        if ( document.getElementsByClassName( "big-picture" )[ 0 ] && document.getElementsByClassName( "channel-wrapper" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerText != "Settings" ) {
+                        if ( document.getElementsByClassName( "big-picture" )[ 0 ] && document.getElementsByClassName( "channel-wrapper" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerText != "Settings" && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText == event.pubkey ) {
                             document.getElementsByClassName( "big-picture" )[ 0 ].src = JSON.parse( content )[ "picture" ];
                         }
                     } else {
