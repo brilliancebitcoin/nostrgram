@@ -294,7 +294,7 @@
                             if ( document.getElementsByClassName( "display-name" )[ 0 ] ) {
                                 document.getElementsByClassName( "display-name" )[ 0 ].value = JSON.parse( content )[ "name" ];
                             }
-                            if ( document.getElementsByClassName( "user-profile-inner" )[ 0 ] && document.getElementsByClassName( "user-profile-inner" )[ 0 ].getElementsByClassName( "name" )[ 0 ] ) {
+                            if ( document.getElementsByClassName( "user-profile-inner" )[ 0 ] && document.getElementsByClassName( "user-profile-inner" )[ 0 ].getElementsByClassName( "name" )[ 0 ] && JSON.parse( content )[ "name" ] && JSON.parse( content )[ "name" ] != "" ) {
                                 document.getElementsByClassName( "user-profile-inner" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerHTML = JSON.parse( content )[ "name" ];
                             }
                         }
@@ -307,10 +307,10 @@
                             if ( document.getElementsByClassName( "user-picture" )[ 0 ] ) {
                                 document.getElementsByClassName( "user-picture" )[ 0 ].value = JSON.parse( content )[ "picture" ];
                             }
-                            if ( document.getElementsByClassName( "big-picture" )[ 0 ] ) {
+                            if ( document.getElementsByClassName( "big-picture" )[ 0 ] && JSON.parse( content )[ "picture" ] && JSON.parse( content )[ "picture" ] != "" ) {
                                 document.getElementsByClassName( "big-picture" )[ 0 ].src = JSON.parse( content )[ "picture" ];
                             }
-                            if ( document.getElementsByClassName( "user-in-sidebar" )[ 0 ] && document.getElementsByClassName( "user-in-sidebar" )[ 0 ].getElementsByTagName( "span" )[ 0 ] ) {
+                            if ( document.getElementsByClassName( "user-in-sidebar" )[ 0 ] && document.getElementsByClassName( "user-in-sidebar" )[ 0 ].getElementsByTagName( "span" )[ 0 ] && JSON.parse( content )[ "picture" ] && JSON.parse( content )[ "picture" ] != "" ) {
                                 document.getElementsByClassName( "user-in-sidebar" )[ 0 ].getElementsByTagName( "span" )[ 0 ].style = "background-image: url(" + JSON.parse( content )[ "picture" ] + ")";
                             }
                         }
