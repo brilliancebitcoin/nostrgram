@@ -34,7 +34,8 @@ body {
     flex-direction: column;
 }
 
-.chat .sidebar .search {
+.chat .sidebar .search,
+.chat .sidebar .user-in-sidebar {
     height: 50px;
     min-height: 50px;
     border-bottom: 1px solid #ddd;
@@ -109,7 +110,8 @@ body {
     color: #999;
 }
 
-.chat .sidebar .channels ul li a {
+.chat .sidebar .channels ul li a,
+.chat .sidebar .user-in-sidebar a {
     display: flex;
     height: 60px;
     align-items: center;
@@ -117,24 +119,18 @@ body {
     cursor: pointer;
 }
 
-.chat .sidebar .channels ul li a .manage-channels-inner .name {
+.chat .sidebar .channels ul li a .manage-channels-inner .name,
+.chat .sidebar .user-in-sidebar a .user-profile-inner .name {
     font-size: 15px;
     color: #333;
     font-weight: 500;
     margin-bottom: 3px;
 }
 
-.chat .sidebar .channels ul li a .manage-channels-inner .message {
+.chat .sidebar .channels ul li a .manage-channels-inner .message,
+.chat .sidebar .user-in-sidebar a .user-profile-inner .message {
     font-size: 13px;
     color: #999;
-}
-
-.chat .sidebar .channels ul li a {
-    display: flex;
-    height: 60px;
-    align-items: center;
-    padding: 0 10px;
-    cursor: pointer;
 }
 
 .chat .sidebar .channels ul li.active a,
@@ -142,7 +138,8 @@ body {
     background: #fff;
 }
 
-.chat .sidebar .channels ul li a span {
+.chat .sidebar .channels ul li a span,
+.chat .sidebar .user-in-sidebar a span {
     width: 40px;
     height: 40px;
     border-radius: 40px;
