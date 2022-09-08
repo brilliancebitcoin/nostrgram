@@ -2265,12 +2265,14 @@
         document.getElementsByClassName( "hotdog" )[ 0 ].addEventListener( "click", function() {
             showSettings();
         });
-        document.getElementsByClassName( "search" )[ 0 ].getElementsByTagName( "input" )[ 0 ].addEventListener( 'keypress', function ( e ) {
-            if ( e.key === 'Enter' ) {
-                showToast( "coming soon" );
-                document.getElementsByClassName( "search" )[ 0 ].getElementsByTagName( "input" )[ 0 ].value = "";
-            }
-        });
+        setTimeout( function() {
+            document.getElementsByClassName( "search" )[ 0 ].getElementsByTagName( "input" )[ 0 ].addEventListener( 'keypress', function ( e ) {
+                if ( e.key === 'Enter' ) {
+                    showToast( "coming soon" );
+                    document.getElementsByClassName( "search" )[ 0 ].getElementsByTagName( "input" )[ 0 ].value = "";
+                }
+            });
+        }, 3000 );
     </script>
     <script>
         function setNoteInputHeight() {
