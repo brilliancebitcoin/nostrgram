@@ -43,7 +43,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] make an option to set and modify relays in settings
 * [ ] connect to at least two relays by default
 * [ ] import channels and other backed up data when you import an account
-* [ ] parse and display @[username] and @[pubkey] as links to profile pages
+* [ ] parse and display @[username] and @[pubkey] as links to profile pages (see nip08 for a spec)
 * [ ] show a green message counter in channels where someone @'d you or dm'd you or replied to you
 * [ ] add message replies via long press or right click
 * [ ] add sticky messages
