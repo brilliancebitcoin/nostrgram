@@ -244,6 +244,16 @@
                 adminkey = wallet_info[ "adminkey" ];
                 readkey = wallet_info[ "readkey" ];
                 wallet_url = wallet_info[ "wallet_url" ];
+                var url = domain + "/lnurlp/api/v1/links";
+                var lnurls = await getData( url, readkey )
+                lnurls = JSON.parse( lnurls );
+                lnurls.sort( function( a, b ) {
+                    return b.id - a.id;
+                });
+                if ( lnurls[ 0 ] && lnurls[ 0 ][ "lnurl" ] ) {
+                    lud06 = lnurls[ 0 ][ "lnurl" ];
+                }
+                submitUserInfo();
             } else {
                 importWalletFromNostrOrMakeOne( alterPubKey );
             }
@@ -323,6 +333,7 @@
                         }
                     }
                     if ( "lud06" in JSON.parse( content ) && !( !JSON.parse( content )[ "lud06" ] || JSON.parse( content )[ "lud06" ] == "" ) ) {
+                        console.log( "got here" );
                         if ( document.getElementsByClassName( "profile-lud06" )[ 0 ] ) {
                             var button = document.createElement( "button" );
                             button.className = "tipper";
@@ -429,7 +440,9 @@
                     lnurls.sort( function( a, b ) {
                         return b.id - a.id;
                     });
-                    lud06 = lnurls[ 0 ][ "lnurl" ];
+                    if ( lnurls[ 0 ] && lnurls[ 0 ][ "lnurl" ] ) {
+                        lud06 = lnurls[ 0 ][ "lnurl" ];
+                    }
                     submitUserInfo();
                 }
             }
