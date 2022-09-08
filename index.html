@@ -290,6 +290,9 @@
                             if ( document.getElementsByClassName( "user-picture" )[ 0 ] ) {
                                 document.getElementsByClassName( "user-picture" )[ 0 ].value = JSON.parse( content )[ "picture" ];
                             }
+                            if ( document.getElementsByClassName( "big-picture" )[ 0 ] ) {
+                                document.getElementsByClassName( "big-picture" )[ 0 ].src = JSON.parse( content )[ "picture" ];
+                            }
                         }
                         Object.keys( JSON.parse( content ) ).forEach( function( key ) {
                             myMetaInfo[ key ] = JSON.parse( content )[ key ];
