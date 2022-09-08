@@ -403,7 +403,7 @@
                     localStorage[ "wallet_info" ] = JSON.stringify( wallet_obj );
                     sendEncryptedNote( JSON.stringify( wallet_obj ), alterPubKey );
                     var json = {}
-                    json[ "description" ] = "test";
+                    json[ "description" ] = pubKey;
                     json[ "min" ] = 1;
                     json[ "max" ] = 9007199254740991;
                     json[ "comment_chars" ] = 240;
@@ -1887,7 +1887,7 @@
                 var html2 = `
                     <span class="sidebar_arrow">&rsaquo;</span>
                     <div class="channel-info">
-                        <span style="background-image: url(${picture})"></span>
+                        <span style="background-image: url(${picture}); cursor: pointer;" onclick="showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
                         <div class="channel-wrapper">
                             <div class="name">${name}</div>
                             <div class="time"></div>
@@ -1914,6 +1914,7 @@
             if ( window.innerWidth < 601 ) {
                 document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
                 document.getElementsByClassName( "content" )[ 0 ].style.display = "flex";
+                document.getElementsByClassName( "message-header" )[ 0 ].remove();
             } else {
                 document.getElementsByClassName( "note-input" )[ 0 ].focus();
                 document.getElementsByClassName( "note-input" )[ 0 ].select();
