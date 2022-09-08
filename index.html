@@ -2407,9 +2407,15 @@
             } else if ( myMetaInfo[ "picture" ] ) {
                 img = myMetaInfo[ "picture" ];
             }
-            myMetaInfo[ "name" ] = name;
-            myMetaInfo[ "about" ] = about;
-            myMetaInfo[ "picture" ] = img;
+            if ( name && name != "" ) {
+                myMetaInfo[ "name" ] = name;
+            }
+            if ( about && about != "" ) {
+                myMetaInfo[ "about" ] = about;
+            }
+            if ( img && img != "" ) {
+                myMetaInfo[ "picture" ] = img;
+            }
             myMetaInfo[ "lud06" ] = lud06;
             localStorage[ "my-meta-info" ] = JSON.stringify( myMetaInfo );
             var note = JSON.stringify( myMetaInfo );
