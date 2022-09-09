@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, user-scalable=no" />
-    <link rel="stylesheet" href="styles.css?v=46" />
+    <link rel="stylesheet" href="styles.css?v=47" />
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="manifest.json">
     <title>Anigma</title>
@@ -126,6 +126,19 @@
             }
             if ( text.match( imgRegex ) ) {
                 returnable = text.replace( imgRegex, ( img ) => {
+                    if ( localStorage[ "img_cache" ] ) {
+                        var imgs = JSON.parse( localStorage[ "img_cache" ] );
+                    } else {
+                        var imgs = [];
+                        localStorage[ "img_cache" ] = JSON.stringify( imgs );
+                    }
+                    if ( isMine && imgs.length >= 50 && !imgs.includes( img ) ) {
+                        imgs.unshift( img );
+                        imgs.pop();
+                    } else if ( isMine && !imgs.includes( img ) ) {
+                        imgs.push( img );
+                    }
+                    localStorage[ "img_cache" ] = JSON.stringify( imgs );
                     return `<a href="${img}" target="_blank" rel="nofollow noopener"><img src="${img}" /></a>`;
                 })
             }
@@ -1132,7 +1145,9 @@
                 }
             });
             document.getElementsByClassName( "sound-btn" )[ 0 ].addEventListener( "click", function() {showToast( "coming soon" );});
-            document.getElementsByClassName( "image-btn" )[ 0 ].addEventListener( "click", function() {showToast( "coming soon" );});
+            document.getElementsByClassName( "image-btn" )[ 0 ].addEventListener( "click", function() {
+                showImgs();
+            });
             addMessages( channel.getAttribute( "data-id" ) );
         }
     </script>
@@ -1379,7 +1394,9 @@
             }
             setTimeout( function() {
                 var closer = [ "CLOSE", heartbeatsubId ];
-                socket.send(JSON.stringify( closer ));
+                if ( socket && socket.readyState != 0 ) {
+                    socket.send( JSON.stringify( closer ) );
+                }
             }, 1500 );
             setTimeout( function() {
                 if ( !heartbeat && socket.readyState == 3 ) {
@@ -1984,7 +2001,9 @@
                 }
             });
             document.getElementsByClassName( "sound-btn" )[ 0 ].addEventListener( "click", function() {showToast( "coming soon" );});
-            document.getElementsByClassName( "image-btn" )[ 0 ].addEventListener( "click", function() {showToast( "coming soon" );});
+            document.getElementsByClassName( "image-btn" )[ 0 ].addEventListener( "click", function() {
+                showImgs();
+            });
             addClosedDecryptedMessages( pubkey );
         }
     </script>
@@ -2705,6 +2724,38 @@
             dataUriPngImage.style.maxWidth = "400px";
             dataUriPngImage.className = 'qr_code';
             return dataUriPngImage;
+        }
+    </script>
+    <script>
+        function showImgs() {
+            if ( localStorage[ "img_cache" ] ) {
+                var imgs = JSON.parse( localStorage[ "img_cache" ] );
+            } else {
+                var imgs = [];
+                localStorage[ "img_cache" ] = JSON.stringify( imgs );
+            }
+            document.getElementById( "modal" ).innerHTML = "";
+            var div = document.createElement( "div" );
+            div.className = "gallery-holder";
+            document.getElementById( "modal" ).append( div );
+            imgs.forEach( function( img ) {
+                var div = document.createElement( "div" );
+                div.setAttribute( "data-img", img );
+                div.className = "gallery";
+                div.style.backgroundImage = "url(" + img + ")";
+                //come back to here
+                div.onclick = function() {
+                    document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value += this.getAttribute( "data-img" );
+                    document.getElementById( "black-bg" ).style.display = "none";
+                    document.getElementById( "modal" ).style.display = "none";
+                }
+                document.getElementsByClassName( "gallery-holder" )[ 0 ].append( div );
+            });
+            if ( !document.getElementsByClassName( "gallery-holder" )[ 0 ].innerHTML || document.getElementsByClassName( "gallery-holder" )[ 0 ].innerHTML == "" ) {
+                document.getElementsByClassName( "gallery-holder" )[ 0 ].innerHTML = "There are no image uploads, but fear not! Paste an image from the web into your message and the next time you click this image button your image will appear here for easy access. By the way, images must be hosted externally (such as on imgur or imgbb) because I don't want to store a bunch of images.";
+            }
+            document.getElementById( "black-bg" ).style.display = "block";
+            document.getElementById( "modal" ).style.display = "block";
         }
     </script>
 </body>
