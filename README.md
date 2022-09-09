@@ -83,3 +83,4 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] add support for replaceable events (nip16) and use them to sync account-specific private data across devices
 * [ ] add support for ephemeral events (nip16) and use them to display "typing..." indicators
 * [ ] add several hard coded channels in a hidden way and expose them via the search bar
+* [ ] fix the metadata overwrite bug -- I think this is caused by anigma sometimes running the function that creates a local metadata cache and then pushing it to nostr before it checks if you already have metadata on nostr
