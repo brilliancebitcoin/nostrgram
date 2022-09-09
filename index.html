@@ -102,6 +102,9 @@
             var returnable = "";
             if ( !isMine && !text.match( ytRegex ) && !text.match( imgRegex ) ) {
                 returnable = text.replace( urlRegex, ( url ) => {
+                    if ( url.includes( ".." ) ) {
+                        return url;
+                    }
                     var url2 = url;
                     if ( !url.startsWith( "http://" ) && !url.startsWith( "https://" ) ) {
                         url2 = "http://" + url;
@@ -111,6 +114,9 @@
             }
             if ( isMine && !text.match( ytRegex ) && !text.match( imgRegex ) ) {
                 returnable = text.replace( urlRegex, ( url ) => {
+                    if ( url.includes( ".." ) ) {
+                        return url;
+                    }
                     var url2 = url;
                     if ( !url.startsWith( "http://" ) && !url.startsWith( "https://" ) ) {
                         url2 = "http://" + url;
