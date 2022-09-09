@@ -98,16 +98,24 @@
         function urlify( text, isMine ) {
             var ytRegex = /(http:|https:)?\/\/(www\.)?(youtube.com|youtu.be)\/(watch)?(\?v=)?(\S+)?/g
             var imgRegex = /\b(https?:\/\/\S+(?:png|jpe?g|gif|webp)\S*)\b/g;
-            var urlRegex = /(https?:\/\/[^\s]+)/g;
+            var urlRegex = /\S*\.(\S){2,}/g;
             var returnable = "";
             if ( !isMine && !text.match( ytRegex ) && !text.match( imgRegex ) ) {
                 returnable = text.replace( urlRegex, ( url ) => {
-                    return `<a href="${url}" target="_blank" rel="nofollow noopener" style="color: #4287f5;">${url}</a>`;
+                    var url2 = url;
+                    if ( !url.startsWith( "http://" ) && !url.startsWith( "https://" ) ) {
+                        url2 = "http://" + url;
+                    }
+                    return `<a href="${url2}" target="_blank" rel="nofollow noopener" style="color: #4287f5;">${url}</a>`;
                 })                
             }
             if ( isMine && !text.match( ytRegex ) && !text.match( imgRegex ) ) {
                 returnable = text.replace( urlRegex, ( url ) => {
-                    return `<a href="${url}" target="_blank" rel="nofollow noopener" style="color: white;">${url}</a>`;
+                    var url2 = url;
+                    if ( !url.startsWith( "http://" ) && !url.startsWith( "https://" ) ) {
+                        url2 = "http://" + url;
+                    }
+                    return `<a href="${url2}" target="_blank" rel="nofollow noopener" style="color: white;">${url}</a>`;
                 })
             }
             if ( text.match( imgRegex ) ) {
