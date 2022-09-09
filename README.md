@@ -41,6 +41,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] fix the emoji modal bug where the select bar gets cleared when you view the next page of emojis
 * [x] give people a link to view their public profile above Manage Channels
 * [x] make it not autoscroll to the bottom unless you are already close to the bottom (fixed on desktop)
+* [x] make the image attach button prompt you to upload your image to imgur and then paste the link
 * [ ] fix the same bug on mobile
 * [ ] private groups with shared decryption keys
 * [ ] make an option to set and modify relays in settings
@@ -54,7 +55,6 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] let channel creators add admins with sticky powers and blacklisting powers
 * [ ] add sticker packs
 * [ ] make the mic button record and broadcast voice chats powered by [https://relay.nostr.info/test/chat.html](https://relay.nostr.info/test/chat.html)
-* [ ] make the image attach button prompt you to upload your image to imgur and then paste the link
 * [ ] show "last seen" indicators for people in your dm list
 * [ ] when a dm is closed, don't show it again til the dm'd person says something
 * [ ] let users block individuals from appearing in their dms
