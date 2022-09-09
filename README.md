@@ -40,8 +40,8 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] change the default channel from bitcoin to nostr
 * [x] fix the emoji modal bug where the select bar gets cleared when you view the next page of emojis
 * [x] give people a link to view their public profile above Manage Channels
-* [x] make it not autoscroll to the bottom unless you are already close to the bottom (fixed on desktop)
 * [x] make the image attach button prompt you to upload your image to imgur and then paste the link
+* [x] make anigma not autoscroll to the bottom unless you are already close to the bottom (fixed on desktop)
 * [ ] fix the same bug on mobile
 * [ ] private groups with shared decryption keys
 * [ ] make an option to set and modify relays in settings
