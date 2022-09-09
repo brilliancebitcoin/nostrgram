@@ -82,12 +82,12 @@
         }
         function triplebackticks( text ) {
             var triplebackticks = /\`\`\`([\s\S]*?)\`\`\`/g;
-            var html = text.replace( triplebackticks, '<pre style="white-space: pre-wrap; padding: 5px; background-color: #999; font-size: 12px;">$1</pre>' );
+            var html = text.replace( triplebackticks, '<pre style="white-space: pre-wrap; padding: 5px; background-color: #999; font-size: 12px; color: white;">$1</pre>' );
             return html;
         }
         function backticks( text ) {
             var backticks = /\`(.*?)\`/gm;
-            var html = text.replace( backticks, '<pre style="display: inline; white-space: pre-wrap; padding: 5px; background-color: #999; font-size: 12px;">$1</pre>' );
+            var html = text.replace( backticks, '<pre style="display: inline-block; white-space: pre-wrap; padding: 5px; background-color: #999; font-size: 12px; color: white;">$1</pre>' );
             return html;
         }
         function youtube_parser( url ) {
@@ -170,7 +170,7 @@
             socket.send( JSON.stringify( importWalletSub ) );
             setTimeout( function() {
                 var closer = [ "CLOSE", importWalletSubId ];
-                socket.send(JSON.stringify( closer ));
+                socket.send( JSON.stringify( closer ) );
             }, 1500 );
         }
     </script>
@@ -1287,8 +1287,8 @@
                 "tags"       : [["e", id]],
                 "pubkey"     : pubKey,
             }
-            var signedEvent = await getSignedEvent(event, privKey);
-            socket.send(JSON.stringify([ "EVENT", signedEvent ]))
+            var signedEvent = await getSignedEvent( event, privKey );
+            socket.send( JSON.stringify( [ "EVENT", signedEvent ] ) );
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
         }
     </script>
@@ -1309,14 +1309,14 @@
                 "pubkey"     : pubKey,
             }
             var signedEvent = await getSignedEvent(event, privKey)
-            socket.send(JSON.stringify([ "EVENT", signedEvent ]))
+            socket.send( JSON.stringify( [ "EVENT", signedEvent ] ) )
             if ( document.getElementsByClassName( "input" )[ 0 ] && document.getElementsByClassName( "input" )[ 0 ].firstElementChild ) {
                 document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
             }
         }
     </script>
     <script>
-        function convertHMS(value) {
+        function convertHMS( value ) {
             if ( value < 0 ) {
                 value = 0;
             }
