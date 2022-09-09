@@ -98,7 +98,7 @@
         function urlify( text, isMine ) {
             var ytRegex = /(http:|https:)?\/\/(www\.)?(youtube.com|youtu.be)\/(watch)?(\?v=)?(\S+)?/g
             var imgRegex = /\b(https?:\/\/\S+(?:png|jpe?g|gif|webp)\S*)\b/g;
-            var urlRegex = /\S+\.{1}[a-zA-Z]{2,}/g;
+            var urlRegex = /\S+\.{1}[a-zA-Z\/\?\=\&\$\+\,\;\@\#\%]{2,}/g;
             var returnable = "";
             if ( !isMine && !text.match( ytRegex ) && !text.match( imgRegex ) ) {
                 returnable = text.replace( urlRegex, ( url ) => {
