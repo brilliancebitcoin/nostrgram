@@ -965,6 +965,32 @@ body {
     background-color: black;
 }
 
+div.gallery-holder {
+    position: relative;
+    text-align: left;
+    max-height: 400px;
+    overflow-y: scroll;
+}
+
+div.gallery {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 5px;
+    border: 1px solid #ccc;
+    width: 100%;
+    max-width: 225px;
+    height: 125px;
+    cursor: pointer;
+    overflow: hidden;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+div.gallery:hover {
+    border: 1px solid #777;
+}
+
 /* mobile */
 
 @media only screen and (max-width: 600px) {
