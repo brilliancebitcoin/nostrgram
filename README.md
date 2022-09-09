@@ -71,7 +71,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] if a "messages not read" line exists when entering a channel or a dm containing unread messages, autoscroll to that instead of to the latest message
 * [ ] fix the bug that makes stuff disappear below the fold when images and videos expand
 * [ ] the anigma browser tab should show a notification when new dms, @'s, or replies arrive
-* [ ] print the total messages that are in a channels in the channel about div
+* [ ] print the total messages that are in a channel in its about div
 * [ ] users who click or tap the back button should not close the app. They should go to the previous page
 * [ ] users who go from a channel to a profile should have a button to go back to the channel. The button that seems most obvious currently takes them to the sidebar
 * [ ] let users add a pubkey to their dms similar to how they can add channels
