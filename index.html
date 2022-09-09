@@ -453,7 +453,7 @@
             if ( subId.startsWith( "00000003" ) ) {
                 if ( JSON.parse( message[ "data" ] )[ 0 ] == "EOSE" && ( !localStorage[ "wallet_info" ] || localStorage[ "wallet_info" ] == "" ) ) {
                     if ( !i_should_create_a_new_wallet ) return;
-                    var mywallet = await getData( "https://legend.lnbits.com/wallet?nme=" + pubKey );
+                    var mywallet = await getData( "https://legend.lnbits.com/wallet?nme=" + pubKey.substring( 0, 15 ) );
                     var key1prep = mywallet.split( "Wallet ID:" );
                     wallet_id = key1prep[ 1 ].substring( 14, 46 );
                     var key2prep = mywallet.split( "Admin key:" );
