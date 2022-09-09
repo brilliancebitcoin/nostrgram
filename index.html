@@ -62,12 +62,10 @@
     </script>
     <script>
         async function setOffset() {
-            console.log( "setting offset" );
             var time = await getData( "https://worldtimeapi.org/api/ip" );
             var realnow = JSON.parse( time )[ "unixtime" ];
             var claimednow = Math.floor( Date.now() / 1000 );
             var offset = realnow - claimednow;
-            console.log( "real now:", realnow, "mynow:", claimednow, "offset:", offset );
             sessionStorage[ "time-offset" ] = offset;
         }
     </script>
@@ -119,6 +117,9 @@
             }
             if ( text.match( ytRegex ) ) {
                 returnable = text.replace( ytRegex, ( yt ) => {
+                    if ( yt.endsWith( ")" ) ) {
+                        yt = yt.substring( 0, yt.length - 1 );
+                    }
                     var vid = `<div class="youtube-wrapper"><img class="ratio" src="./16x9-transparent.png"/><iframe class="youtube-video" src="${"https://www.youtube-nocookie.com/embed/" + youtube_parser( yt )}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><span class="p-in-p" onclick='moveVid( this.previousElementSibling );'>Picture-in-picture</span>`;
                     return vid;
                 })
