@@ -60,12 +60,16 @@
             });
         }
     </script>
-    <script type="module">
-        var time = await getData( "https://worldtimeapi.org/api/ip" );
-        var realnow = JSON.parse( time )[ "unixtime" ];
-        var claimednow = Math.floor( Date.now() / 1000 );
-        var offset = realnow - claimednow;
-        sessionStorage[ "time-offset" ] = offset;
+    <script>
+        async function setOffset() {
+            console.log( "setting offset" );
+            var time = await getData( "https://worldtimeapi.org/api/ip" );
+            var realnow = JSON.parse( time )[ "unixtime" ];
+            var claimednow = Math.floor( Date.now() / 1000 );
+            var offset = realnow - claimednow;
+            console.log( "real now:", realnow, "mynow:", claimednow, "offset:", offset );
+            sessionStorage[ "time-offset" ] = offset;
+        }
     </script>
     <script>
         function bold( text ) {
@@ -1389,8 +1393,8 @@
                 getUserMeta( array_of_pubkeys[ 0 ] );
                 array_of_pubkeys.shift();
             });
-//            setTimeout( checkHeartbeat, 3000 );
             checkHeartbeat();
+            setOffset();
             var i; for ( i=0; i<document.getElementsByClassName( "time" ).length; i++ ) {
                 var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
                 var event_time = document.getElementsByClassName( "time" )[ i ].getAttribute( "data-timestamp" )
