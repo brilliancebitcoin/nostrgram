@@ -338,7 +338,7 @@
                     document.getElementsByClassName( "removable-channels" )[ 0 ].innerHTML += `
                             <div class="removable-channel ${event.id}">
                                 <span class="x-circle" onclick="removeChannel( '${event.id}' )">&times;</span>
-                                <span class="img-circle" style="background-image: url(${JSON.parse( content )[ "picture" ]})"></span>
+                                <span class="img-circle" style="background-image: url('${JSON.parse( content )[ "picture" ]}')"></span>
                                 <span class="removable-channel-name">${JSON.parse( content )[ "name" ]}</span>
                                 <div style="clear: both"></div>
                             </div>
@@ -371,7 +371,7 @@
                                 document.getElementsByClassName( "big-picture" )[ 0 ].src = JSON.parse( content )[ "picture" ];
                             }
                             if ( document.getElementsByClassName( "user-in-sidebar" )[ 0 ] && document.getElementsByClassName( "user-in-sidebar" )[ 0 ].getElementsByTagName( "span" )[ 0 ] && JSON.parse( content )[ "picture" ] && JSON.parse( content )[ "picture" ] != "" ) {
-                                document.getElementsByClassName( "user-in-sidebar" )[ 0 ].getElementsByTagName( "span" )[ 0 ].style = "background-image: url(" + JSON.parse( content )[ "picture" ] + ")";
+                                document.getElementsByClassName( "user-in-sidebar" )[ 0 ].getElementsByTagName( "span" )[ 0 ].style = "background-image: url('" + JSON.parse( content )[ "picture" ] + "')";
                             }
                         }
                         Object.keys( JSON.parse( content ) ).forEach( function( key ) {
@@ -1009,7 +1009,7 @@
             var html = `
                         <li class="channel-outer ${id}" data-id="${id}" data-img="${image}" data-num-of-new-messages="${String( old_num_of_new_messages )}" onclick="selectChannel( this );">
                             <a>
-                                <span style="background-image: url(${image})"></span>
+                                <span style="background-image: url('${image}')"></span>
                                 <div class="channel-inner">
                                     <div class="name">${name}</div>
                                     <div data-timestamp="${timestamp}" class="message">${message}</div>
@@ -1034,7 +1034,7 @@
             var html = `
                 <div class="message-header">
                     <div class="channel-info">
-                        <span style="background-image: url(${channel.getAttribute( "data-img" )})"></span>
+                        <span style="background-image: url('${channel.getAttribute( "data-img" )}')"></span>
                         <div class="channel-wrapper">
                             <div class="name">${channel.getElementsByClassName( "name" )[ 0 ].innerText}</div>
                             <div data-timestamp="${channel.getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestamp" )}" class="time">${channel.getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestring" )}</div>
@@ -1094,7 +1094,7 @@
                 var html2 = `
                     <span class="sidebar_arrow">&rsaquo;</span>
                     <div class="channel-info">
-                        <span style="background-image: url(${channel.getAttribute( "data-img" )})"></span>
+                        <span style="background-image: url('${channel.getAttribute( "data-img" )}')"></span>
                         <div class="channel-wrapper">
                             <div class="name">${channel.getElementsByClassName( "name" )[ 0 ].innerText}</div>
                             <div data-timestamp="${channel.getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestamp" )}" class="time">${channel.getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestring" )}</div>
@@ -1543,7 +1543,7 @@
                 document.getElementsByClassName( "removable-channels" )[ 0 ].innerHTML += `
                         <div class="removable-channel ${item.id}">
                             <span class="x-circle" onclick="removeChannel( '${item.id}' )">&times;</span>
-                            <span class="img-circle" style="background-image: url(${item.img})"></span>
+                            <span class="img-circle" style="background-image: url('${item.img}')"></span>
                             <span class="removable-channel-name">${item.name}</span>
                             <div style="clear: both"></div>
                         </div>
@@ -1553,7 +1553,7 @@
                 document.getElementsByClassName( "removable-channels" )[ 0 ].innerHTML += `
                         <div class="removable-channel ${item}">
                             <span class="x-circle" onclick="removeDm( '${item}' )">&times;</span>
-                            <span class="img-circle" style="background-image: url(${dms_info[ item ][ "picture" ]})"></span>
+                            <span class="img-circle" style="background-image: url('${dms_info[ item ][ "picture" ]}')"></span>
                             <span class="removable-channel-name">${dms_info[ item ][ "name" ]}</span>
                             <div style="clear: both"></div>
                         </div>
@@ -1976,7 +1976,7 @@
             var html = `
                         <li class="dm-outer ${pubkey.substring( 0, 20 )}" data-pubkey="${pubkey}" data-img="${picture}" data-num-of-new-messages="${String( old_num_of_new_messages )}" onclick="selectDM( '${pubkey}', '${name}', '${picture}' );">
                             <a>
-                                <span style="background-image: url(${picture})"></span>
+                                <span style="background-image: url('${picture}')"></span>
                                 <div class="dm-inner">
                                     <div class="name">${name}</div>
                                     <div data-timestamp="" class="message"></div>
@@ -2003,7 +2003,7 @@
             var html = `
                 <div class="message-header">
                     <div class="channel-info">
-                        <span style="background-image: url(${picture}); cursor: pointer;" onclick="showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
+                        <span style="background-image: url('${picture}'); cursor: pointer;" onclick="showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
                         <div class="channel-wrapper">
                             <div class="name">${name}</div>
                             <div class="time"></div>
@@ -2054,7 +2054,7 @@
                 var html2 = `
                     <span class="sidebar_arrow">&rsaquo;</span>
                     <div class="channel-info">
-                        <span style="background-image: url(${picture}); cursor: pointer;" onclick="showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
+                        <span style="background-image: url('${picture}'); cursor: pointer;" onclick="showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
                         <div class="channel-wrapper">
                             <div class="name">${name}</div>
                             <div class="time"></div>
@@ -2344,7 +2344,7 @@
                 <a>
                     <span class="plus-circle fa fa-user"></span>
                     <div class="user-profile-inner">
-                        <div class="name"><script>document.getElementsByClassName( "user-profile-inner" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerHTML = pubKey.substring( 0, 15 ) + "...";document.getElementsByClassName( "user-in-sidebar" )[ 0 ].getElementsByTagName( "span" )[ 0 ].className = "";document.getElementsByClassName( "user-in-sidebar" )[ 0 ].getElementsByTagName( "span" )[ 0 ].style="background-image: url(https://www.gravatar.com/avatar/" + pubKey + "?s=128&d=retro)";document.getElementsByClassName( "user-in-sidebar" )[ 0 ].onclick = function() {showProfile( pubKey, pubKey.substring( 0, 15 ) + "...", "https://www.gravatar.com/avatar/" + pubKey + "?s=128&d=retro" );}</script></div>
+                        <div class="name"><script>document.getElementsByClassName( "user-profile-inner" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerHTML = pubKey.substring( 0, 15 ) + "...";document.getElementsByClassName( "user-in-sidebar" )[ 0 ].getElementsByTagName( "span" )[ 0 ].className = "";document.getElementsByClassName( "user-in-sidebar" )[ 0 ].getElementsByTagName( "span" )[ 0 ].style="background-image: url('https://www.gravatar.com/avatar/" + pubKey + "?s=128&d=retro')";document.getElementsByClassName( "user-in-sidebar" )[ 0 ].onclick = function() {showProfile( pubKey, pubKey.substring( 0, 15 ) + "...", "https://www.gravatar.com/avatar/" + pubKey + "?s=128&d=retro" );}</script></div>
                         <div class="message">View your profile</div>
                     </div>
                 </a>
