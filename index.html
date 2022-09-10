@@ -630,7 +630,7 @@
                     div.innerHTML = html;
                 } else {
                     var html = `
-                        <span class="picture" style="background-image: url(${picture})" onclick="showProfile( '${event.pubkey}', '${name}', '${picture}' )"></span>
+                        <span class="picture" style="background-image: url('${picture}')" onclick="showProfile( '${event.pubkey}', '${name}', '${picture}' )"></span>
                         <div class="bubble"><div class="author ${color} ${event.pubkey}">${name}</div>${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
                     `;
                     div.innerHTML = html;
@@ -741,7 +741,7 @@
                     div.innerHTML = html;
                 } else {
                     var html = `
-                        <span class="picture" style="background-image: url(${picture})" onclick="showProfile( '${event.pubkey}', '${name}', '${picture}' )"></span>
+                        <span class="picture" style="background-image: url('${picture}')" onclick="showProfile( '${event.pubkey}', '${name}', '${picture}' )"></span>
                         <div class="bubble"><div class="author ${color} ${event.pubkey}">${name}</div>${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
                     `;
                     div.innerHTML = html;
@@ -1212,7 +1212,7 @@
                     div.innerHTML = html;
                 } else {
                     var html = `
-                        <span class="picture" style="background-image: url(${picture})" onclick="showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
+                        <span class="picture" style="background-image: url('${picture}')" onclick="showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
                         <div class="bubble"><div class="author ${color} ${pubkey}">${name}</div>${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
                     `;
                     div.innerHTML = html;
@@ -1275,7 +1275,7 @@
                         div.innerHTML = html;
                     } else {
                         var html = `
-                            <span class="picture" style="background-image: url(${picture})" onclick="showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
+                            <span class="picture" style="background-image: url('${picture}')" onclick="showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
                             <div class="bubble"><div class="author ${color} ${pubkey}">${name}</div>${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
                         `;
                         div.innerHTML = html;
@@ -1653,6 +1653,7 @@
             document.getElementsByClassName( "content" )[ 0 ].innerHTML = html;
             document.getElementsByClassName( "message-content" )[ 0 ].style.padding = "0px";
             document.getElementsByClassName( "message-content" )[ 0 ].style.display = "block";
+            document.getElementsByClassName( "message-content" )[ 0 ].style.textAlign = "center";
             document.getElementsByClassName( "message-content" )[ 0 ].style.flexDirection = "initial";
             document.getElementsByClassName( "message-content" )[ 0 ].style.overflowY = "hidden";
             if ( window.innerWidth < 601 ) {
