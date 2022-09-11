@@ -70,7 +70,12 @@
             var winfo = await getData( url, readkey )
             winfo = JSON.parse( winfo );
             var balance = String( Math.floor( winfo[ "balance" ] / 1000 ) );
-            document.getElementsByClassName( "manage-wallet-outer" )[ 0 ].getElementsByClassName( "message" )[ 0 ].innerText = balance + " sats";
+            if ( document.getElementsByClassName( "manage-wallet-outer" )[ 0 ] && document.getElementsByClassName( "manage-wallet-outer" )[ 0 ].getElementsByClassName( "message" )[ 0 ] ) {
+                document.getElementsByClassName( "manage-wallet-outer" )[ 0 ].getElementsByClassName( "message" )[ 0 ].innerText = balance + " sats";
+            }
+            if ( document.getElementsByClassName( "message-header" )[ 0 ] && document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "message" )[ 0 ] && document.getElementsByClassName( "message-header" )[ 0 ] && document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "message" )[ 0 ].innerText == "Loading..." ) {
+                document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "message" )[ 0 ].innerText = String( balance ) + " sats";
+            }
             if ( localStorage[ "wallet_balance" ] ) {
                 var old_wallet_balance = Number( localStorage[ "wallet_balance" ] );
             } else {
