@@ -2878,6 +2878,8 @@
                     document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value += this.getAttribute( "data-img" );
                     document.getElementById( "black-bg" ).style.display = "none";
                     document.getElementById( "modal" ).style.display = "none";
+                    document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                    document.getElementsByClassName( "note-input" )[ 0 ].select();
                 }
                 document.getElementsByClassName( "gallery-holder" )[ 0 ].append( div );
             });
