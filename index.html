@@ -169,7 +169,7 @@
                         imgs.unshift( img );
                         imgs.pop();
                     } else if ( isMine && !imgs.includes( img ) ) {
-                        imgs.push( img );
+                        imgs.unshift( img );
                     }
                     localStorage[ "img_cache" ] = JSON.stringify( imgs );
                     return `<a href="${img}" target="_blank" rel="nofollow noopener"><img src="${img}" /></a>`;
@@ -340,6 +340,7 @@
                 if ( isError ) {
                     showToast( "unknown error, could not add this channel -- please contact a developer for help" );
                 } else {
+                    var picture = 
                     document.getElementsByClassName( "removable-channels" )[ 0 ].innerHTML += `
                             <div class="removable-channel ${event.id}">
                                 <span class="x-circle" onclick="removeChannel( '${event.id}' )">&times;</span>
@@ -2349,7 +2350,8 @@
                 <a>
                     <span class="plus-circle fa fa-user"></span>
                     <div class="user-profile-inner">
-                        <div class="name"><script>document.getElementsByClassName( "user-profile-inner" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerHTML = pubKey.substring( 0, 15 ) + "...";document.getElementsByClassName( "user-in-sidebar" )[ 0 ].getElementsByTagName( "span" )[ 0 ].className = "";document.getElementsByClassName( "user-in-sidebar" )[ 0 ].getElementsByTagName( "span" )[ 0 ].style="background-image: url('https://www.gravatar.com/avatar/" + pubKey + "?s=128&d=retro')";document.getElementsByClassName( "user-in-sidebar" )[ 0 ].onclick = function() {showProfile( pubKey, pubKey.substring( 0, 15 ) + "...", "https://www.gravatar.com/avatar/" + pubKey + "?s=128&d=retro" );}</script></div>
+                        <!-- //var picture = "https://hashvatar.vercel.app/" + pubKey; -->
+                        <div class="name"><script>document.getElementsByClassName( "user-in-sidebar" )[ 0 ].getElementsByTagName( "span" )[ 0 ].className = "";document.getElementsByClassName( "user-in-sidebar" )[ 0 ].getElementsByTagName( "span" )[ 0 ].style="background-image: url('https://www.gravatar.com/avatar/" + pubKey + "?s=128&d=retro')";document.getElementsByClassName( "user-in-sidebar" )[ 0 ].onclick = function() {showProfile( pubKey, pubKey.substring( 0, 15 ) + "...", "https://www.gravatar.com/avatar/" + pubKey + "?s=128&d=retro" );document.getElementsByClassName( "user-profile-inner" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerHTML = pubKey.substring( 0, 15 ) + "...";}</script></div>
                         <div class="message">View your profile</div>
                     </div>
                 </a>
@@ -2872,7 +2874,6 @@
                 div.setAttribute( "data-img", img );
                 div.className = "gallery";
                 div.style.backgroundImage = "url(" + img + ")";
-                //come back to here
                 div.onclick = function() {
                     document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value += this.getAttribute( "data-img" );
                     document.getElementById( "black-bg" ).style.display = "none";
