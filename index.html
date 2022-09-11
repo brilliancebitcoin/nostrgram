@@ -534,7 +534,7 @@
                 socket.send(JSON.stringify( closer ));
             }
             if ( kind == 42 && subId.includes( "latest-message" ) ) {
-                var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
+                var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
                 var event_time = event.created_at
                 var how_long_ago = convertHMS( now - event_time )
                 var isMine = ( event.pubkey == pubKey );
@@ -666,7 +666,7 @@
                 if ( !isMine && !array_of_pubkeys.includes( event.pubkey ) ) {
                     array_of_pubkeys.push( event.pubkey );
                 }
-                var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
+                var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
                 var event_time = event.created_at
                 var how_long_ago = convertHMS( now - event_time )
                 if ( event.pubkey == pubKey ) {
@@ -1193,7 +1193,7 @@
                 var parent = msg[ Object.keys( msg )[ 0 ] ][ "parent" ];
                 var picture = msg[ Object.keys( msg )[ 0 ] ][ "picture" ];
                 var pubkey = msg[ Object.keys( msg )[ 0 ] ][ "pubkey" ];
-                var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
+                var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
                 var how_long_ago = convertHMS( now - event_time )
                 var div = document.createElement( "div" );
                 if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
@@ -1256,7 +1256,7 @@
                     var parent = msg[ Object.keys( msg )[ 0 ] ][ "parent" ];
                     var picture = msg[ Object.keys( msg )[ 0 ] ][ "picture" ];
                     var pubkey = msg[ Object.keys( msg )[ 0 ] ][ "pubkey" ];
-                    var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
+                    var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
                     var how_long_ago = convertHMS( now - event_time )
                     var div = document.createElement( "div" );
                     if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
@@ -1335,7 +1335,7 @@
         async function sendNote() {
             var note = document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value;
             if ( !note || note == "" ) return;
-            var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
+            var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
             var id = document.getElementsByClassName( "channel-outer active" )[ 0 ].getAttribute( "data-id" );
             var event = {
                 "content"    : note,
@@ -1352,7 +1352,7 @@
     <script>
         async function sendEncryptedNote( note, pubkey ) {
             if ( !note || note == "" ) return;
-            var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
+            var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
             if ( !admin && window.nostr ) {
                 var encrypted = await window.nostr.nip04.encrypt( pubkey, note );
             } else {
@@ -1457,7 +1457,7 @@
             setOffset();
             getBalance();
             var i; for ( i=0; i<document.getElementsByClassName( "time" ).length; i++ ) {
-                var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
+                var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
                 var event_time = document.getElementsByClassName( "time" )[ i ].getAttribute( "data-timestamp" )
                 var how_long_ago = convertHMS( now - event_time )
                 document.getElementsByClassName( "time" )[ i ].innerText = how_long_ago;
@@ -2195,7 +2195,7 @@
             chan[ "about" ] = "";
             chan[ "name" ] = name;
             chan[ "picture" ] = img;
-            var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
+            var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
             var note = JSON.stringify( chan );
             var event = {
                 "content"    : note,
@@ -2593,7 +2593,7 @@
             myMetaInfo[ "lud06" ] = lud06;
             localStorage[ "my-meta-info" ] = JSON.stringify( myMetaInfo );
             var note = JSON.stringify( myMetaInfo );
-            var now = Math.floor( Date.now() / 1000 ) - Number( sessionStorage[ "time-offset" ] );
+            var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
             var event = {
                 "content"    : note,
                 "created_at" : now,
