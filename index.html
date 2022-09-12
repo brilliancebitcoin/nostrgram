@@ -669,6 +669,9 @@
                     if ( document.getElementsByClassName( "message-content" )[ 0 ] && document.getElementsByClassName( "message-content" )[ 0 ].getElementsByClassName( "message" )[ 0 ] ) {
                         offset = document.getElementsByClassName( "message-content" )[ 0 ].getElementsByClassName( "message" )[ document.getElementsByClassName( "message-content" )[ 0 ].getElementsByClassName( "message" ).length - 1 ].offsetHeight;
                     }
+                    if ( offset > 20 ) {
+                        offset = offset - 20;
+                    }
                     if ( ( document.getElementsByClassName( "chat" )[ 0 ].scrollHeight - document.getElementsByClassName( "chat" )[ 0 ].scrollTop ) > 1500 ) {
                         document.getElementsByClassName( "chat" )[ 0 ].scrollTo( 0, scrollto + offset );
                     } else {
@@ -822,6 +825,9 @@
                     var offset = 0;
                     if ( document.getElementsByClassName( "message-content" )[ 0 ] && document.getElementsByClassName( "message-content" )[ 0 ].getElementsByClassName( "message" )[ 0 ] ) {
                         offset = document.getElementsByClassName( "message-content" )[ 0 ].getElementsByClassName( "message" )[ document.getElementsByClassName( "message-content" )[ 0 ].getElementsByClassName( "message" ).length - 1 ].offsetHeight;
+                    }
+                    if ( offset > 20 ) {
+                        offset = offset - 20;
                     }
                     if ( ( document.getElementsByClassName( "chat" )[ 0 ].scrollHeight - document.getElementsByClassName( "chat" )[ 0 ].scrollTop ) > 1500 ) {
                         document.getElementsByClassName( "chat" )[ 0 ].scrollTo( 0, scrollto + offset );
