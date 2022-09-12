@@ -664,10 +664,13 @@
                     document.getElementsByClassName( "message-content" )[ 0 ].append( item );
                 });
                 if ( window.innerWidth < 601 ) {
-                    //if ( ( document.getElementsByClassName( "chat" )[ 0 ].scrollHeight - document.getElementsByClassName( "chat" )[ 0 ].scrollTop ) > 1500 ) return;
                     var scrollto = document.getElementsByClassName( "chat" )[ 0 ].scrollTop;
+                    var offset = 0;
+                    if ( document.getElementsByClassName( "message-content" )[ 0 ] && document.getElementsByClassName( "message-content" )[ 0 ].getElementsByClassName( "message" )[ 0 ] ) {
+                        offset = document.getElementsByClassName( "message-content" )[ 0 ].getElementsByClassName( "message" )[ document.getElementsByClassName( "message-content" )[ 0 ].getElementsByClassName( "message" ).length - 1 ].offsetHeight;
+                    }
                     if ( ( document.getElementsByClassName( "chat" )[ 0 ].scrollHeight - document.getElementsByClassName( "chat" )[ 0 ].scrollTop ) > 1500 ) {
-                        document.getElementsByClassName( "chat" )[ 0 ].scrollTo( 0, scrollto );
+                        document.getElementsByClassName( "chat" )[ 0 ].scrollTo( 0, scrollto + offset );
                     } else {
                         document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
                         if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {
@@ -815,10 +818,13 @@
                     document.getElementsByClassName( otherKey.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago );
                 }
                 if ( window.innerWidth < 601 ) {
-                    //if ( ( document.getElementsByClassName( "chat" )[ 0 ].scrollHeight - document.getElementsByClassName( "chat" )[ 0 ].scrollTop ) > 1500 ) return;
                     var scrollto = document.getElementsByClassName( "chat" )[ 0 ].scrollTop;
+                    var offset = 0;
+                    if ( document.getElementsByClassName( "message-content" )[ 0 ] && document.getElementsByClassName( "message-content" )[ 0 ].getElementsByClassName( "message" )[ 0 ] ) {
+                        offset = document.getElementsByClassName( "message-content" )[ 0 ].getElementsByClassName( "message" )[ document.getElementsByClassName( "message-content" )[ 0 ].getElementsByClassName( "message" ).length - 1 ].offsetHeight;
+                    }
                     if ( ( document.getElementsByClassName( "chat" )[ 0 ].scrollHeight - document.getElementsByClassName( "chat" )[ 0 ].scrollTop ) > 1500 ) {
-                        document.getElementsByClassName( "chat" )[ 0 ].scrollTo( 0, scrollto );
+                        document.getElementsByClassName( "chat" )[ 0 ].scrollTo( 0, scrollto + offset );
                     } else {
                         document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
                         if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {
