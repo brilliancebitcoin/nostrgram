@@ -172,6 +172,7 @@
                             }
                         }
                         imgs.unshift( img );
+                        localStorage[ "img_cache" ] = JSON.stringify( imgs );
                     }
                     if ( isMine && imgs.length >= 50 && !imgs.includes( img ) ) {
                         imgs.unshift( img );
