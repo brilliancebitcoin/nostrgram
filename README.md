@@ -86,3 +86,4 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] fix the metadata overwrite bug -- I think this is caused by anigma sometimes running the function that creates a local metadata cache and then pushing it to nostr before it checks if you already have metadata on nostr
 * [ ] on mobile, when someone clicks to view the sidebar, scroll it to the top
 * [ ] on mobile, when someone clicks to view the sidebar, remove the "active" class from the channel they were just in so they can see the unread message count
+* [ ] fix bug that urlifies backticks
