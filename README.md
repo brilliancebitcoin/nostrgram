@@ -42,7 +42,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] give people a link to view their public profile above Manage Channels
 * [x] make the image attach button prompt you to upload your image to imgur and then paste the link
 * [x] make anigma not autoscroll to the bottom unless you are already close to the bottom (fixed on desktop)
-* [ ] fix the same bug on mobile
+* [x] fix the same bug on mobile
 * [ ] private groups with shared decryption keys
 * [ ] make an option to set and modify relays in settings
 * [ ] connect to at least two relays by default
