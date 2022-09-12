@@ -172,7 +172,6 @@
                             }
                         }
                         imgs.unshift( img );
-                        localStorage[ "img_cache" ] = JSON.stringify( imgs );
                     }
                     if ( isMine && imgs.length >= 50 && !imgs.includes( img ) ) {
                         imgs.unshift( img );
@@ -666,12 +665,24 @@
                 });
                 if ( window.innerWidth < 601 ) {
                     //if ( ( document.getElementsByClassName( "chat" )[ 0 ].scrollHeight - document.getElementsByClassName( "chat" )[ 0 ].scrollTop ) > 1500 ) return;
+                    var scrollto = document.getElementsByClassName( "chat" )[ 0 ].scrollTop;
+                    if ( ( document.getElementsByClassName( "chat" )[ 0 ].scrollHeight - document.getElementsByClassName( "chat" )[ 0 ].scrollTop ) > 1500 ) {
+                        document.getElementsByClassName( "chat" )[ 0 ].scrollTo( 0, scrollto );
+                    } else {
+                        document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
+                        if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {
+                            document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();
+                        }
+                    }
                 } else {
-                    if ( ( document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight - document.getElementsByClassName( "message-content" )[ 0 ].scrollTop ) > 1500 ) return;
-                }
-                document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {
-                    document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();
+                    if ( ( document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight - document.getElementsByClassName( "message-content" )[ 0 ].scrollTop ) > 1500 ) {
+                        return
+                    } else {
+                        document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
+                        if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {
+                            document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();
+                        }
+                    }
                 }
             }
             //this code runs whenever a dm is clicked, it should also work for "closed dms" where you only see someone's dms if you first add them to your sidebar
@@ -805,12 +816,24 @@
                 }
                 if ( window.innerWidth < 601 ) {
                     //if ( ( document.getElementsByClassName( "chat" )[ 0 ].scrollHeight - document.getElementsByClassName( "chat" )[ 0 ].scrollTop ) > 1500 ) return;
+                    var scrollto = document.getElementsByClassName( "chat" )[ 0 ].scrollTop;
+                    if ( ( document.getElementsByClassName( "chat" )[ 0 ].scrollHeight - document.getElementsByClassName( "chat" )[ 0 ].scrollTop ) > 1500 ) {
+                        document.getElementsByClassName( "chat" )[ 0 ].scrollTo( 0, scrollto );
+                    } else {
+                        document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
+                        if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {
+                            document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();
+                        }
+                    }
                 } else {
-                    if ( ( document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight - document.getElementsByClassName( "message-content" )[ 0 ].scrollTop ) > 1500 ) return;
-                }
-                document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {
-                    document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();
+                    if ( ( document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight - document.getElementsByClassName( "message-content" )[ 0 ].scrollTop ) > 1500 ) {
+                        return;
+                    } else {
+                        document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
+                        if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {
+                            document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();
+                        }
+                    }
                 }
             }
             if ( kind === 4 && subId.includes( "encrypted-open-dms" ) ) {
