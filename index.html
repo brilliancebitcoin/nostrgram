@@ -165,6 +165,14 @@
                         var imgs = [];
                         localStorage[ "img_cache" ] = JSON.stringify( imgs );
                     }
+                    if ( isMine && imgs.includes( img ) ) {
+                        var i; for ( i=0; i<imgs.length; i++ ) {
+                            if ( imgs[ i ] == img ) {
+                                imgs.splice( i, 1 );
+                            }
+                        }
+                        imgs.unshift( img );
+                    }
                     if ( isMine && imgs.length >= 50 && !imgs.includes( img ) ) {
                         imgs.unshift( img );
                         imgs.pop();
