@@ -712,7 +712,7 @@ body {
     font-family: monospace;
 }
 
-.copy-pubkey-btn, .copy-privkey-btn, .dm, .copy-walleturl-btn, .copy-adminkey-btn, .copy-readkey-btn, .tipper {
+.copy-pubkey-btn, .copy-privkey-btn, .dm, .copy-walleturl-btn, .copy-adminkey-btn, .copy-readkey-btn, .tipper, .tip-em, .msg-context-btn {
     display: inline-block;
     width: 100px;
     box-sizing: border-box;
@@ -726,11 +726,16 @@ body {
     margin-top: 20px;
 }
 
-.dm, .tipper {
+.dm, .tipper, .msg-context-btn {
     width: auto;
 }
 
-.import-privkey-input, .display-name, .user-picture, .import-lnbits-endpoint, .import-lnbits-port, .import-lnbits-adminkey {
+.msg-context-btn {
+    height: auto;
+    padding: 10px 15px;
+}
+
+.import-privkey-input, .display-name, .user-picture, .import-lnbits-endpoint, .import-lnbits-port, .import-lnbits-adminkey, .amount-to-tip {
     margin-top: 20px;
     display: inline-block;
     width: 80%;
@@ -989,6 +994,38 @@ div.gallery {
 
 div.gallery:hover {
     border: 1px solid #777;
+}
+
+.msg-context-option {
+    text-align: center;
+}
+
+.reply-div {
+    display: none;
+    position: relative;
+    border-bottom: 1px solid #333;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    font-size: 14px;
+    font-style: italic;
+}
+
+.reply-x {
+    font-size: 18px;
+    cursor: pointer;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+.reply-prefix {
+    border-left: 1px solid #4287f5;
+    margin-left: 5px;
+    padding-left: 5px;
+    margin-bottom: 10px;
+}
+
+.reply-in-blue {
+    border-left: 1px solid white;    
 }
 
 /* mobile */
