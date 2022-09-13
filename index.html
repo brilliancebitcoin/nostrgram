@@ -694,6 +694,7 @@
                 div.classList.add( "message" );
                 div.classList.add( event.id );
                 div.setAttribute( "data-author", event.pubkey );
+                div.onclick = function() {msgContext( event.id );}
                 if ( isMine ) {
                     var replyclass = "reply-in-blue";
                 } else {
@@ -723,12 +724,12 @@
                 }
                 if ( isMine ) {
                     div.classList.add( "me" );
-                    var html = `<div class="bubble" onclick="msgContext( '${event.id}' )">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
+                    var html = `<div class="bubble">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
                     div.innerHTML = html;
                 } else {
                     var html = `
-                        <span class="picture" style="background-image: url('${picture}')" onclick="showProfile( '${event.pubkey}', '${name}', '${picture}' )"></span>
-                        <div class="bubble" onclick="msgContext( '${event.id}' )"><div class="author ${color} ${event.pubkey}">${name}</div>${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
+                        <span class="picture" style="background-image: url('${picture}')" onclick="event.stopPropagation();showProfile( '${event.pubkey}', '${name}', '${picture}' )"></span>
+                        <div class="bubble"><div class="author ${color} ${event.pubkey}">${name}</div>${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
                     `;
                     div.innerHTML = html;
                 }
@@ -865,6 +866,7 @@
                 });
                 addMessageToCache( event.pubkey, event.id, event_time, parent, color, name, picture, content, replyingTo );
                 div.setAttribute( "data-author", event.pubkey );
+                div.onclick = function() {msgContext( event.id );}
                 if ( isMine ) {
                     var replyclass = "reply-in-blue";
                 } else {
@@ -894,12 +896,12 @@
                 }
                 if ( isMine ) {
                     div.classList.add( "me" );
-                    var html = `<div class="bubble" onclick="msgContext( '${event.id}' )">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
+                    var html = `<div class="bubble">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
                     div.innerHTML = html;
                 } else {
                     var html = `
-                        <span class="picture" style="background-image: url('${picture}')" onclick="showProfile( '${event.pubkey}', '${name}', '${picture}' )"></span>
-                        <div class="bubble" onclick="msgContext( '${event.id}' )"><div class="author ${color} ${event.pubkey}">${name}</div>${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
+                        <span class="picture" style="background-image: url('${picture}')" onclick="event.stopPropagation();showProfile( '${event.pubkey}', '${name}', '${picture}' )"></span>
+                        <div class="bubble"><div class="author ${color} ${event.pubkey}">${name}</div>${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
                     `;
                     div.innerHTML = html;
                 }
@@ -1430,6 +1432,7 @@
                 div.classList.add( "message" );
                 div.classList.add( id );
                 div.setAttribute( "data-author", pubkey );
+                div.onclick = function() {msgContext( id );}
                 var isMine = ( pubkey == pubKey );
                 if ( isMine ) {
                     var replyclass = "reply-in-blue";
@@ -1457,12 +1460,12 @@
                 }
                 if ( isMine ) {
                     div.classList.add( "me" );
-                    var html = `<div class="bubble" onclick="msgContext( '${id}' )">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
+                    var html = `<div class="bubble">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
                     div.innerHTML = html;
                 } else {
                     var html = `
-                        <span class="picture" style="background-image: url('${picture}')" onclick="showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
-                        <div class="bubble" onclick="msgContext( '${id}' )"><div class="author ${color} ${pubkey}">${name}</div>${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
+                        <span class="picture" style="background-image: url('${picture}')" onclick="event.stopPropagation();showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
+                        <div class="bubble"><div class="author ${color} ${pubkey}">${name}</div>${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
                     `;
                     div.innerHTML = html;
                 }
@@ -1522,6 +1525,7 @@
                     div.classList.add( id );
                     var isMine = ( pubkey == pubKey );
                     div.setAttribute( "data-author", pubkey );
+                    div.onclick = function() {msgContext( id );}
                     var replyAuthor = `<span class="reply-author">Unknown</span>`;
                     var replyContent = "This post is a reply to a message that could not be found";
                     var replyPrefix = "";
@@ -1548,12 +1552,12 @@
                     }
                     if ( isMine ) {
                         div.classList.add( "me" );
-                        var html = `<div class="bubble" onclick="msgContext( '${id}' )">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
+                        var html = `<div class="bubble">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
                         div.innerHTML = html;
                     } else {
                         var html = `
-                            <span class="picture" style="background-image: url('${picture}')" onclick="showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
-                            <div class="bubble" onclick="msgContext( '${id}' )"><div class="author ${color} ${pubkey}">${name}</div>${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
+                            <span class="picture" style="background-image: url('${picture}')" onclick="event.stopPropagation();showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
+                            <div class="bubble"><div class="author ${color} ${pubkey}">${name}</div>${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
                         `;
                         div.innerHTML = html;
                     }
