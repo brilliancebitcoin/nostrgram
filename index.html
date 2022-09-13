@@ -1753,7 +1753,7 @@
             var msgSubId   = "00000004" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 );
             var msgFilter  = { "ids": [ id ] }
             var msgSub     = [ "REQ", msgSubId, msgFilter ];
-            if ( admin && socket && socket.readyState != 0 ) {
+            if ( socket && socket.readyState != 0 ) {
                 socket.send( JSON.stringify( msgSub ) );
             }
             setTimeout( function() {
