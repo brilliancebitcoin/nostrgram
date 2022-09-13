@@ -1023,6 +1023,12 @@ div.gallery:hover {
     padding-left: 5px;
     margin-bottom: 10px;
     margin-top: 10px;
+    cursor: pointer;
+    font-style: italic;
+}
+
+.reply-author {
+    text-decoration: underline;
 }
 
 .reply-in-blue {
