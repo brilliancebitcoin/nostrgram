@@ -696,6 +696,9 @@
                 div.setAttribute( "data-author", event.pubkey );
                 div.onclick = function() {msgContext( event.id );}
                 if ( isMine ) {
+                    div.align = "right";
+                }
+                if ( isMine ) {
                     var replyclass = "reply-in-blue";
                 } else {
                     var replyclass = "reply-in-white";
@@ -724,7 +727,7 @@
                 }
                 if ( isMine ) {
                     div.classList.add( "me" );
-                    var html = `<div class="bubble">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
+                    var html = `<div class="bubble" align="left">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
                     div.innerHTML = html;
                 } else {
                     var html = `
@@ -866,6 +869,9 @@
                 });
                 addMessageToCache( event.pubkey, event.id, event_time, parent, color, name, picture, content, replyingTo );
                 div.setAttribute( "data-author", event.pubkey );
+                if ( isMine ) {
+                    div.align = "right";
+                }
                 div.onclick = function() {msgContext( event.id );}
                 if ( isMine ) {
                     var replyclass = "reply-in-blue";
@@ -896,7 +902,7 @@
                 }
                 if ( isMine ) {
                     div.classList.add( "me" );
-                    var html = `<div class="bubble">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
+                    var html = `<div class="bubble" align="left">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
                     div.innerHTML = html;
                 } else {
                     var html = `
@@ -1431,9 +1437,12 @@
                 }
                 div.classList.add( "message" );
                 div.classList.add( id );
-                div.setAttribute( "data-author", pubkey );
-                div.onclick = function() {msgContext( id );}
                 var isMine = ( pubkey == pubKey );
+                div.setAttribute( "data-author", pubkey );
+                if ( isMine ) {
+                    div.align = "right";
+                }
+                div.onclick = function() {msgContext( id );}
                 if ( isMine ) {
                     var replyclass = "reply-in-blue";
                 } else {
@@ -1460,7 +1469,7 @@
                 }
                 if ( isMine ) {
                     div.classList.add( "me" );
-                    var html = `<div class="bubble">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
+                    var html = `<div class="bubble" align="left">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
                     div.innerHTML = html;
                 } else {
                     var html = `
@@ -1525,6 +1534,9 @@
                     div.classList.add( id );
                     var isMine = ( pubkey == pubKey );
                     div.setAttribute( "data-author", pubkey );
+                    if ( isMine ) {
+                        div.align = "right";
+                    }
                     div.onclick = function() {msgContext( id );}
                     var replyAuthor = `<span class="reply-author">Unknown</span>`;
                     var replyContent = "This post is a reply to a message that could not be found";
@@ -1552,7 +1564,7 @@
                     }
                     if ( isMine ) {
                         div.classList.add( "me" );
-                        var html = `<div class="bubble">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
+                        var html = `<div class="bubble" align="left">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
                         div.innerHTML = html;
                     } else {
                         var html = `
