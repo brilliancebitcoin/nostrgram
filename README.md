@@ -43,7 +43,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] make the image attach button prompt you to upload your image to imgur and then paste the link
 * [x] make anigma not autoscroll to the bottom unless you are already close to the bottom (fixed on desktop)
 * [x] fix the same bug on mobile
-* [x] add message replies via long press or right click
+* [x] add message replies via long press or right click (I ended up going with a short click or tap)
 * [ ] private groups with shared decryption keys
 * [ ] make an option to set and modify relays in settings
 * [ ] connect to at least two relays by default
