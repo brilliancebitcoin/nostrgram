@@ -43,13 +43,13 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] make the image attach button prompt you to upload your image to imgur and then paste the link
 * [x] make anigma not autoscroll to the bottom unless you are already close to the bottom (fixed on desktop)
 * [x] fix the same bug on mobile
+* [x] add message replies via long press or right click
 * [ ] private groups with shared decryption keys
 * [ ] make an option to set and modify relays in settings
 * [ ] connect to at least two relays by default
 * [ ] import channels and other backed up data when you import an account
 * [ ] parse and display @[username] and @[pubkey] as links to profile pages (see nip08 for a spec)
 * [ ] show a green message counter in channels where someone @'d you or dm'd you or replied to you
-* [ ] add message replies via long press or right click
 * [ ] add sticky messages
 * [ ] let channel creators blacklist posts and users (blacklists are enforced client side, so client software can optionally ignore them)
 * [ ] let channel creators add admins with sticky powers and blacklisting powers
