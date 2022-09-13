@@ -696,12 +696,17 @@
                     var replyclass = "reply-in-white";
                 }
                 var replyAuthor = `<span class="reply-author">Unknown</span>`;
+                if ( isMine ) {
+                    replyAuthor = `<span class="reply-author">${document.getElementsByClassName( "user-profile-inner" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerText}</span>`;
+                }
                 var replyContent = "This post is a reply to a message that could not be found";
                 var replyPrefix = "";
                 if ( replyingTo && replyingTo != "" ) {
                     if ( document.getElementsByClassName( replyingTo )[ 0 ] && document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ] && document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ] ) {
                         var replyPubkey = document.getElementsByClassName( replyingTo )[ 0 ].getAttribute( "data-author" );
-                        replyAuthor = `<span class="reply-author ${replyPubkey}">` + document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "author" )[ 0 ].innerHTML + `</span>`;
+                        if ( !isMine ) {
+                            replyAuthor = `<span class="reply-author ${replyPubkey}">` + document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "author" )[ 0 ].innerHTML + `</span>`;
+                        }
                         replyContent = document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ].innerHTML;
                         shortened_reply_content = replyContent.replace( /\n/g, " " ).substring( 0, 50 );
                         if ( replyContent.length > 50 ) {
@@ -862,12 +867,17 @@
                     var replyclass = "reply-in-white";
                 }
                 var replyAuthor = `<span class="reply-author">Unknown</span>`;
+                if ( isMine ) {
+                    replyAuthor = `<span class="reply-author">${document.getElementsByClassName( "user-profile-inner" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerText}</span>`;
+                }
                 var replyContent = "This post is a reply to a message that could not be found";
                 var replyPrefix = "";
                 if ( replyingTo && replyingTo != "" ) {
                     if ( document.getElementsByClassName( replyingTo )[ 0 ] && document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ] && document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ] ) {
                         var replyPubkey = document.getElementsByClassName( replyingTo )[ 0 ].getAttribute( "data-author" );
-                        replyAuthor = `<span class="reply-author ${replyPubkey}">` + document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "author" )[ 0 ].innerHTML + `</span>`;
+                        if ( !isMine ) {
+                            replyAuthor = `<span class="reply-author ${replyPubkey}">` + document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "author" )[ 0 ].innerHTML + `</span>`;
+                        }
                         replyContent = document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ].innerHTML;
                         shortened_reply_content = replyContent.replace( /\n/g, " " ).substring( 0, 50 );
                         if ( replyContent.length > 50 ) {
