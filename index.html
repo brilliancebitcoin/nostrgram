@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, user-scalable=no" />
-    <link rel="stylesheet" href="styles.css?v=51" />
+    <link rel="stylesheet" href="styles.css?v=52" />
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="manifest.json">
     <title>Anigma</title>
@@ -719,7 +719,7 @@
                         replyContent = shortened_reply_content;
                     }
                     div.setAttribute( "data-replying-to", replyingTo );
-                    replyPrefix = `<div class="reply-prefix ${replyclass}" onclick='document.getElementsByClassName( "${replyingTo}" )[ 0 ].scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "0px 0px 25px 2px yellow";setTimeout( function() {document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "";}, 300 );event.stopPropagation();'>${replyAuthor}<br>${replyContent}</div>`
+                    replyPrefix = `<div class="reply-prefix ${replyclass}" onclick='document.getElementsByClassName( "${replyingTo}" )[ 0 ].scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "0px 0px 25px 2px yellow";setTimeout( function() {document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "";}, 600 );event.stopPropagation();'>${replyAuthor}<br>${replyContent}</div>`
                 }
                 if ( isMine ) {
                     div.classList.add( "me" );
@@ -890,7 +890,7 @@
                         replyContent = shortened_reply_content;
                     }
                     div.setAttribute( "data-replying-to", replyingTo );
-                    replyPrefix = `<div class="reply-prefix ${replyclass}" onclick='document.getElementsByClassName( "${replyingTo}" )[ 0 ].scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "0px 0px 25px 2px yellow";setTimeout( function() {document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "";}, 300 );event.stopPropagation();'>${replyAuthor}<br>${replyContent}</div>`
+                    replyPrefix = `<div class="reply-prefix ${replyclass}" onclick='document.getElementsByClassName( "${replyingTo}" )[ 0 ].scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "0px 0px 25px 2px yellow";setTimeout( function() {document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "";}, 600 );event.stopPropagation();'>${replyAuthor}<br>${replyContent}</div>`
                 }
                 if ( isMine ) {
                     div.classList.add( "me" );
@@ -1453,7 +1453,7 @@
                         }
                     });
                     div.setAttribute( "data-replying-to", replyingTo );
-                    replyPrefix = `<div class="reply-prefix ${replyclass}" onclick='document.getElementsByClassName( "${replyingTo}" )[ 0 ].scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "0px 0px 25px 2px yellow";setTimeout( function() {document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "";}, 300 );event.stopPropagation();'>${replyAuthor}<br>${replyContent}</div>`
+                    replyPrefix = `<div class="reply-prefix ${replyclass}" onclick='document.getElementsByClassName( "${replyingTo}" )[ 0 ].scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "0px 0px 25px 2px yellow";setTimeout( function() {document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "";}, 600 );event.stopPropagation();'>${replyAuthor}<br>${replyContent}</div>`
                 }
                 if ( isMine ) {
                     div.classList.add( "me" );
@@ -1544,7 +1544,7 @@
                             }
                         });
                         div.setAttribute( "data-replying-to", replyingTo );
-                        replyPrefix = `<div class="reply-prefix ${replyclass}" onclick='document.getElementsByClassName( "${replyingTo}" )[ 0 ].scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "0px 0px 25px 2px yellow";setTimeout( function() {document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "";}, 300 );event.stopPropagation();'>${replyAuthor}<br>${replyContent}</div>`
+                        replyPrefix = `<div class="reply-prefix ${replyclass}" onclick='document.getElementsByClassName( "${replyingTo}" )[ 0 ].scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "0px 0px 25px 2px yellow";setTimeout( function() {document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "";}, 600 );event.stopPropagation();'>${replyAuthor}<br>${replyContent}</div>`
                     }
                     if ( isMine ) {
                         div.classList.add( "me" );
