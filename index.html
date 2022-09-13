@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, user-scalable=no" />
-    <link rel="stylesheet" href="styles.css?v=50" />
+    <link rel="stylesheet" href="styles.css?v=51" />
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="manifest.json">
     <title>Anigma</title>
@@ -444,7 +444,9 @@
                         imagemap[ event.pubkey ] = JSON.parse( content )[ "picture" ];
                         localStorage[ "imagemap" ] = JSON.stringify( imagemap );
                         var i; for ( i=0; i<document.getElementsByClassName( event.pubkey ).length; i++ ) {
-                            document.getElementsByClassName( event.pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + JSON.parse( content )[ "picture" ] + ")";
+                            if ( document.getElementsByClassName( event.pubkey )[ i ] && document.getElementsByClassName( event.pubkey )[ i ].parentElement && document.getElementsByClassName( event.pubkey )[ i ].parentElement.parentElement && document.getElementsByClassName( event.pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ] ) {
+                                document.getElementsByClassName( event.pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + JSON.parse( content )[ "picture" ] + ")";
+                            }
                         }
                         if ( document.getElementsByClassName( "big-picture" )[ 0 ] && document.getElementsByClassName( "channel-wrapper" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerText != "Settings" && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText == event.pubkey ) {
                             document.getElementsByClassName( "big-picture" )[ 0 ].src = JSON.parse( content )[ "picture" ];
@@ -715,7 +717,7 @@
                         replyContent = shortened_reply_content;
                     }
                     div.setAttribute( "data-replying-to", replyingTo );
-                    replyPrefix = `<div class="reply-prefix ${replyclass}" onclick="document.getElementsByClassName( '${replyingTo}' )[ 0 ].scrollIntoView();event.stopPropagation();">${replyAuthor}<br>${replyContent}</div>`
+                    replyPrefix = `<div class="reply-prefix ${replyclass}" onclick='document.getElementsByClassName( "${replyingTo}" )[ 0 ].scrollIntoView();document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollTop - 200;document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "0px 0px 25px 2px yellow";setTimeout( function() {document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "";}, 300 );event.stopPropagation();'>${replyAuthor}<br>${replyContent}</div>`
                 }
                 if ( isMine ) {
                     div.classList.add( "me" );
@@ -886,7 +888,7 @@
                         replyContent = shortened_reply_content;
                     }
                     div.setAttribute( "data-replying-to", replyingTo );
-                    replyPrefix = `<div class="reply-prefix ${replyclass}" onclick="document.getElementsByClassName( '${replyingTo}' )[ 0 ].scrollIntoView();event.stopPropagation()">${replyAuthor}<br>${replyContent}</div>`
+                    replyPrefix = `<div class="reply-prefix ${replyclass}" onclick='document.getElementsByClassName( "${replyingTo}" )[ 0 ].scrollIntoView();document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollTop - 200;document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "0px 0px 25px 2px yellow";setTimeout( function() {document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "";}, 300 );event.stopPropagation();'>${replyAuthor}<br>${replyContent}</div>`
                 }
                 if ( isMine ) {
                     div.classList.add( "me" );
@@ -1449,7 +1451,7 @@
                         }
                     });
                     div.setAttribute( "data-replying-to", replyingTo );
-                    replyPrefix = `<div class="reply-prefix ${replyclass}" onclick="document.getElementsByClassName( '${replyingTo}' )[ 0 ].scrollIntoView();event.stopPropagation()">${replyAuthor}<br>${replyContent}</div>`
+                    replyPrefix = `<div class="reply-prefix ${replyclass}" onclick='document.getElementsByClassName( "${replyingTo}" )[ 0 ].scrollIntoView();document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollTop - 200;document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "0px 0px 25px 2px yellow";setTimeout( function() {document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "";}, 300 );event.stopPropagation();'>${replyAuthor}<br>${replyContent}</div>`
                 }
                 if ( isMine ) {
                     div.classList.add( "me" );
@@ -1540,7 +1542,7 @@
                             }
                         });
                         div.setAttribute( "data-replying-to", replyingTo );
-                        replyPrefix = `<div class="reply-prefix ${replyclass}" onclick="document.getElementsByClassName( '${replyingTo}' )[ 0 ].scrollIntoView();event.stopPropagation()">${replyAuthor}<br>${replyContent}</div>`
+                        replyPrefix = `<div class="reply-prefix ${replyclass}" onclick='document.getElementsByClassName( "${replyingTo}" )[ 0 ].scrollIntoView();document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollTop - 200;document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "0px 0px 25px 2px yellow";setTimeout( function() {document.getElementsByClassName( "${replyingTo}" )[ 0 ].style.boxShadow = "";}, 300 );event.stopPropagation();'>${replyAuthor}<br>${replyContent}</div>`
                     }
                     if ( isMine ) {
                         div.classList.add( "me" );
