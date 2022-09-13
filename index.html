@@ -711,7 +711,7 @@
                         if ( !isMine ) {
                             replyAuthor = `<span class="reply-author ${replyPubkey}">` + document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "author" )[ 0 ].innerHTML + `</span>`;
                         }
-                        replyContent = document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ].innerHTML;
+                        replyContent = document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ].innerText;
                         shortened_reply_content = replyContent.replace( /\n/g, " " ).substring( 0, 50 );
                         if ( replyContent.length > 50 ) {
                             shortened_reply_content = shortened_reply_content + "...";
@@ -882,7 +882,7 @@
                         if ( !isMine ) {
                             replyAuthor = `<span class="reply-author ${replyPubkey}">` + document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "author" )[ 0 ].innerHTML + `</span>`;
                         }
-                        replyContent = document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ].innerHTML;
+                        replyContent = document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ].innerText;
                         shortened_reply_content = replyContent.replace( /\n/g, " " ).substring( 0, 50 );
                         if ( replyContent.length > 50 ) {
                             shortened_reply_content = shortened_reply_content + "...";
