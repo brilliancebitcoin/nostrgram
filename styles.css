@@ -379,6 +379,7 @@ body {
     word-break: break-word;
     position: relative;
     max-width: 50vw;
+    transition: box-shadow 0.3s ease-in-out;
 }
 
 .chat .content .message-content .picture {
