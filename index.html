@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, user-scalable=no" />
-    <link rel="stylesheet" href="styles.css?v=49" />
+    <link rel="stylesheet" href="styles.css?v=50" />
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="manifest.json">
     <title>Anigma</title>
@@ -695,10 +695,13 @@
                 } else {
                     var replyclass = "reply-in-white";
                 }
+                var replyAuthor = `<span class="reply-author">Unknown</span>`;
                 var replyContent = "This post is a reply to a message that could not be found";
                 var replyPrefix = "";
                 if ( replyingTo && replyingTo != "" ) {
                     if ( document.getElementsByClassName( replyingTo )[ 0 ] && document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ] && document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ] ) {
+                        var replyPubkey = document.getElementsByClassName( replyingTo )[ 0 ].getAttribute( "data-author" );
+                        replyAuthor = `<span class="reply-author ${replyPubkey}">` + document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "author" )[ 0 ].innerHTML + `</span>`;
                         replyContent = document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ].innerHTML;
                         shortened_reply_content = replyContent.replace( /\n/g, " " ).substring( 0, 50 );
                         if ( replyContent.length > 50 ) {
@@ -707,7 +710,7 @@
                         replyContent = shortened_reply_content;
                     }
                     div.setAttribute( "data-replying-to", replyingTo );
-                    replyPrefix = `<div class="reply-prefix ${replyclass}">${replyContent}</div>`
+                    replyPrefix = `<div class="reply-prefix ${replyclass}" onclick="document.getElementsByClassName( '${replyingTo}' )[ 0 ].scrollIntoView();event.stopPropagation();">${replyAuthor}<br>${replyContent}</div>`
                 }
                 if ( isMine ) {
                     div.classList.add( "me" );
@@ -858,10 +861,13 @@
                 } else {
                     var replyclass = "reply-in-white";
                 }
+                var replyAuthor = `<span class="reply-author">Unknown</span>`;
                 var replyContent = "This post is a reply to a message that could not be found";
                 var replyPrefix = "";
                 if ( replyingTo && replyingTo != "" ) {
                     if ( document.getElementsByClassName( replyingTo )[ 0 ] && document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ] && document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ] ) {
+                        var replyPubkey = document.getElementsByClassName( replyingTo )[ 0 ].getAttribute( "data-author" );
+                        replyAuthor = `<span class="reply-author ${replyPubkey}">` + document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "author" )[ 0 ].innerHTML + `</span>`;
                         replyContent = document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ].innerHTML;
                         shortened_reply_content = replyContent.replace( /\n/g, " " ).substring( 0, 50 );
                         if ( replyContent.length > 50 ) {
@@ -870,7 +876,7 @@
                         replyContent = shortened_reply_content;
                     }
                     div.setAttribute( "data-replying-to", replyingTo );
-                    replyPrefix = `<div class="reply-prefix ${replyclass}">${replyContent}</div>`
+                    replyPrefix = `<div class="reply-prefix ${replyclass}" onclick="document.getElementsByClassName( '${replyingTo}' )[ 0 ].scrollIntoView();event.stopPropagation()">${replyAuthor}<br>${replyContent}</div>`
                 }
                 if ( isMine ) {
                     div.classList.add( "me" );
@@ -1416,11 +1422,14 @@
                 } else {
                     var replyclass = "reply-in-white";
                 }
+                var replyAuthor = `<span class="reply-author">Unknown</span>`;
                 var replyContent = "This post is a reply to a message that could not be found";
                 var replyPrefix = "";
                 if ( replyingTo && replyingTo != "" ) {
                     cached_messages.forEach( function( item ) {
                         if ( item[ replyingTo ] ) {
+                            var replyPubkey = item[ replyingTo ][ "pubkey" ];
+                            replyAuthor = `<span class="reply-author ${replyPubkey}">` + item[ replyingTo ][ "name" ] + `</span>`;
                             replyContent = item[ replyingTo ][ "content" ];
                             shortened_reply_content = replyContent.replace( /\n/g, " " ).substring( 0, 50 );
                             if ( replyContent.length > 50 ) {
@@ -1430,7 +1439,7 @@
                         }
                     });
                     div.setAttribute( "data-replying-to", replyingTo );
-                    replyPrefix = `<div class="reply-prefix ${replyclass}">${replyContent}</div>`
+                    replyPrefix = `<div class="reply-prefix ${replyclass}" onclick="document.getElementsByClassName( '${replyingTo}' )[ 0 ].scrollIntoView();event.stopPropagation()">${replyAuthor}<br>${replyContent}</div>`
                 }
                 if ( isMine ) {
                     div.classList.add( "me" );
@@ -1499,6 +1508,7 @@
                     div.classList.add( id );
                     var isMine = ( pubkey == pubKey );
                     div.setAttribute( "data-author", pubkey );
+                    var replyAuthor = `<span class="reply-author">Unknown</span>`;
                     var replyContent = "This post is a reply to a message that could not be found";
                     var replyPrefix = "";
                     if ( isMine ) {
@@ -1509,6 +1519,8 @@
                     if ( replyingTo && replyingTo != "" ) {
                         cached_messages.forEach( function( item ) {
                             if ( item[ replyingTo ] ) {
+                                var replyPubkey = item[ replyingTo ][ "pubkey" ];
+                                replyAuthor = `<span class="reply-author ${replyPubkey}">` + item[ replyingTo ][ "name" ] + `</span>`;
                                 replyContent = item[ replyingTo ][ "content" ];
                                 shortened_reply_content = replyContent.replace( /\n/g, " " ).substring( 0, 50 );
                                 if ( replyContent.length > 50 ) {
@@ -1518,7 +1530,7 @@
                             }
                         });
                         div.setAttribute( "data-replying-to", replyingTo );
-                        replyPrefix = `<div class="reply-prefix ${replyclass}">${replyContent}</div>`
+                        replyPrefix = `<div class="reply-prefix ${replyclass}" onclick="document.getElementsByClassName( '${replyingTo}' )[ 0 ].scrollIntoView();event.stopPropagation()">${replyAuthor}<br>${replyContent}</div>`
                     }
                     if ( isMine ) {
                         div.classList.add( "me" );
