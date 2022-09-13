@@ -313,6 +313,7 @@
         var alterPrivKey = privKey.substring( 32 ) + privKey.substring( 0, 32 );
         var alterPubKey = nobleSecp256k1.getPublicKey( alterPrivKey, true ).substring( 2 );
         var i_should_create_a_new_wallet = true;
+        sessionStorage[ "my-name" ] = pubKey.substring( 0, 15 ) + "...";
 
         async function getWallet() {
             if ( localStorage[ "wallet_info" ] ) {
@@ -375,6 +376,7 @@
                             if ( document.getElementsByClassName( "user-profile-inner" )[ 0 ] && document.getElementsByClassName( "user-profile-inner" )[ 0 ].getElementsByClassName( "name" )[ 0 ] && JSON.parse( content )[ "name" ] && JSON.parse( content )[ "name" ] != "" ) {
                                 document.getElementsByClassName( "user-profile-inner" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerHTML = JSON.parse( content )[ "name" ];
                             }
+                            sessionStorage[ "my-name" ] = JSON.parse( content )[ "name" ];
                         }
                         if ( "about" in JSON.parse( content ) ) {
                             if ( document.getElementsByClassName( "about-input" )[ 0 ] ) {
@@ -699,7 +701,7 @@
                 }
                 var replyAuthor = `<span class="reply-author">Unknown</span>`;
                 if ( isMine ) {
-                    replyAuthor = `<span class="reply-author">${document.getElementsByClassName( "user-profile-inner" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerText}</span>`;
+                    replyAuthor = `<span class="reply-author">${sessionStorage[ "my-name" ]}</span>`;
                 }
                 var replyContent = "This post is a reply to a message that could not be found";
                 var replyPrefix = "";
@@ -870,7 +872,7 @@
                 }
                 var replyAuthor = `<span class="reply-author">Unknown</span>`;
                 if ( isMine ) {
-                    replyAuthor = `<span class="reply-author">${document.getElementsByClassName( "user-profile-inner" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerText}</span>`;
+                    replyAuthor = `<span class="reply-author">${sessionStorage[ "my-name" ]}</span>`;
                 }
                 var replyContent = "This post is a reply to a message that could not be found";
                 var replyPrefix = "";
