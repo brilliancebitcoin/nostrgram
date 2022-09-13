@@ -1444,7 +1444,7 @@
                         if ( item[ replyingTo ] ) {
                             var replyPubkey = item[ replyingTo ][ "pubkey" ];
                             replyAuthor = `<span class="reply-author ${replyPubkey}">` + item[ replyingTo ][ "name" ] + `</span>`;
-                            replyContent = item[ replyingTo ][ "content" ];
+                            replyContent = item[ replyingTo ][ "content" ].replace( /&/g, "&#38;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
                             shortened_reply_content = replyContent.replace( /\n/g, " " ).substring( 0, 50 );
                             if ( replyContent.length > 50 ) {
                                 shortened_reply_content = shortened_reply_content + "...";
@@ -1535,7 +1535,7 @@
                             if ( item[ replyingTo ] ) {
                                 var replyPubkey = item[ replyingTo ][ "pubkey" ];
                                 replyAuthor = `<span class="reply-author ${replyPubkey}">` + item[ replyingTo ][ "name" ] + `</span>`;
-                                replyContent = item[ replyingTo ][ "content" ];
+                                replyContent = item[ replyingTo ][ "content" ].replace( /&/g, "&#38;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
                                 shortened_reply_content = replyContent.replace( /\n/g, " " ).substring( 0, 50 );
                                 if ( replyContent.length > 50 ) {
                                     shortened_reply_content = shortened_reply_content + "...";
