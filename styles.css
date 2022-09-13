@@ -379,7 +379,6 @@ body {
     word-break: break-word;
     position: relative;
     max-width: 50vw;
-    transition: box-shadow 0.6s ease-in-out;
 }
 
 .chat .content .message-content .picture {
@@ -404,6 +403,7 @@ body {
     white-space: pre-wrap;
     vertical-align: middle;
     max-width: 50vw;
+    transition: box-shadow 0.6s ease-in-out;
 }
 
 .chat .content .message-content .message .bubble a {
