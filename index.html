@@ -1851,7 +1851,7 @@
             Object.keys( imagemap ).forEach( function( pubkey ) {
                 if ( pubkey in imagemap && imagemap[ pubkey ] != "none" ) {
                     var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
-                        if ( !document.getElementsByClassName( pubkey )[ i ].classList.contains( "removable-channel" ) ) {
+                        if ( !document.getElementsByClassName( pubkey )[ i ].classList.contains( "removable-channel" ) && document.getElementsByClassName( pubkey )[ i ] && document.getElementsByClassName( pubkey )[ i ].parentElement && document.getElementsByClassName( pubkey )[ i ].parentElement.parentElement && document.getElementsByClassName( pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ] ) {
                             document.getElementsByClassName( pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + imagemap[ pubkey ] + ")";
                         }
                     }
