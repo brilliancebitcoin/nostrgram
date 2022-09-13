@@ -87,6 +87,10 @@
                 if ( balance_for_notification > 999 ) {
                     balance_for_notification = "999+";
                 }
+                if ( !sessionStorage[ "wallet_checked" ] ) {
+                    sessionStorage[ "wallet_checked" ] = "checked";
+                    localStorage[ "wallet_balance" ] = String( balance );
+                }
                 document.getElementsByClassName( "manage-wallet-outer" )[ 0 ].getElementsByClassName( "notification" )[ 0 ].innerText = String( balance_for_notification );
                 document.getElementsByClassName( "manage-wallet-outer" )[ 0 ].setAttribute( "data-current-balance", String( balance ) );
                 document.getElementsByClassName( "manage-wallet-outer" )[ 0 ].getElementsByClassName( "notification" )[ 0 ].style.display = "inline";
