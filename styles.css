@@ -193,6 +193,7 @@ body {
     flex-direction: column;
     background: url("./cartoons.png") repeat center center fixed;
     background-size: 600px;
+    overflow-y: scroll;
 }
 
 .chat .content .message-header {
@@ -354,7 +355,6 @@ body {
     flex-direction: column;
     padding: 15px;
     overflow: auto;
-    background: url("./cartoons.png") repeat center center fixed;
     background-size: 600px;
     overflow-y: scroll;
     overflow-x: clip;
