@@ -1367,7 +1367,7 @@
     <script>
         function clickSendPublicWithReply( e ) {
             keymap[ "Shift" ] = false;
-            var event_id = document.getElementsByClassName( "reply-div" )[ 0 ].getAttribute( "data-event_id" );
+            var event_id = document.getElementsByClassName( "reply-div" )[ 0 ].getAttribute( "data-event-id" );
             var pubkey = document.getElementsByClassName( "reply-div" )[ 0 ].getAttribute( "data-pubkey" );
             sendNoteWithReply( event_id, pubkey );
             if ( window.innerWidth < 601 ) {
@@ -1588,7 +1588,7 @@
                 "content"    : note,
                 "created_at" : now,
                 "kind"       : 42,
-                "tags"       : [ ["e", id] ],
+                "tags"       : [ [ "e", id ] ],
                 "pubkey"     : pubKey,
             }
             var signedEvent = await getSignedEvent( event, privKey );
@@ -1606,11 +1606,13 @@
                 "content"    : note,
                 "created_at" : now,
                 "kind"       : 42,
-                "tags"       : [ ["e", id], ["e", id_of_post_being_replied_to], ["p", pubkey_of_person_being_replied_to] ],
+                "tags"       : [ [ "e", id ], [ "e", id_of_post_being_replied_to ], [ "p", pubkey_of_person_being_replied_to ] ],
                 "pubkey"     : pubKey,
             }
             var signedEvent = await getSignedEvent( event, privKey );
+            console.log( event );
             socket.send( JSON.stringify( [ "EVENT", signedEvent ] ) );
+            console.log( signedEvent );
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
             document.getElementsByClassName( "reply-div" )[ 0 ].style.display = "none";
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.removeEventListener( 'keypress', enterSendPublicWithReply );
