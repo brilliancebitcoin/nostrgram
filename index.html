@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, user-scalable=no" />
-    <link rel="stylesheet" href="styles.css?v=47" />
+    <link rel="stylesheet" href="styles.css?v=48" />
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="manifest.json">
     <title>Anigma</title>
@@ -142,7 +142,7 @@
                     if ( !url.startsWith( "http://" ) && !url.startsWith( "https://" ) ) {
                         url2 = "http://" + url;
                     }
-                    return `<a href="${url2}" target="_blank" rel="nofollow noopener" style="color: #4287f5;">${url}</a>`;
+                    return `<a href="${url2}" target="_blank" rel="nofollow noopener" style="color: #4287f5;" onclick="event.stopPropagation()">${url}</a>`;
                 })                
             }
             if ( isMine && !text.match( ytRegex ) && !text.match( imgRegex ) ) {
@@ -154,7 +154,7 @@
                     if ( !url.startsWith( "http://" ) && !url.startsWith( "https://" ) ) {
                         url2 = "http://" + url;
                     }
-                    return `<a href="${url2}" target="_blank" rel="nofollow noopener" style="color: white;">${url}</a>`;
+                    return `<a href="${url2}" target="_blank" rel="nofollow noopener" style="color: white;" onclick="event.stopPropagation()">${url}</a>`;
                 })
             }
             if ( text.match( imgRegex ) ) {
@@ -180,7 +180,7 @@
                         imgs.unshift( img );
                     }
                     localStorage[ "img_cache" ] = JSON.stringify( imgs );
-                    return `<a href="${img}" target="_blank" rel="nofollow noopener"><img src="${img}" /></a>`;
+                    return `<a href="${img}" target="_blank" rel="nofollow noopener" onclick="event.stopPropagation()"><img src="${img}" onclick="event.stopPropagation()" /></a>`;
                 })
             }
             if ( text.match( ytRegex ) ) {
@@ -188,7 +188,7 @@
                     if ( yt.endsWith( ")" ) ) {
                         yt = yt.substring( 0, yt.length - 1 );
                     }
-                    var vid = `<div class="youtube-wrapper"><img class="ratio" src="./16x9-transparent.png"/><iframe class="youtube-video" src="${"https://www.youtube-nocookie.com/embed/" + youtube_parser( yt )}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><span class="p-in-p" onclick='moveVid( this.previousElementSibling );'>Picture-in-picture</span>`;
+                    var vid = `<div class="youtube-wrapper" onclick="event.stopPropagation()"><img class="ratio" src="./16x9-transparent.png" onclick="event.stopPropagation()" /><iframe class="youtube-video" src="${"https://www.youtube-nocookie.com/embed/" + youtube_parser( yt )}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen onclick="event.stopPropagation()"></iframe></div><span class="p-in-p" onclick='moveVid( this.previousElementSibling );event.stopPropagation()'>Picture-in-picture</span>`;
                     return vid;
                 })
             }
@@ -292,7 +292,7 @@
             subscribed_channels.forEach( function( id ) {
                 msg_cache[ id ] = [];
             });
-            Object.keys(dms_info).forEach( function( pubkey ) {
+            Object.keys( dms_info ).forEach( function( pubkey ) {
                 msg_cache[ pubkey ] = [];
             });
             localStorage[ "msg_cache" ] = JSON.stringify( msg_cache );
@@ -530,6 +530,45 @@
                     submitUserInfo();
                 }
             }
+            if ( subId.startsWith( "00000004" ) ) {
+                if ( content ) {
+                    if ( event.pubkey == pubKey ) {
+                        var otherKey = "";
+                        var i; for ( i=0; i<event.tags.length; i++ ) {
+                            if ( event[ "tags" ][ i ][ 0 ] == "p" && ( !otherKey || otherKey == "" ) ) {
+                                otherKey = event[ "tags" ][ i ][ 1 ];
+                                break;
+                            } else {
+                                otherKey = event.pubkey;
+                            }
+                        }
+                    } else {
+                        otherKey = event.pubkey;
+                    }
+                    if ( kind == 4 ) {
+                        if ( !admin && window.nostr ) {
+                            content = await window.nostr.nip04.decrypt( otherKey, content );
+                        } else {
+                            content = await decrypt(privKey, otherKey, content)
+                        }
+                    }
+                    var shortened_content = content.replace( /\n/g, " " ).substring( 0, 50 );
+                    if ( content.length > 50 ) {
+                        shortened_content = shortened_content + "...";
+                    }
+                    shortened_content = shortened_content.replace( /\'/g, "\\'" );
+                    document.getElementById( "modal" ).innerHTML = "";
+                    document.getElementById( "modal" ).innerHTML += `<div><strong>Message</strong></div>`;
+                    document.getElementById( "modal" ).innerHTML += shortened_content;
+                    document.getElementById( "modal" ).innerHTML += `<hr style="border: 1px solid; margin-top: 20px;" />`;
+                    document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="replyToMsg( '${event.id}', '${shortened_content}', '${event.pubkey}' )">Reply to this message</button></div>`;
+                    //document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="atAUser( '${event.pubkey}' )">@ this user</button></div>`;
+                    document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="window.open( 'https://nostr.com/e/${event.id}', '_blank' )">View this event on nostr.com</button></div>`;
+                    document.getElementById( "black-bg" ).style.display = "block";
+                    document.getElementById( "modal" ).style.display = "block";
+                    document.getElementById( "modal" ).style.textAlign = "left";
+                }
+            }
             if ( kind == 40 ) {
                 if ( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( event.id )[ 0 ] ) return
                 var isError = checkForChannelSubscriptionErrors( content );
@@ -555,11 +594,20 @@
                 if ( !isMine && !array_of_pubkeys.includes( event.pubkey ) ) {
                     array_of_pubkeys.push( event.pubkey );
                 }
-                var parent = "";
+                var events_replied_to = [];
+                var pubkeys_replied_to = [];
                 var i; for ( i=0; i<event.tags.length; i++ ) {
-                    if ( event[ "tags" ][ i ][ 0 ] == "e" && ( !parent || parent == "" ) ) {
-                        parent = event[ "tags" ][ i ][ 1 ];
+                    if ( event[ "tags" ][ i ][ 0 ] == "e" ) {
+                        events_replied_to.push( event[ "tags" ][ i ][ 1 ] );
                     }
+                    if ( event[ "tags" ][ i ][ 0 ] == "p" ) {
+                        pubkeys_replied_to.push( event[ "tags" ][ i ][ 1 ] );
+                    }
+                }
+                var parent = events_replied_to[ 0 ];
+                var replyingTo = "";
+                if ( events_replied_to[ 1 ] ) {
+                    replyingTo = events_replied_to[ 1 ];
                 }
                 var shortened_content = content.replace( /\n/g, " " ).substring( 0, 50 );
                 if ( content.length > 50 ) {
@@ -617,7 +665,7 @@
                     }
                 });
                 if ( !messageIsKnown ) {
-                    addMessageToCache( event.pubkey, event.id, event_time, parent, color, name, picture, content );
+                    addMessageToCache( event.pubkey, event.id, event_time, parent, color, name, picture, content, replyingTo );
                     if ( !document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].classList.contains( "active" ) ) {
                         var old_num_of_new_messages = Number( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].getAttribute( "data-num-of-new-messages" ) );                        
                         new_num_of_new_messages = old_num_of_new_messages + 1;
@@ -639,13 +687,32 @@
                 div.classList.add( event.id );
                 div.setAttribute( "data-author", event.pubkey );
                 if ( isMine ) {
+                    var replyclass = "reply-in-blue";
+                } else {
+                    var replyclass = "reply-in-white";
+                }
+                var replyContent = "This post is a reply to a message that could not be found";
+                var replyPrefix = "";
+                if ( replyingTo && replyingTo != "" ) {
+                    if ( document.getElementsByClassName( replyingTo )[ 0 ] && document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ] && document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ] ) {
+                        replyContent = document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ].innerHTML;
+                        shortened_reply_content = replyContent.replace( /\n/g, " " ).substring( 0, 50 );
+                        if ( replyContent.length > 50 ) {
+                            shortened_reply_content = shortened_reply_content + "...";
+                        }
+                        replyContent = shortened_reply_content;
+                    }
+                    div.setAttribute( "data-replying-to", replyingTo );
+                    replyPrefix = `<div class="reply-prefix ${replyclass}">${replyContent}</div>`
+                }
+                if ( isMine ) {
                     div.classList.add( "me" );
-                    var html = `<div class="bubble">${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
+                    var html = `<div class="bubble" onclick="msgContext( '${event.id}' )">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
                     div.innerHTML = html;
                 } else {
                     var html = `
                         <span class="picture" style="background-image: url('${picture}')" onclick="showProfile( '${event.pubkey}', '${name}', '${picture}' )"></span>
-                        <div class="bubble"><div class="author ${color} ${event.pubkey}">${name}</div>${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
+                        <div class="bubble" onclick="msgContext( '${event.id}' )"><div class="author ${color} ${event.pubkey}">${name}</div>${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
                     `;
                     div.innerHTML = html;
                 }
@@ -706,6 +773,7 @@
                     var i; for ( i=0; i<event.tags.length; i++ ) {
                         if ( event[ "tags" ][ i ][ 0 ] == "p" && ( !otherKey || otherKey == "" ) ) {
                             otherKey = event[ "tags" ][ i ][ 1 ];
+                            break;
                         } else {
                             otherKey = event.pubkey;
                         }
@@ -755,6 +823,20 @@
                 }
                 content = content.replace( /&/g, "&#38;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
                 content = markdownify( content, isMine );
+                var events_replied_to = [];
+                var pubkeys_replied_to = [];
+                var i; for ( i=0; i<event.tags.length; i++ ) {
+                    if ( event[ "tags" ][ i ][ 0 ] == "e" ) {
+                        events_replied_to.push( event[ "tags" ][ i ][ 1 ] );
+                    }
+                    if ( event[ "tags" ][ i ][ 0 ] == "p" ) {
+                        pubkeys_replied_to.push( event[ "tags" ][ i ][ 1 ] );
+                    }
+                }
+                var replyingTo = "";
+                if ( events_replied_to[ 0 ] ) {
+                    replyingTo = events_replied_to[ 0 ];
+                }
                 var div = document.createElement( "div" );
                 div.classList.add( "message" );
                 div.classList.add( event.id );
@@ -765,16 +847,35 @@
                 msg_cache[ parent ].forEach( function( message ) {
                     existing_messages.push( Object.keys( message ) [ 0 ] )
                 });
-                addMessageToCache( event.pubkey, event.id, event_time, parent, color, name, picture, content );
+                addMessageToCache( event.pubkey, event.id, event_time, parent, color, name, picture, content, replyingTo );
                 div.setAttribute( "data-author", event.pubkey );
                 if ( isMine ) {
+                    var replyclass = "reply-in-blue";
+                } else {
+                    var replyclass = "reply-in-white";
+                }
+                var replyContent = "This post is a reply to a message that could not be found";
+                var replyPrefix = "";
+                if ( replyingTo && replyingTo != "" ) {
+                    if ( document.getElementsByClassName( replyingTo )[ 0 ] && document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ] && document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ] ) {
+                        replyContent = document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ].innerHTML;
+                        shortened_reply_content = replyContent.replace( /\n/g, " " ).substring( 0, 50 );
+                        if ( replyContent.length > 50 ) {
+                            shortened_reply_content = shortened_reply_content + "...";
+                        }
+                        replyContent = shortened_reply_content;
+                    }
+                    div.setAttribute( "data-replying-to", replyingTo );
+                    replyPrefix = `<div class="reply-prefix ${replyclass}">${replyContent}</div>`
+                }
+                if ( isMine ) {
                     div.classList.add( "me" );
-                    var html = `<div class="bubble">${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
+                    var html = `<div class="bubble" onclick="msgContext( '${event.id}' )">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
                     div.innerHTML = html;
                 } else {
                     var html = `
                         <span class="picture" style="background-image: url('${picture}')" onclick="showProfile( '${event.pubkey}', '${name}', '${picture}' )"></span>
-                        <div class="bubble"><div class="author ${color} ${event.pubkey}">${name}</div>${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
+                        <div class="bubble" onclick="msgContext( '${event.id}' )"><div class="author ${color} ${event.pubkey}">${name}</div>${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
                     `;
                     div.innerHTML = html;
                 }
@@ -858,6 +959,7 @@
                     var i; for ( i=0; i<event.tags.length; i++ ) {
                         if ( event[ "tags" ][ i ][ 0 ] == "p" && ( !otherKey || otherKey == "" ) ) {
                             otherKey = event[ "tags" ][ i ][ 1 ];
+                            break;
                         } else {
                             otherKey = event.pubkey;
                         }
@@ -866,6 +968,19 @@
                     otherKey = event.pubkey;
                 }
                 var parent = otherKey;
+                var events_replied_to = [];
+                var pubkeys_replied_to = [];
+                var i; for ( i=0; i<event.tags.length; i++ ) {
+                    if ( event[ "tags" ][ i ][ 0 ] == "e" ) {
+                        events_replied_to.push( event[ "tags" ][ i ][ 1 ] );
+                    }
+                    if ( event[ "tags" ][ i ][ 0 ] == "p" ) {
+                        pubkeys_replied_to.push( event[ "tags" ][ i ][ 1 ] );
+                    }
+                }
+                if ( events_replied_to[ 0 ] ) {
+                    var replyingTo = events_replied_to[ 0 ];
+                }
                 if ( !msg_cache[ parent ] ) {
                     msg_cache[ parent ] = [];
                 }
@@ -1112,6 +1227,7 @@
                 <div class="message-content">
                 </div>
                 <div class="message-form">
+                    <div class="reply-div"></div>
                     <ul>
                         <li class="emoji-btn" onclick="showEmojis( 0 )">
                             <a>
@@ -1205,28 +1321,59 @@
             document.getElementsByClassName( "hotdog" )[ 0 ].addEventListener( "click", function() {
                 showSettings();
             });
-            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', function ( e ) {
-                if ( e.key === 'Enter' && !isShiftDown() ) {
-                    sendNote();
-                    if ( window.innerWidth < 601 ) {
-                        document.getElementsByClassName( "note-input" )[ 0 ].focus();
-                        document.getElementsByClassName( "note-input" )[ 0 ].select();
-                    }
-                }
-            });
-            document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', function ( e ) {
-                keymap[ "Shift" ] = false;
-                sendNote();
-                if ( window.innerWidth < 601 ) {
-                    document.getElementsByClassName( "note-input" )[ 0 ].focus();
-                    document.getElementsByClassName( "note-input" )[ 0 ].select();
-                }
-            });
+            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendPublic );
+            document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendPublic );
             document.getElementsByClassName( "sound-btn" )[ 0 ].addEventListener( "click", function() {showToast( "coming soon" );});
             document.getElementsByClassName( "image-btn" )[ 0 ].addEventListener( "click", function() {
                 showImgs();
             });
             addMessages( channel.getAttribute( "data-id" ) );
+        }
+    </script>
+    <script>
+        function enterSendPublic( e ) {
+            if ( e.key === 'Enter' && !isShiftDown() ) {
+                sendNote();
+                if ( window.innerWidth < 601 ) {
+                    document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                    document.getElementsByClassName( "note-input" )[ 0 ].select();
+                }
+            }
+        }
+    </script>
+    <script>
+        function enterSendPublicWithReply( e ) {
+            if ( e.key === 'Enter' && !isShiftDown() ) {
+                var event_id = document.getElementsByClassName( "reply-div" )[ 0 ].getAttribute( "data-event-id" );
+                var pubkey = document.getElementsByClassName( "reply-div" )[ 0 ].getAttribute( "data-pubkey" );
+                sendNoteWithReply( event_id, pubkey );
+                if ( window.innerWidth < 601 ) {
+                    document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                    document.getElementsByClassName( "note-input" )[ 0 ].select();
+                }
+            }
+        }
+    </script>
+    <script>
+        function clickSendPublic( e ) {
+            keymap[ "Shift" ] = false;
+            sendNote();
+            if ( window.innerWidth < 601 ) {
+                document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                document.getElementsByClassName( "note-input" )[ 0 ].select();
+            }
+        }
+    </script>
+    <script>
+        function clickSendPublicWithReply( e ) {
+            keymap[ "Shift" ] = false;
+            var event_id = document.getElementsByClassName( "reply-div" )[ 0 ].getAttribute( "data-event_id" );
+            var pubkey = document.getElementsByClassName( "reply-div" )[ 0 ].getAttribute( "data-pubkey" );
+            sendNoteWithReply( event_id, pubkey );
+            if ( window.innerWidth < 601 ) {
+                document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                document.getElementsByClassName( "note-input" )[ 0 ].select();
+            }
         }
     </script>
     <script>
@@ -1243,6 +1390,10 @@
                 var parent = msg[ Object.keys( msg )[ 0 ] ][ "parent" ];
                 var picture = msg[ Object.keys( msg )[ 0 ] ][ "picture" ];
                 var pubkey = msg[ Object.keys( msg )[ 0 ] ][ "pubkey" ];
+                var replyingTo = "";
+                if ( "replyingTo" in msg[ Object.keys( msg )[ 0 ] ] ) {
+                    replyingTo = msg[ Object.keys( msg )[ 0 ] ][ "replyingTo" ];
+                }
                 var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
                 var how_long_ago = convertHMS( now - event_time )
                 var div = document.createElement( "div" );
@@ -1257,13 +1408,34 @@
                 div.setAttribute( "data-author", pubkey );
                 var isMine = ( pubkey == pubKey );
                 if ( isMine ) {
+                    var replyclass = "reply-in-blue";
+                } else {
+                    var replyclass = "reply-in-white";
+                }
+                var replyContent = "This post is a reply to a message that could not be found";
+                var replyPrefix = "";
+                if ( replyingTo && replyingTo != "" ) {
+                    cached_messages.forEach( function( item ) {
+                        if ( item[ replyingTo ] ) {
+                            replyContent = item[ replyingTo ][ "content" ];
+                            shortened_reply_content = replyContent.replace( /\n/g, " " ).substring( 0, 50 );
+                            if ( replyContent.length > 50 ) {
+                                shortened_reply_content = shortened_reply_content + "...";
+                            }
+                            replyContent = shortened_reply_content;
+                        }
+                    });
+                    div.setAttribute( "data-replying-to", replyingTo );
+                    replyPrefix = `<div class="reply-prefix ${replyclass}">${replyContent}</div>`
+                }
+                if ( isMine ) {
                     div.classList.add( "me" );
-                    var html = `<div class="bubble">${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
+                    var html = `<div class="bubble" onclick="msgContext( '${id}' )">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
                     div.innerHTML = html;
                 } else {
                     var html = `
                         <span class="picture" style="background-image: url('${picture}')" onclick="showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
-                        <div class="bubble"><div class="author ${color} ${pubkey}">${name}</div>${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
+                        <div class="bubble" onclick="msgContext( '${id}' )"><div class="author ${color} ${pubkey}">${name}</div>${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
                     `;
                     div.innerHTML = html;
                 }
@@ -1306,6 +1478,10 @@
                     var parent = msg[ Object.keys( msg )[ 0 ] ][ "parent" ];
                     var picture = msg[ Object.keys( msg )[ 0 ] ][ "picture" ];
                     var pubkey = msg[ Object.keys( msg )[ 0 ] ][ "pubkey" ];
+                    var replyingTo = "";
+                    if ( "replyingTo" in msg[ Object.keys( msg )[ 0 ] ] ) {
+                        replyingTo = msg[ Object.keys( msg )[ 0 ] ][ "replyingTo" ];
+                    }
                     var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
                     var how_long_ago = convertHMS( now - event_time )
                     var div = document.createElement( "div" );
@@ -1319,14 +1495,35 @@
                     div.classList.add( id );
                     var isMine = ( pubkey == pubKey );
                     div.setAttribute( "data-author", pubkey );
+                    var replyContent = "This post is a reply to a message that could not be found";
+                    var replyPrefix = "";
+                    if ( isMine ) {
+                        var replyclass = "reply-in-blue";
+                    } else {
+                        var replyclass = "reply-in-white";
+                    }
+                    if ( replyingTo && replyingTo != "" ) {
+                        cached_messages.forEach( function( item ) {
+                            if ( item[ replyingTo ] ) {
+                                replyContent = item[ replyingTo ][ "content" ];
+                                shortened_reply_content = replyContent.replace( /\n/g, " " ).substring( 0, 50 );
+                                if ( replyContent.length > 50 ) {
+                                    shortened_reply_content = shortened_reply_content + "...";
+                                }
+                                replyContent = shortened_reply_content;
+                            }
+                        });
+                        div.setAttribute( "data-replying-to", replyingTo );
+                        replyPrefix = `<div class="reply-prefix ${replyclass}">${replyContent}</div>`
+                    }
                     if ( isMine ) {
                         div.classList.add( "me" );
-                        var html = `<div class="bubble">${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
+                        var html = `<div class="bubble" onclick="msgContext( '${id}' )">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
                         div.innerHTML = html;
                     } else {
                         var html = `
                             <span class="picture" style="background-image: url('${picture}')" onclick="showProfile( '${pubkey}', '${name}', '${picture}' )"></span>
-                            <div class="bubble"><div class="author ${color} ${pubkey}">${name}</div>${content}<div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
+                            <div class="bubble" onclick="msgContext( '${id}' )"><div class="author ${color} ${pubkey}">${name}</div>${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
                         `;
                         div.innerHTML = html;
                     }
@@ -1391,12 +1588,35 @@
                 "content"    : note,
                 "created_at" : now,
                 "kind"       : 42,
-                "tags"       : [["e", id]],
+                "tags"       : [ ["e", id] ],
                 "pubkey"     : pubKey,
             }
             var signedEvent = await getSignedEvent( event, privKey );
             socket.send( JSON.stringify( [ "EVENT", signedEvent ] ) );
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
+        }
+    </script>
+    <script>
+        async function sendNoteWithReply( id_of_post_being_replied_to, pubkey_of_person_being_replied_to ) {
+            var note = document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value;
+            if ( !note || note == "" ) return;
+            var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
+            var id = document.getElementsByClassName( "channel-outer active" )[ 0 ].getAttribute( "data-id" );
+            var event = {
+                "content"    : note,
+                "created_at" : now,
+                "kind"       : 42,
+                "tags"       : [ ["e", id], ["e", id_of_post_being_replied_to], ["p", pubkey_of_person_being_replied_to] ],
+                "pubkey"     : pubKey,
+            }
+            var signedEvent = await getSignedEvent( event, privKey );
+            socket.send( JSON.stringify( [ "EVENT", signedEvent ] ) );
+            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
+            document.getElementsByClassName( "reply-div" )[ 0 ].style.display = "none";
+            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.removeEventListener( 'keypress', enterSendPublicWithReply );
+            document.getElementsByClassName( "send-btn" )[ 0 ].removeEventListener( 'click', clickSendPublicWithReply );
+            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendPublic );
+            document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendPublic );
         }
     </script>
     <script>
@@ -1415,11 +1635,42 @@
                 "tags"       : [ [ 'p', pubkey ] ],
                 "pubkey"     : pubKey,
             }
-            var signedEvent = await getSignedEvent(event, privKey)
-            socket.send( JSON.stringify( [ "EVENT", signedEvent ] ) )
+            var signedEvent = await getSignedEvent( event, privKey );
+            socket.send( JSON.stringify( [ "EVENT", signedEvent ] ) );
             if ( document.getElementsByClassName( "input" )[ 0 ] && document.getElementsByClassName( "input" )[ 0 ].firstElementChild ) {
                 document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
             }
+        }
+    </script>
+    <script>
+        async function sendEncryptedNoteWithReply( note, pubkey, id_of_post_being_replied_to, pubkey_of_person_being_replied_to ) {
+            if ( !note || note == "" ) return;
+            var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
+            if ( !admin && window.nostr ) {
+                var encrypted = await window.nostr.nip04.encrypt( pubkey, note );
+            } else {
+                var encrypted = encrypt( privKey, pubkey, note );
+            }
+            var event = {
+                "content"    : encrypted,
+                "created_at" : now,
+                "kind"       : 4,
+                "tags"       : [ [ 'p', pubkey ], [ 'e', id_of_post_being_replied_to ] ],
+                "pubkey"     : pubKey,
+            }
+            if ( pubkey != pubkey_of_person_being_replied_to ) {
+                event[ "tags" ].push( [ 'p', pubkey_of_person_being_replied_to ] );
+            }
+            var signedEvent = await getSignedEvent( event, privKey );
+            socket.send( JSON.stringify( [ "EVENT", signedEvent ] ) );
+            if ( document.getElementsByClassName( "input" )[ 0 ] && document.getElementsByClassName( "input" )[ 0 ].firstElementChild ) {
+                document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
+            }
+            document.getElementsByClassName( "reply-div" )[ 0 ].style.display = "none";
+            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.removeEventListener( 'keypress', enterSendPrivateWithReply );
+            document.getElementsByClassName( "send-btn" )[ 0 ].removeEventListener( 'click', clickSendPrivateWithReply );
+            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendPrivate );
+            document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendPrivate );
         }
     </script>
     <script>
@@ -1495,6 +1746,68 @@
                 var pubkey = document.getElementsByClassName( "dm-outer" )[ i ].getAttribute( "data-pubkey" );
                 getUserMeta( pubkey );
             }
+        }
+    </script>
+    <script>
+        function msgContext( id ) {
+            var msgSubId   = "00000004" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 );
+            var msgFilter  = { "ids": [ id ] }
+            var msgSub     = [ "REQ", msgSubId, msgFilter ];
+            if ( admin && socket && socket.readyState != 0 ) {
+                socket.send( JSON.stringify( msgSub ) );
+            }
+            setTimeout( function() {
+                var closer = [ "CLOSE", msgSubId ];
+                if ( socket && socket.readyState != 0 ) {
+                    socket.send( JSON.stringify( closer ) );
+                }
+            }, 1500 );
+        }
+    </script>
+    <script>
+        function replyToMsg( id, content, pubkey ) {
+            document.getElementById( "black-bg" ).style.display = "none";
+            document.getElementById( "modal" ).style.display = "none";
+            document.getElementsByClassName( "reply-div" )[ 0 ].innerHTML = `<span class="reply-x" onclick="removeReply();">&times; </span>`;
+            document.getElementsByClassName( "reply-div" )[ 0 ].innerHTML += content;
+            document.getElementsByClassName( "reply-div" )[ 0 ].setAttribute( "data-event-id", id );
+            document.getElementsByClassName( "reply-div" )[ 0 ].setAttribute( "data-pubkey", pubkey );
+            document.getElementsByClassName( "reply-div" )[ 0 ].style.display = "block";
+            if ( !document.getElementsByClassName( "active" )[ 0 ].getAttribute( "data-pubkey" ) ) {
+                document.getElementsByClassName( "input" )[ 0 ].firstElementChild.removeEventListener( 'keypress', enterSendPublic );
+                document.getElementsByClassName( "send-btn" )[ 0 ].removeEventListener( 'click', clickSendPublic );
+                document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendPublicWithReply );
+                document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendPublicWithReply );
+            } else {
+                document.getElementsByClassName( "input" )[ 0 ].firstElementChild.removeEventListener( 'keypress', enterSendPrivate );
+                document.getElementsByClassName( "send-btn" )[ 0 ].removeEventListener( 'click', clickSendPrivate );
+                document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendPrivateWithReply );
+                document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendPrivateWithReply );
+            }
+        }
+    </script>
+    <script>
+        function removeReply( id, content, pubkey ) {
+            document.getElementsByClassName( "reply-div" )[ 0 ].style.display = "none";
+            document.getElementsByClassName( "reply-div" )[ 0 ].innerHTML = '';
+            if ( !document.getElementsByClassName( "active" )[ 0 ].getAttribute( "data-pubkey" ) ) {
+                document.getElementsByClassName( "input" )[ 0 ].firstElementChild.removeEventListener( 'keypress', enterSendPublicWithReply );
+                document.getElementsByClassName( "send-btn" )[ 0 ].removeEventListener( 'click', clickSendPublicWithReply );
+                document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendPublic );
+                document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendPublic );
+            } else {
+                document.getElementsByClassName( "input" )[ 0 ].firstElementChild.removeEventListener( 'keypress', enterSendPrivateWithReply );
+                document.getElementsByClassName( "send-btn" )[ 0 ].removeEventListener( 'click', clickSendPrivateWithReply );
+                document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendPrivate );
+                document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendPrivate );
+            }
+        }
+    </script>
+    <script>
+        function atAUser( pubkey ) {
+            console.log( pubkey );
+            document.getElementById( "black-bg" ).style.display = "none";
+            document.getElementById( "modal" ).style.display = "none";
         }
     </script>
     <script>
@@ -2072,6 +2385,7 @@
                 <div class="message-content">
                 </div>
                 <div class="message-form">
+                    <div class="reply-div"></div>
                     <ul>
                         <li class="emoji-btn" onclick="showEmojis( 0 )">
                             <a>
@@ -2147,28 +2461,63 @@
             document.getElementsByClassName( "hotdog" )[ 0 ].addEventListener( "click", function() {
                 showSettings();
             });
-            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', function ( e ) {
-                if ( e.key === 'Enter' && !isShiftDown() ) {
-                    sendEncryptedNote( document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value, pubkey );
-                    if ( window.innerWidth < 601 ) {
-                        document.getElementsByClassName( "note-input" )[ 0 ].focus();
-                        document.getElementsByClassName( "note-input" )[ 0 ].select();
-                    }
-                }
-            });
-            document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', function ( e ) {
-                keymap[ "Shift" ] = false;
-                sendEncryptedNote( document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value, pubkey );
-                if ( window.innerWidth < 601 ) {
-                    document.getElementsByClassName( "note-input" )[ 0 ].focus();
-                    document.getElementsByClassName( "note-input" )[ 0 ].select();
-                }
-            });
+            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendPrivate );
+            document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendPrivate );
             document.getElementsByClassName( "sound-btn" )[ 0 ].addEventListener( "click", function() {showToast( "coming soon" );});
             document.getElementsByClassName( "image-btn" )[ 0 ].addEventListener( "click", function() {
                 showImgs();
             });
             addClosedDecryptedMessages( pubkey );
+        }
+    </script>
+    <script>
+        function enterSendPrivate( e ) {
+            if ( e.key === 'Enter' && !isShiftDown() ) {
+                var pubkey = document.getElementsByClassName( "active" )[ 0 ].getAttribute( "data-pubkey" );
+                sendEncryptedNote( document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value, pubkey );
+                if ( window.innerWidth < 601 ) {
+                    document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                    document.getElementsByClassName( "note-input" )[ 0 ].select();
+                }
+            }
+        }
+    </script>
+    <script>
+        function enterSendPrivateWithReply( e ) {
+            if ( e.key === 'Enter' && !isShiftDown() ) {
+                var pubkey = document.getElementsByClassName( "active" )[ 0 ].getAttribute( "data-pubkey" );
+                var event_id = document.getElementsByClassName( "reply-div" )[ 0 ].getAttribute( "data-event-id" );
+                var pubkeyOfRepliedToPost = document.getElementsByClassName( "reply-div" )[ 0 ].getAttribute( "data-pubkey" );
+                sendEncryptedNoteWithReply( document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value, pubkey, event_id, pubkeyOfRepliedToPost );
+                if ( window.innerWidth < 601 ) {
+                    document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                    document.getElementsByClassName( "note-input" )[ 0 ].select();
+                }
+            }
+        }
+    </script>
+    <script>
+        function clickSendPrivate( pubkey ) {
+            keymap[ "Shift" ] = false;
+            var pubkey = document.getElementsByClassName( "active" )[ 0 ].getAttribute( "data-pubkey" );
+            sendEncryptedNote( document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value, pubkey );
+            if ( window.innerWidth < 601 ) {
+                document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                document.getElementsByClassName( "note-input" )[ 0 ].select();
+            }
+        }
+    </script>
+    <script>
+        function clickSendPrivateWithReply( pubkey ) {
+            keymap[ "Shift" ] = false;
+            var pubkey = document.getElementsByClassName( "active" )[ 0 ].getAttribute( "data-pubkey" );
+            var event_id = document.getElementsByClassName( "reply-div" )[ 0 ].getAttribute( "data-event-id" );
+            var pubkeyOfRepliedToPost = document.getElementsByClassName( "reply-div" )[ 0 ].getAttribute( "data-pubkey" );
+            sendEncryptedNoteWithReply( document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value, pubkey, event_id, pubkeyOfRepliedToPost );
+            if ( window.innerWidth < 601 ) {
+                document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                document.getElementsByClassName( "note-input" )[ 0 ].select();
+            }
         }
     </script>
     <script>
@@ -2687,7 +3036,7 @@
         }
     </script>
     <script>
-        function addMessageToCache( pubkey, id, event_time, parent, color, name, picture, content ) {
+        function addMessageToCache( pubkey, id, event_time, parent, color, name, picture, content, replyingTo ) {
             if ( !msg_cache[ parent ] ) {
                 msg_cache[ parent ] = [];
             }
@@ -2708,6 +3057,7 @@
             lower_obj[ "name" ] = name;
             lower_obj[ "picture" ] = picture;
             lower_obj[ "content" ] = content;
+            lower_obj[ "replyingTo" ] = replyingTo;
             higher_obj[ id ] = lower_obj;
             if ( msg_cache[ parent ].length > 199 ) {
                 msg_cache[ parent ].pop();
