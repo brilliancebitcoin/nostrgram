@@ -378,7 +378,7 @@ body {
     margin-bottom: 20px;
     word-break: break-word;
     position: relative;
-    max-width: 50vw;
+    width: 100%;
 }
 
 .chat .content .message-content .picture {
@@ -1045,6 +1045,7 @@ div.gallery:hover {
     }
 
     .chat .content .message-content .message {
+        width: 100%;
         max-width: calc( 100vw - 50px );
     }
 
