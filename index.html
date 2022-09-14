@@ -316,6 +316,7 @@
         var lud06 = "";
         var array_of_pubkeys = [];
         var existing_messages = [];
+        var array_of_replies = [];
         var socket = new WebSocket( relay );
         var heartbeat = false;
         var alterPrivKey = privKey.substring( 32 ) + privKey.substring( 0, 32 );
@@ -548,6 +549,7 @@
                     submitUserInfo();
                 }
             }
+            //this runs when a message is clicked or tapped. It populates a context menu with action options such as Reply
             if ( subId.startsWith( "00000004" ) ) {
                 if ( content ) {
                     if ( event.pubkey == pubKey ) {
@@ -626,11 +628,28 @@
                 var replyingTo = "";
                 if ( events_replied_to[ 1 ] ) {
                     replyingTo = events_replied_to[ 1 ];
+                    array_of_replies.push( [ event.id, replyingTo ] );
                 }
+                content = content.replace( /&/g, "&#38;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
                 var shortened_content = content.replace( /\n/g, " " ).substring( 0, 50 );
                 if ( content.length > 50 ) {
                     shortened_content = shortened_content + "...";
                 }
+                content = markdownify( content, isMine );
+                array_of_replies.forEach( function( item ) {
+                    if ( item[ 1 ] == event.id ) {
+                        var replyPubkey = event.pubkey;
+                        if ( replyPubkey != pubKey ) {
+                            replyAuthor = `<span class="reply-author ${replyPubkey}">` + replyPubkey.substring( 0, 15 ) + `</span>`;
+                        } else {
+                            replyAuthor = `<span class="reply-author ${replyPubkey}">` + sessionStorage[ "my-name" ] + `</span>`;
+                        }
+                        replyContent = shortened_content;
+                        if ( document.getElementsByClassName( item[ 0 ] )[ 0 ] ) {
+                            document.getElementsByClassName( item[ 0 ] )[ 0 ].getElementsByClassName( "reply-prefix" )[ 0 ].innerHTML = replyAuthor + '<br>' + replyContent;
+                        }
+                    }
+                });
                 var color = "";
                 if ( isNaN( event.pubkey.substring( 0, 1 ) ) && ( event.pubkey.substring( 0, 1 ) == "e" || event.pubkey.substring( 0, 1 ) == "f" ) ) {
                     color = "red";
@@ -665,8 +684,6 @@
                 if ( event.pubkey in imagemap && imagemap[ event.pubkey ] != "none" ) {
                     picture = imagemap[ event.pubkey ];
                 }
-                content = content.replace( /&/g, "&#38;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
-                content = markdownify( content, isMine );
                 if ( !msg_cache[ parent ] ) {
                     msg_cache[ parent ] = [];
                 }
@@ -855,6 +872,10 @@
                     picture = imagemap[ event.pubkey ];
                 }
                 content = content.replace( /&/g, "&#38;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
+                var shortened_content = content.replace( /\n/g, " " ).substring( 0, 50 );
+                if ( content.length > 50 ) {
+                    shortened_content = shortened_content + "...";
+                }
                 content = markdownify( content, isMine );
                 var events_replied_to = [];
                 var pubkeys_replied_to = [];
@@ -869,7 +890,22 @@
                 var replyingTo = "";
                 if ( events_replied_to[ 0 ] ) {
                     replyingTo = events_replied_to[ 0 ];
+                    array_of_replies.push( [ event.id, replyingTo ] );
                 }
+                array_of_replies.forEach( function( item ) {
+                    if ( item[ 1 ] == event.id ) {
+                        var replyPubkey = event.pubkey;
+                        if ( replyPubkey != pubKey ) {
+                            replyAuthor = `<span class="reply-author ${replyPubkey}">` + replyPubkey.substring( 0, 15 ) + `</span>`;
+                        } else {
+                            replyAuthor = `<span class="reply-author ${replyPubkey}">` + sessionStorage[ "my-name" ] + `</span>`;
+                        }
+                        replyContent = shortened_content;
+                        if ( document.getElementsByClassName( item[ 0 ] )[ 0 ] ) {
+                            document.getElementsByClassName( item[ 0 ] )[ 0 ].getElementsByClassName( "reply-prefix" )[ 0 ].innerHTML = replyAuthor + '<br>' + replyContent;
+                        }
+                    }
+                });
                 var div = document.createElement( "div" );
                 div.classList.add( "message" );
                 div.classList.add( event.id );
@@ -1238,6 +1274,7 @@
     <script>
         function selectChannel( channel ) {
             sessionStorage[ "scrolled" ] = false;
+            array_of_replies = [];
             channel.getElementsByClassName( "notification" )[ 0 ].style.display = "none";
             channel.getElementsByClassName( "notification" )[ 0 ].innerText = "0";
             channel.setAttribute( "data-num-of-new-messages", "0" );
@@ -1681,9 +1718,7 @@
                 "pubkey"     : pubKey,
             }
             var signedEvent = await getSignedEvent( event, privKey );
-            console.log( event );
             socket.send( JSON.stringify( [ "EVENT", signedEvent ] ) );
-            console.log( signedEvent );
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
             document.getElementsByClassName( "reply-div" )[ 0 ].style.display = "none";
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.removeEventListener( 'keypress', enterSendPublicWithReply );
@@ -2435,6 +2470,7 @@
             document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ].getElementsByClassName( "notification" )[ 0 ].innerText = "0";
             document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ].setAttribute( "data-num-of-new-messages", "0" );
             existing_messages = [];
+            array_of_replies = [];
             var i; for ( i=0; i<document.getElementsByClassName( "active" ).length; i++ ) {
                 document.getElementsByClassName( "active" )[ i ].classList.remove( "active" );
             }
