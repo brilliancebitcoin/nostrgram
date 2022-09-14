@@ -212,8 +212,16 @@
             if ( Number( sessionStorage[ "keyboard_is_open" ] ) && window.innerHeight > ( Number( sessionStorage[ "full-window-height" ] ) * 0.9 ) ) {
                 document.getElementsByClassName( "input" )[ 0 ].firstElementChild.blur();
                 sessionStorage[ "keyboard_is_open" ] = String( 0 );
+                if ( sessionStorage[ "keyboard_size" ] ) {
+                    var keyboard_size = Number( sessionStorage[ "keyboard_size" ] );
+                    var current_height = document.getElementsByClassName( "content" )[ 0 ].scrollTop;
+                    var new_height = ( current_height - keyboard_size ) - 50;
+                    var max_height = document.getElementsByClassName( "content" )[ 0 ].scrollHeight;
+                    if ( new_height > max_height - 1500 ) {new_height = max_height;}
+                    document.getElementsByClassName( "content" )[ 0 ].scrollTo({top: new_height, left: 0, behavior: "smooth"});
+                }
             }
-            setTimeout( shutKeyboard, 3000 );
+            setTimeout( shutKeyboard, 1000 );
         }
     </script>
     <script>
@@ -1306,7 +1314,7 @@
                             </a>
                         </li>
                         <li class="input">
-                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='setTimeout( function() {if ( window.innerWidth < 601 && ( window.innerHeight < Number( sessionStorage[ "full-window-height" ] ) * 0.9 ) ) {sessionStorage[ "keyboard_is_open" ] = String( 1 );var size_difference = Number( sessionStorage[ "full-window-height" ] ) - window.innerHeight;var current_height = document.getElementsByClassName( "content" )[ 0 ].scrollTop;var new_height = current_height + size_difference + 50;var max_height = document.getElementsByClassName( "content" )[ 0 ].scrollHeight;if ( new_height > max_height ) {new_height = max_height;} document.getElementsByClassName( "content" )[ 0 ].scrollTo({top: new_height, left: 0, behavior: "smooth"});}}, 600 );'></textarea>
+                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='setTimeout( function() {if ( window.innerWidth < 601 && ( window.innerHeight < Number( sessionStorage[ "full-window-height" ] ) * 0.9 ) ) {sessionStorage[ "keyboard_is_open" ] = String( 1 );var size_difference = Number( sessionStorage[ "full-window-height" ] ) - window.innerHeight;if ( !sessionStorage[ "keyboard_size" ] ) {sessionStorage[ "keyboard_size" ] = String( size_difference );}var current_height = document.getElementsByClassName( "content" )[ 0 ].scrollTop;var new_height = current_height + size_difference + 50;var max_height = document.getElementsByClassName( "content" )[ 0 ].scrollHeight;if ( new_height > max_height ) {new_height = max_height;} document.getElementsByClassName( "content" )[ 0 ].scrollTo({top: new_height, left: 0, behavior: "smooth"});}}, 600 );'></textarea>
                         </li>
                         <li class="send-btn">
                             <a>
@@ -1924,7 +1932,6 @@
             }
             setTimeout( function() {doBackgroundTasks();}, 10000 );
             modDMMeta();
-            shutKeyboard();
             Object.keys( imagemap ).forEach( function( pubkey ) {
                 if ( pubkey in imagemap && imagemap[ pubkey ] != "none" ) {
                     var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
@@ -1951,6 +1958,7 @@
             });
         }
         doBackgroundTasks();
+        shutKeyboard();
     </script>
     <script>
         function manageChannels() {
@@ -2491,7 +2499,7 @@
                             </a>
                         </li>
                         <li class="input">
-                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='setTimeout( function() {if ( window.innerWidth < 601 && ( window.innerHeight < Number( sessionStorage[ "full-window-height" ] ) * 0.9 ) ) {sessionStorage[ "keyboard_is_open" ] = String( 1 );var size_difference = Number( sessionStorage[ "full-window-height" ] ) - window.innerHeight;var current_height = document.getElementsByClassName( "content" )[ 0 ].scrollTop;var new_height = current_height + size_difference + 50;var max_height = document.getElementsByClassName( "content" )[ 0 ].scrollHeight;if ( new_height > max_height ) {new_height = max_height;} document.getElementsByClassName( "content" )[ 0 ].scrollTo({top: new_height, left: 0, behavior: "smooth"});}}, 600 );'></textarea>
+                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='setTimeout( function() {if ( window.innerWidth < 601 && ( window.innerHeight < Number( sessionStorage[ "full-window-height" ] ) * 0.9 ) ) {sessionStorage[ "keyboard_is_open" ] = String( 1 );var size_difference = Number( sessionStorage[ "full-window-height" ] ) - window.innerHeight;if ( !sessionStorage[ "keyboard_size" ] ) {sessionStorage[ "keyboard_size" ] = String( size_difference );}var current_height = document.getElementsByClassName( "content" )[ 0 ].scrollTop;var new_height = current_height + size_difference + 50;var max_height = document.getElementsByClassName( "content" )[ 0 ].scrollHeight;if ( new_height > max_height ) {new_height = max_height;} document.getElementsByClassName( "content" )[ 0 ].scrollTo({top: new_height, left: 0, behavior: "smooth"});}}, 600 );'></textarea>
                         </li>
                         <li class="send-btn">
                             <a>
