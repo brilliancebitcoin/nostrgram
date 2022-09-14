@@ -576,7 +576,7 @@
                     if ( content.length > 50 ) {
                         shortened_content = shortened_content + "...";
                     }
-                    shortened_content = shortened_content.replace( /\'/g, "\\'" );
+                    shortened_content = shortened_content.replace( /\'/g, "\'" );
                     document.getElementById( "modal" ).innerHTML = "";
                     document.getElementById( "modal" ).innerHTML += `<div><strong>Message</strong></div>`;
                     document.getElementById( "modal" ).innerHTML += shortened_content;
