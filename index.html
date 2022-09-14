@@ -318,6 +318,7 @@
         var alterPubKey = nobleSecp256k1.getPublicKey( alterPrivKey, true ).substring( 2 );
         var i_should_create_a_new_wallet = true;
         sessionStorage[ "my-name" ] = pubKey.substring( 0, 15 ) + "...";
+        sessionStorage[ "full-window-height" ] = window.innerHeight;
 
         async function getWallet() {
             if ( localStorage[ "wallet_info" ] ) {
@@ -1278,7 +1279,7 @@
                             </a>
                         </li>
                         <li class="input">
-                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='if ( window.innerWidth < 601 && ( document.getElementsByClassName( "content" )[ 0 ].scrollHeight - document.getElementsByClassName( "content" )[ 0 ].scrollTop ) < 1500 ) {setTimeout( function() {document.getElementsByClassName( "content" )[ 0 ].scrollTo({top: document.getElementsByClassName( "content" )[ 0 ].scrollHeight, left: 0, behavior: "smooth"});if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"});}}, 300 );}'></textarea>
+                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='setTimeout( function() {if ( window.innerWidth < 601 && window.innerHeight < Number( sessionStorage[ "full-window-height" ] ) * 0.9  ) {var size_difference = Number( sessionStorage[ "full-window-height" ] ) - window.innerHeight;var current_height = document.getElementsByClassName( "content" )[ 0 ].scrollTop;var new_height = current_height + size_difference;var max_height = document.getElementsByClassName( "content" )[ 0 ].scrollHeight;if ( new_height > max_height ) {new_height = max_height;} document.getElementsByClassName( "content" )[ 0 ].scrollTo({top: new_height, left: 0, behavior: "smooth"});}}, 300 );'></textarea>
                         </li>
                         <li class="send-btn">
                             <a>
@@ -2463,7 +2464,7 @@
                             </a>
                         </li>
                         <li class="input">
-                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='if ( window.innerWidth < 601 && ( document.getElementsByClassName( "content" )[ 0 ].scrollHeight - document.getElementsByClassName( "content" )[ 0 ].scrollTop ) < 1500 ) {setTimeout( function() {document.getElementsByClassName( "content" )[ 0 ].scrollTo({top: document.getElementsByClassName( "content" )[ 0 ].scrollHeight, left: 0, behavior: "smooth"});if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"});}}, 300 );}'></textarea>
+                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='setTimeout( function() {if ( window.innerWidth < 601 && window.innerHeight < Number( sessionStorage[ "full-window-height" ] ) * 0.9  ) {var size_difference = Number( sessionStorage[ "full-window-height" ] ) - window.innerHeight;var current_height = document.getElementsByClassName( "content" )[ 0 ].scrollTop;var new_height = current_height + size_difference;var max_height = document.getElementsByClassName( "content" )[ 0 ].scrollHeight;if ( new_height > max_height ) {new_height = max_height;} document.getElementsByClassName( "content" )[ 0 ].scrollTo({top: new_height, left: 0, behavior: "smooth"});}}, 300 );'></textarea>
                         </li>
                         <li class="send-btn">
                             <a>
