@@ -356,7 +356,6 @@ body {
     padding: 15px;
     overflow: auto;
     background-size: 600px;
-    overflow-y: scroll;
     overflow-x: clip;
 }
 
