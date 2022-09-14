@@ -146,7 +146,7 @@
                     if ( !url.startsWith( "http://" ) && !url.startsWith( "https://" ) ) {
                         url2 = "http://" + url;
                     }
-                    return `<a href="${url2}" target="_blank" rel="nofollow noopener" style="color: #4287f5;" onclick="event.stopPropagation()">${url}</a>`;
+                    return `<a onclick="event.stopPropagation()" href="${url2}" target="_blank" rel="nofollow noopener" style="color: #4287f5;">${url}</a>`;
                 })                
             }
             if ( isMine && !text.match( ytRegex ) && !text.match( imgRegex ) ) {
@@ -158,7 +158,7 @@
                     if ( !url.startsWith( "http://" ) && !url.startsWith( "https://" ) ) {
                         url2 = "http://" + url;
                     }
-                    return `<a href="${url2}" target="_blank" rel="nofollow noopener" style="color: white;" onclick="event.stopPropagation()">${url}</a>`;
+                    return `<a onclick="event.stopPropagation()" href="${url2}" target="_blank" rel="nofollow noopener" style="color: white;">${url}</a>`;
                 })
             }
             if ( text.match( imgRegex ) ) {
