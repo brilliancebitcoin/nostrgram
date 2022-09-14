@@ -208,38 +208,12 @@
         }
     </script>
     <script>
-        function leftJustifyImages() {
-            var i; for ( i=0; i<document.getElementsByClassName( "bubble" ).length; i++ ) {
-                if ( document.getElementsByClassName( "bubble" )[ i ].getElementsByTagName( "img" )[ 0 ] ) {
-                    var image = document.getElementsByClassName( "bubble" )[ i ].getElementsByTagName( "img" )[ 0 ];
-                    var isLoaded = image.complete && image.naturalHeight !== 0;
-                    if ( isLoaded ) {
-                        if ( document.getElementsByClassName( "bubble" )[ i ].getElementsByTagName( "img" )[ 0 ] && ( document.getElementsByClassName( "bubble" )[ i ].offsetWidth > ( window.innerWidth / 2 ) + 100 ) ) {
-                            document.getElementsByClassName( "bubble" )[ i ].parentElement.style.alignSelf = "flex-start";
-                        }
-                        if ( sessionStorage[ "scrolled" ] == false ) {
-                            sessionStorage[ "scrolled" ] = true;
-                            if ( window.innerWidth < 601 ) {
-                                document.getElementsByClassName( "content" )[ 0 ].scrollTop = document.getElementsByClassName( "content" )[ 0 ].scrollHeight;
-                            } else {
-                                document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
-                            }
-                            if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {
-                                document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();
-                            }
-                        }
-                    }
-                }
-                if ( window.innerWidth < 601 && document.getElementsByClassName( "bubble" )[ i ].getElementsByClassName( "youtube-video" )[ 0 ] ) {
-                    document.getElementsByClassName( "bubble" )[ i ].parentElement.style.alignSelf = "flex-start";
-                    document.getElementsByClassName( "bubble" )[ i ].parentElement.style.maxWidth = "calc( 100vw - 60px)";
-                }
-            }
+        function shutKeyboard() {
             if ( Number( sessionStorage[ "keyboard_is_open" ] ) && window.innerHeight > ( Number( sessionStorage[ "full-window-height" ] ) * 0.9 ) ) {
                 document.getElementsByClassName( "input" )[ 0 ].firstElementChild.blur();
                 sessionStorage[ "keyboard_is_open" ] = String( 0 );
             }
-            setTimeout( leftJustifyImages, 3000 );
+            setTimeout( shutKeyboard, 3000 );
         }
     </script>
     <script>
@@ -1950,7 +1924,7 @@
             }
             setTimeout( function() {doBackgroundTasks();}, 10000 );
             modDMMeta();
-            leftJustifyImages();
+            shutKeyboard();
             Object.keys( imagemap ).forEach( function( pubkey ) {
                 if ( pubkey in imagemap && imagemap[ pubkey ] != "none" ) {
                     var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
