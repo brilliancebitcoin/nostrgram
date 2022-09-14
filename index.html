@@ -639,8 +639,13 @@
                 array_of_replies.forEach( function( item ) {
                     if ( item[ 1 ] == event.id ) {
                         var replyPubkey = event.pubkey;
+                        if ( event.pubkey in namemap && namemap[ event.pubkey ] != "none" ) {
+                            var person_name = namemap[ event.pubkey ];
+                        } else {
+                            var person_name = replyPubkey.substring( 0, 15 );
+                        }
                         if ( replyPubkey != pubKey ) {
-                            replyAuthor = `<span class="reply-author ${replyPubkey}">` + replyPubkey.substring( 0, 15 ) + `</span>`;
+                            replyAuthor = `<span class="reply-author ${replyPubkey}">` + person_name + `</span>`;
                         } else {
                             replyAuthor = `<span class="reply-author ${replyPubkey}">` + sessionStorage[ "my-name" ] + `</span>`;
                         }
@@ -895,8 +900,13 @@
                 array_of_replies.forEach( function( item ) {
                     if ( item[ 1 ] == event.id ) {
                         var replyPubkey = event.pubkey;
+                        if ( event.pubkey in namemap && namemap[ event.pubkey ] != "none" ) {
+                            var person_name = namemap[ event.pubkey ];
+                        } else {
+                            var person_name = replyPubkey.substring( 0, 15 );
+                        }
                         if ( replyPubkey != pubKey ) {
-                            replyAuthor = `<span class="reply-author ${replyPubkey}">` + replyPubkey.substring( 0, 15 ) + `</span>`;
+                            replyAuthor = `<span class="reply-author ${replyPubkey}">` + person_name + `</span>`;
                         } else {
                             replyAuthor = `<span class="reply-author ${replyPubkey}">` + sessionStorage[ "my-name" ] + `</span>`;
                         }
