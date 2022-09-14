@@ -576,12 +576,13 @@
                     if ( content.length > 50 ) {
                         shortened_content = shortened_content + "...";
                     }
-                    shortened_content = shortened_content.replace( /\'/g, "\'" );
+                    shortened_content_for_code = shortened_content.replace( /\'/g, "\\'" );
+                    shortened_content_for_display = shortened_content.replace( /\'/g, "\'" );
                     document.getElementById( "modal" ).innerHTML = "";
                     document.getElementById( "modal" ).innerHTML += `<div><strong>Message</strong></div>`;
-                    document.getElementById( "modal" ).innerHTML += shortened_content;
+                    document.getElementById( "modal" ).innerHTML += shortened_content_for_display;
                     document.getElementById( "modal" ).innerHTML += `<hr style="border: 1px solid; margin-top: 20px;" />`;
-                    document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="replyToMsg( '${event.id}', '${shortened_content}', '${event.pubkey}' )">Reply to this message</button></div>`;
+                    document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="replyToMsg( '${event.id}', '${shortened_content_for_code}', '${event.pubkey}' )">Reply to this message</button></div>`;
                     //document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="atAUser( '${event.pubkey}' )">@ this user</button></div>`;
                     document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="window.open( 'https://nostr.com/e/${event.id}', '_blank' )">View this event on nostr.com</button></div>`;
                     document.getElementById( "black-bg" ).style.display = "block";
@@ -1885,6 +1886,7 @@
     </script>
     <script>
         function replyToMsg( id, content, pubkey ) {
+            content = content.replace( /\\'/g, "'" );
             document.getElementById( "black-bg" ).style.display = "none";
             document.getElementById( "modal" ).style.display = "none";
             document.getElementsByClassName( "reply-div" )[ 0 ].innerHTML = `<span class="reply-x" onclick="removeReply();">&times; </span>`;
