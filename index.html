@@ -1817,6 +1817,7 @@
     </script>
     <script>
         function msgContext( id ) {
+            if ( isTextSelected() ) return;
             var msgSubId   = "00000004" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 );
             var msgFilter  = { "ids": [ id ] }
             var msgSub     = [ "REQ", msgSubId, msgFilter ];
@@ -2804,6 +2805,11 @@
                 return keymap[ "Shift" ];
             }
             return false;
+        }
+    </script>
+    <script>
+        function isTextSelected() {
+            return ( window.getSelection() && window.getSelection().toString() != '' );
         }
     </script>
     <div class="chat">
