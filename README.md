@@ -88,3 +88,5 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] on mobile, when someone clicks to view the sidebar, remove the "active" class from the channel they were just in so they can see the unread message count
 * [ ] fix bug that urlifies backticks
 * [ ] if browser is not in focus, don't scroll to bottom when new messages come in
+localization i18n
+* [ ] add a i18n solution (https://phrase.com/blog/posts/step-step-guide-javascript-localization/)

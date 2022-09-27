@@ -12,6 +12,7 @@
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
     <script src="https://bundle.run/browserify-cipher@1.0.1"></script>
     <script src="https://supertestnet.github.io/bitcoin-chess/js/qrcode.js"></script>
+    <script src="translation.js"></script>
 </head>
 <body>
     <!-- based on this: https://github.com/YunusEmreNalbant/css-chat-interface -->
@@ -63,7 +64,7 @@
     <script>
         async function getBalance() {
             if ( !wallet_url || wallet_url == "" ) {
-                return "Loading...";
+                return `${t('loading')}`;
             }
             var domain = wallet_url.substring( 0, wallet_url.indexOf( "/wallet" ) );
             var url = domain + "/api/v1/wallet";
@@ -73,7 +74,7 @@
             if ( document.getElementsByClassName( "manage-wallet-outer" )[ 0 ] && document.getElementsByClassName( "manage-wallet-outer" )[ 0 ].getElementsByClassName( "message" )[ 0 ] ) {
                 document.getElementsByClassName( "manage-wallet-outer" )[ 0 ].getElementsByClassName( "message" )[ 0 ].innerText = balance + " sats";
             }
-            if ( document.getElementsByClassName( "message-header" )[ 0 ] && document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "message" )[ 0 ] && document.getElementsByClassName( "message-header" )[ 0 ] && document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "message" )[ 0 ].innerText == "Loading..." ) {
+            if ( document.getElementsByClassName( "message-header" )[ 0 ] && document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "message" )[ 0 ] && document.getElementsByClassName( "message-header" )[ 0 ] && document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "message" )[ 0 ].innerText == `${t('loading')}` ) {
                 document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "message" )[ 0 ].innerText = String( balance ) + " sats";
             }
             if ( localStorage[ "wallet_balance" ] ) {
@@ -345,11 +346,11 @@
             var { kind, content } = event || {}
             if ( kind && subId.startsWith( "00000000" ) ) {
                 if ( kind != 40 ) {
-                    showToast( "unknown error, could not add this channel -- please contact a developer for help" );
+                    showToast( `${t('unknownError')}` );
                 }
                 var isError = checkForChannelSubscriptionErrors( content );
                 if ( isError ) {
-                    showToast( "unknown error, could not add this channel -- please contact a developer for help" );
+                    showToast( `${t('unknownError')}` );
                 } else {
                     var picture = 
                     document.getElementsByClassName( "removable-channels" )[ 0 ].innerHTML += `
@@ -448,7 +449,7 @@
                                 document.getElementsByClassName( event.pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + JSON.parse( content )[ "picture" ] + ")";
                             }
                         }
-                        if ( document.getElementsByClassName( "big-picture" )[ 0 ] && document.getElementsByClassName( "channel-wrapper" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerText != "Settings" && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText == event.pubkey ) {
+                        if ( document.getElementsByClassName( "big-picture" )[ 0 ] && document.getElementsByClassName( "channel-wrapper" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerText != `${t('settings')}` && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText == event.pubkey ) {
                             document.getElementsByClassName( "big-picture" )[ 0 ].src = JSON.parse( content )[ "picture" ];
                         }
                     } else {
@@ -508,14 +509,14 @@
                     }
                     var sig_is_valid = await nobleSecp256k1.schnorr.verify( thisevent[ "sig" ], thisevent[ "id" ], thisevent[ "pubkey" ] );
                     if ( !sig_is_valid ) {
-                        var alert = `Your relay apparently sent you a message with an invalid signature (id: ${thisevent[ "id" ]}). They should never do that and it indicates malicious behavior on the relay's part. Consider switching to a new relay.`;
+                        var alert = `${t('importWalletError')} (id: ${thisevent[ "id" ]}). ${t('relayPart')}`;
                         alert( alert );
                         return;
                     }
                     var wallet = JSON.parse( decrypt( privKey, alterPubKey, thisevent[ "content" ] ) );
                     var walletIsValid = checkForWalletImportErrors( wallet );
                     if ( !walletIsValid ) {
-                        showToast( "Something went wrong while importing your wallet, contact a developer for help" );
+                        showToast( `${t('importWalletError')}`);
                         return;
                     }
                     wallet_id = wallet[ "wallet_id" ];
@@ -566,12 +567,12 @@
                     shortened_content_for_code = shortened_content.replace( /\'/g, "\\'" );
                     shortened_content_for_display = shortened_content.replace( /\'/g, "\'" );
                     document.getElementById( "modal" ).innerHTML = "";
-                    document.getElementById( "modal" ).innerHTML += `<div><strong>Message</strong></div>`;
+                    document.getElementById( "modal" ).innerHTML += `<div><strong>${t('unknownError')}</strong></div>`;
                     document.getElementById( "modal" ).innerHTML += shortened_content_for_display;
                     document.getElementById( "modal" ).innerHTML += `<hr style="border: 1px solid; margin-top: 20px;" />`;
-                    document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="replyToMsg( '${event.id}', '${shortened_content_for_code}', '${event.pubkey}' )">Reply to this message</button></div>`;
+                    document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="replyToMsg( '${event.id}', '${shortened_content_for_code}', '${event.pubkey}' )">${t('replyToThisMessage')}</button></div>`;
                     //document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="atAUser( '${event.pubkey}' )">@ this user</button></div>`;
-                    document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="window.open( 'https://nostr.com/e/${event.id}', '_blank' )">View this event on nostr.com</button></div>`;
+                    document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="window.open( 'https://nostr.com/e/${event.id}', '_blank' )">${t('viewThisEvent')}</button></div>`;
                     document.getElementById( "black-bg" ).style.display = "block";
                     document.getElementById( "modal" ).style.display = "block";
                     document.getElementById( "modal" ).style.textAlign = "left";
@@ -581,7 +582,7 @@
                 if ( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( event.id )[ 0 ] ) return
                 var isError = checkForChannelSubscriptionErrors( content );
                 if ( isError ) {
-                    showToast( "unknown error, could not add this channel -- please contact a developer for help" );
+                    showToast( `${t('unknownError')}` );
                 } else {
                     document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayChannel( JSON.parse( content )[ "picture" ], JSON.parse( content )[ "name" ], "", event.id, event.created_at );
                     getLatestMessage( event.id );
@@ -723,7 +724,7 @@
                 } else {
                     var replyclass = "reply-in-white";
                 }
-                var replyAuthor = `<span class="reply-author">Unknown</span>`;
+                var replyAuthor = `<span class="reply-author">${t('unknown')}</span>`;
                 var replyPubkey = null;
                 if ( document.getElementsByClassName( replyingTo )[ 0 ] ) {
                     replyPubkey = document.getElementsByClassName( replyingTo )[ 0 ].getAttribute( "data-author" );
@@ -731,7 +732,7 @@
                 if ( replyPubkey == pubKey ) {
                     replyAuthor = `<span class="reply-author">${sessionStorage[ "my-name" ]}</span>`;
                 }
-                var replyContent = "This post is a reply to a message that could not be found";
+                var replyContent = `${t('replyToMessageNotFound')}`;
                 var replyPrefix = "";
                 if ( replyingTo && replyingTo != "" ) {
                     if ( document.getElementsByClassName( replyingTo )[ 0 ] && document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ] && document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ] ) {
@@ -925,7 +926,7 @@
                 } else {
                     var replyclass = "reply-in-white";
                 }
-                var replyAuthor = `<span class="reply-author">Unknown</span>`;
+                var replyAuthor = `<span class="reply-author">${t('unknown')}</span>`;
                 var replyPubkey = null;
                 if ( document.getElementsByClassName( replyingTo )[ 0 ] ) {
                     replyPubkey = document.getElementsByClassName( replyingTo )[ 0 ].getAttribute( "data-author" );
@@ -1305,7 +1306,7 @@
                     </div>
                 </div>
                 <div class="infobox">
-                    <span class="infobox-text">Channel id: ${channel.getAttribute( "data-id" )}</span>
+                    <span class="infobox-text">${t('channelId')}: ${channel.getAttribute( "data-id" )}</span>
                     <span class="infobox-x">&times;</span>
                 </div>
                 <div class="message-content">
@@ -1319,7 +1320,7 @@
                             </a>
                         </li>
                         <li class="input">
-                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='setTimeout( function() {if ( window.innerWidth < 601 && ( window.innerHeight < Number( sessionStorage[ "full-window-height" ] ) * 0.9 ) ) {sessionStorage[ "keyboard_is_open" ] = String( 1 );var size_difference = Number( sessionStorage[ "full-window-height" ] ) - window.innerHeight;if ( !sessionStorage[ "keyboard_size" ] ) {sessionStorage[ "keyboard_size" ] = String( size_difference );}var current_height = document.getElementsByClassName( "content" )[ 0 ].scrollTop;var new_height = current_height + size_difference + 50;var max_height = document.getElementsByClassName( "content" )[ 0 ].scrollHeight;if ( new_height > max_height ) {new_height = max_height;} document.getElementsByClassName( "content" )[ 0 ].scrollTo({top: new_height, left: 0, behavior: "smooth"});}}, 600 );'></textarea>
+                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="${t('saySomething')}" onfocus='setTimeout( function() {if ( window.innerWidth < 601 && ( window.innerHeight < Number( sessionStorage[ "full-window-height" ] ) * 0.9 ) ) {sessionStorage[ "keyboard_is_open" ] = String( 1 );var size_difference = Number( sessionStorage[ "full-window-height" ] ) - window.innerHeight;if ( !sessionStorage[ "keyboard_size" ] ) {sessionStorage[ "keyboard_size" ] = String( size_difference );}var current_height = document.getElementsByClassName( "content" )[ 0 ].scrollTop;var new_height = current_height + size_difference + 50;var max_height = document.getElementsByClassName( "content" )[ 0 ].scrollHeight;if ( new_height > max_height ) {new_height = max_height;} document.getElementsByClassName( "content" )[ 0 ].scrollTo({top: new_height, left: 0, behavior: "smooth"});}}, 600 );'></textarea>
                         </li>
                         <li class="send-btn">
                             <a>
@@ -1407,7 +1408,7 @@
             });
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendPublic );
             document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendPublic );
-            document.getElementsByClassName( "sound-btn" )[ 0 ].addEventListener( "click", function() {showToast( "coming soon" );});
+            document.getElementsByClassName( "sound-btn" )[ 0 ].addEventListener( "click", function() {showToast( `${t('comingSoon')}` );});
             document.getElementsByClassName( "image-btn" )[ 0 ].addEventListener( "click", function() {
                 showImgs();
             });
@@ -1500,8 +1501,8 @@
                 } else {
                     var replyclass = "reply-in-white";
                 }
-                var replyAuthor = `<span class="reply-author">Unknown</span>`;
-                var replyContent = "This post is a reply to a message that could not be found";
+                var replyAuthor = `<span class="reply-author">${t('unknown')}</span>`;
+                var replyContent = `${t('replyToMessageNotFound')}`;
                 var replyPrefix = "";
                 if ( replyingTo && replyingTo != "" ) {
                     cached_messages.forEach( function( item ) {
@@ -1594,8 +1595,8 @@
                         div.align = "right";
                     }
                     div.onclick = function() {msgContext( id );}
-                    var replyAuthor = `<span class="reply-author">Unknown</span>`;
-                    var replyContent = "This post is a reply to a message that could not be found";
+                    var replyAuthor = `<span class="reply-author">${t('unknown')}</span>`;
+                    var replyContent = `${t('replyToMessageNotFound')}`;
                     var replyPrefix = "";
                     if ( isMine ) {
                         var replyclass = "reply-in-blue";
@@ -1791,31 +1792,31 @@
             let hours   = Math.floor((sec - (years * 31536000) - (months * 2592000) - (days * 86400)) / 3600); // get hours
             let minutes = Math.floor((sec - (years * 31536000) - (months * 2592000) - (days * 86400) - (hours * 3600)) / 60); // get minutes
             let seconds = sec - (years * 31536000) - (months * 2592000) - (days * 86400) - (hours * 3600) - (minutes * 60); //  get seconds
-            var yearsstring = (years > 1) ? "years":"year";
-            var monthsstring = (months > 1) ? "months":"month";
-            var daysstring = (days > 1) ? "days":"day";
-            var hoursstring = (hours > 1) ? "hours":"hour";
-            var minutesstring = (minutes > 1) ? "minutes":"minute";
-            var secondsstring = (seconds > 1) ? "seconds":"second";
+            var yearsstring = (years > 1) ? `${t('years')}`:`${t('year')}`;
+            var monthsstring = (months > 1) ?  `${t('months')}`:`${t('month')}`;
+            var daysstring = (days > 1) ? `${t('days')}`:`${t('day')}`;
+            var hoursstring = (hours > 1) ? `${t('hours')}`:`${t('hour')}`;
+            var minutesstring = (minutes > 1) ? `${t('minutes')}`:`${t('minute')}`;
+            var secondsstring = (seconds > 1) ? `${t('seconds')}`:`${t('second')}`;
             if ( years > 0 ) {
-                return years + " " + yearsstring + " ago";
+                return `${years} ${yearsstring} ${t('ago')}`;
             }
             if ( months > 0 ) {
-                return months + " " + monthsstring + " ago";
+                return `${months} ${monthsstring} ${t('ago')}`;
             }
             if ( days > 0 ) {
-                return days + " " + daysstring + " ago";
+                return `${days} ${daysstring} ${t('ago')}`;
             }
             if ( hours > 0 ) {
-                return hours + " " + hoursstring + " ago";
+                return `${hours} ${hoursstring} ${t('ago')}`;
             }
             if ( minutes > 0 ) {
-                return minutes + " " + minutesstring + " ago";
+                return `${minutes} ${minutesstring} ${t('ago')}`;
             }
             if ( seconds == 0 ) {
-                return seconds + " seconds ago";
+                return `${seconds} ${t('seconds')} ${t('ago')}`;
             }
-            return seconds + " " + secondsstring + " ago";
+            return `${seconds} ${secondsstring} ${t('ago')}`;
         }
     </script>
     <script>
@@ -1984,8 +1985,8 @@
                     <div class="channel-info">
                         <span class="plus-circle fa fa-list-check"></span>
                         <div class="channel-wrapper">
-                            <div class="name">Manage channels</div>
-                            <div class="message">Find/create/remove channels</div>
+                            <div class="name">${t('manageChannels')}</div>
+                            <div class="message">${t('manageChannelsMessage')}</div>
                         </div>
                     </div>
                     <div class="actions">
@@ -1999,16 +2000,16 @@
                     </div>
                 </div>
                 <div class="message-content">
-                    <h2>Add by channel id</h2>
-                    <input class="add-channel-input" type="text" placeholder="channel id" />
-                    <button class="add-channel-btn">Submit</button>
-                    <h2 style="margin-top: 20px;">Remove a channel</h2>
+                    <h2>${t('addChannel')}</h2>
+                    <input class="add-channel-input" type="text" placeholder="${t('addChannelPlaceholder')}" />
+                    <button class="add-channel-btn">${t('submit')}</button>
+                    <h2 style="margin-top: 20px;">${t('removeChannel')}</h2>
                     <div class="removable-channels"></div>
-                    <h2 style="margin-top: 20px;">Create a channel</h2>
-                    <input class="create-channel-name" type="text" placeholder="channel name" />
-                    <input class="create-channel-image" type="text" placeholder="channel image e.g. https://i.ibb.co/Q8X9cQL/bitcoin-chess.png" />
-                    <p class="image-instructions">The image needs to be hosted externally (such as on imgur or imgbb) because I don't want to store a bunch of images</p>
-                    <button class="create-channel-btn" onclick="createChannel()">Submit</button>
+                    <h2 style="margin-top: 20px;">${t('createChannel')}</h2>
+                    <input class="create-channel-name" type="text" placeholder="${t('channelNamePlaceholder')}" />
+                    <input class="create-channel-image" type="text" placeholder="${t('channelImagePlaceholder')}" />
+                    <p class="image-instructions">${t('imageInstructions')}</p>
+                    <button class="create-channel-btn" onclick="createChannel()">${t('submit')}</button>
                 </div>
             `;
             document.getElementsByClassName( "content" )[ 0 ].innerHTML = html;
@@ -2040,8 +2041,8 @@
                     <div class="channel-info">
                         <span class="plus-circle fa fa-list-check"></span>
                         <div class="channel-wrapper">
-                            <div class="name">Manage channels</div>
-                            <div class="message">Find/create/remove channels</div>
+                            <div class="name">${t('manageChannels')}</div>
+                            <div class="message">${t('manageChannelsMessage')}</div>
                         </div>
                     </div>
                     <div class="actions">
@@ -2105,7 +2106,7 @@
                     <div class="channel-info">
                         <span class="plus-circle fa fa-wallet"></span>
                         <div class="channel-wrapper">
-                            <div class="name">Manage wallet</div>
+                            <div class="name">${t('manageWallet')}</div>
                             <div class="message">${amount}</div>
                         </div>
                     </div>
@@ -2135,7 +2136,7 @@
                     <div class="channel-info">
                         <span class="plus-circle fa fa-wallet"></span>
                         <div class="channel-wrapper">
-                            <div class="name">Manage wallet</div>
+                            <div class="name">${t('manageWallet')}</div>
                             <div class="message">${amount}</div>
                         </div>
                     </div>
@@ -2211,8 +2212,8 @@
                     <div class="channel-info">
                         <span class="plus-circle fa fa-sliders"></span>
                         <div class="channel-wrapper">
-                            <div class="name">Settings</div>
-                            <div class="message">Modify all the things</div>
+                            <div class="name">${t('settings')}</div>
+                            <div class="message">${t('modifyAllThings')}</div>
                         </div>
                     </div>
                     <div class="actions">
@@ -2226,45 +2227,47 @@
                     </div>
                 </div>
                 <div class="message-content">
-                    <h2>Your info</h2>
+                    <h2>${t('yourInfo')}</h2>
                     <img class="big-picture" src="${picture_to_show}" />
-                    <input class="display-name" type="text" placeholder="display name" value="${name}" />
-                    <textarea class="about-input" type="text" rows="5" cols="70" placeholder="enter info about yourself">${about}</textarea>
-                    <input class="user-picture" type="text" placeholder="user picture e.g. https://i.ibb.co/Q8X9cQL/bitcoin-chess.png" value="${picture}" />
-                    <p class="image-instructions">The image needs to be hosted externally (such as on imgur or imgbb) because I don't want to store a bunch of images</p>
-                    <button class="submit-user-info" onclick='submitUserInfo();showToast( "Your info was processed" );'>Submit</button>
-                    <h2 style="margin-top: 20px;">Your public key</h2>
+                    <input class="display-name" type="text" placeholder="${t('yourInfoNamePlaceholder')}" value="${name}" />
+                    <textarea class="about-input" type="text" rows="5" cols="70" placeholder="${t('yourInfoAboutPlaceholder')}">${about}</textarea>
+                    <input class="user-picture" type="text" placeholder="${t('yourInfoImagePlaceholder')}" value="${picture}" />
+                    <p class="image-instructions">${t('imageInstructions')}</p>
+                    <button class="submit-user-info" onclick='submitUserInfo();showToast( "${t('yourInfoProcessed')}" );'>${t('submit')}</button>
+                    <h2 style="margin-top: 20px;">${t('publicKey')}</h2>
                     <input class="public-key" type="text" value="${pubKey}" disabled />
-                    <button class="copy-pubkey-btn">Copy</button>
-                    <h2 style="margin-top: 20px;">Your private key</h2>
+                    <button class="copy-pubkey-btn">${t('copy')}</button>
+                    <h2 style="margin-top: 20px;">${t('privateKey')}</h2>
                     <input class="private-key" type="text" value="${privKey}" disabled />
-                    <button class="copy-privkey-btn">Copy</button>
-                    <h2 style="margin-top: 20px;">Import an account</h2>
-                    <input class="import-privkey-input" type="text" placeholder="paste a private key" />
-                    <button class="import-privkey-btn">Import</button>
+                    <button class="copy-privkey-btn">${t('copy')}</button>
+                    <h2 style="margin-top: 20px;">${t('importAccount')}</h2>
+                    <input class="import-privkey-input" type="text" placeholder="${t('pastePrivateKey')}" />
+                    <button class="import-privkey-btn">${t('import')}</button>
                     <hr style="border: 1px solid; margin-top: 20px;" />
-                    <h2 style="margin-top: 20px;">Your wallet url</h2>
+                    <h2 style="margin-top: 20px;">${t('walletUrl')}</h2>
                     <input class="wallet-url" type="text" value="${wallet_url}" disabled />
-                    <button class="copy-walleturl-btn">Copy</button>
-                    <h2 style="margin-top: 20px; display: none;">Your admin key</h2>
+                    <button class="copy-walleturl-btn">${t('copy')}</button>
+                    <h2 style="margin-top: 20px; display: none;">${t('adminKey')}</h2>
                     <input style="display: none;" class="admin-key" type="text" value="${adminkey}" disabled />
-                    <button style="display: none;" class="copy-adminkey-btn">Copy</button>
-                    <h2 style="margin-top: 20px; display: none;">Your read key</h2>
+                    <button style="display: none;" class="copy-adminkey-btn">${t('copy')}</button>
+                    <h2 style="margin-top: 20px; display: none;">${t('readKey')}</h2>
                     <input style="display: none;" class="read-key" type="text" value="${readkey}" disabled />
-                    <button style="display: none;" class="copy-readkey-btn">Copy</button>
+                    <button style="display: none;" class="copy-readkey-btn">${t('copy')}</button>
                 </div>
             `;
             document.getElementsByClassName( "content" )[ 0 ].innerHTML = html;
             document.getElementsByClassName( "message-content" )[ 0 ].style.display = "block";
             document.getElementsByClassName( "message-content" )[ 0 ].style.flexDirection = "initial";
+            
+
             if ( window.innerWidth < 601 ) {
                 var html2 = `
                     <span class="sidebar_arrow">&rsaquo;</span>
                     <div class="channel-info">
                         <span class="plus-circle fa fa-sliders"></span>
                         <div class="channel-wrapper">
-                            <div class="name">Settings</div>
-                            <div class="message">Modify all the things</div>
+                            <div class="name">${t('settings')}</div>
+                            <div class="message">${t('modifyAllThings')}</div>
                         </div>
                     </div>
                     <div class="actions">
@@ -2344,8 +2347,8 @@
                     <div class="channel-info">
                         <span class="plus-circle">P</span>
                         <div class="channel-wrapper">
-                            <div class="name">Profile</div>
-                            <div class="message">Check someone out</div>
+                            <div class="name">${t('profile')}</div>
+                            <div class="message">${t('checkSomeone')}</div>
                         </div>
                     </div>
                     <div class="actions">
@@ -2361,11 +2364,11 @@
                 <div class="message-content">
                     <img class="big-picture" src="${picture}" />
                     <h2 class="profile-name">${name}</h2>
-                    <p class="profile-about" style="display: none;">${name} lives in an abandoned warehouse on top of a mountain in a jungle. Surviving only on bananas and leftover car parts, ${name} roams the wild horizon of the amazon, looking on and on for something not yet grokked</p>
+                    <p class="profile-about" style="display: none;">${name} ${t('nameLives')}</p>
                     <p class="profile-lud06" style="display: none;"></p>
-                    <h2 style="margin-top: 20px;" class="profile-pubkey-title">${name}'s public key</h2>
+                    <h2 style="margin-top: 20px;" class="profile-pubkey-title">${name}'s ${t('_publicKey')}</h2>
                     <p class="profile-pubkey">${pubkey}</p>
-                    <button class="dm" onclick="dmThisUser( '${pubkey}', '${name}', '${picture}' )">Direct message this user</button>
+                    <button class="dm" onclick="dmThisUser( '${pubkey}', '${name}', '${picture}' )">${t('directMessage')}</button>
                 </div>
             `;
             document.getElementsByClassName( "content" )[ 0 ].innerHTML = html;
@@ -2377,8 +2380,8 @@
                     <div class="channel-info">
                         <span class="plus-circle">P</span>
                         <div class="channel-wrapper">
-                            <div class="name">Profile</div>
-                            <div class="message">Check someone out</div>
+                            <div class="name">${t('profile')}</div>
+                            <div class="message">${t('checkSomeone')}</div>
                         </div>
                     </div>
                     <div class="actions">
@@ -2504,7 +2507,7 @@
                             </a>
                         </li>
                         <li class="input">
-                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="Say something" onfocus='setTimeout( function() {if ( window.innerWidth < 601 && ( window.innerHeight < Number( sessionStorage[ "full-window-height" ] ) * 0.9 ) ) {sessionStorage[ "keyboard_is_open" ] = String( 1 );var size_difference = Number( sessionStorage[ "full-window-height" ] ) - window.innerHeight;if ( !sessionStorage[ "keyboard_size" ] ) {sessionStorage[ "keyboard_size" ] = String( size_difference );}var current_height = document.getElementsByClassName( "message-content" )[ 0 ].scrollTop;var new_height = current_height + size_difference + 50;var max_height = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;if ( new_height > max_height ) {new_height = max_height;} document.getElementsByClassName( "message-content" )[ 0 ].scrollTo({top: new_height, left: 0, behavior: "smooth"});}}, 600 );'></textarea>
+                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="${t('saySomething')}" onfocus='setTimeout( function() {if ( window.innerWidth < 601 && ( window.innerHeight < Number( sessionStorage[ "full-window-height" ] ) * 0.9 ) ) {sessionStorage[ "keyboard_is_open" ] = String( 1 );var size_difference = Number( sessionStorage[ "full-window-height" ] ) - window.innerHeight;if ( !sessionStorage[ "keyboard_size" ] ) {sessionStorage[ "keyboard_size" ] = String( size_difference );}var current_height = document.getElementsByClassName( "message-content" )[ 0 ].scrollTop;var new_height = current_height + size_difference + 50;var max_height = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;if ( new_height > max_height ) {new_height = max_height;} document.getElementsByClassName( "message-content" )[ 0 ].scrollTo({top: new_height, left: 0, behavior: "smooth"});}}, 600 );'></textarea>
                         </li>
                         <li class="send-btn">
                             <a>
@@ -2574,7 +2577,7 @@
             });
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendPrivate );
             document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendPrivate );
-            document.getElementsByClassName( "sound-btn" )[ 0 ].addEventListener( "click", function() {showToast( "coming soon" );});
+            document.getElementsByClassName( "sound-btn" )[ 0 ].addEventListener( "click", function() {showToast( `${t('comingSoon')}` );});
             document.getElementsByClassName( "image-btn" )[ 0 ].addEventListener( "click", function() {
                 showImgs();
             });
@@ -2692,11 +2695,11 @@
             var name = document.getElementsByClassName( "create-channel-name" )[ 0 ].value;
             var img = document.getElementsByClassName( "create-channel-image" )[ 0 ].value;
             if ( !name || name == "" ) {
-                showToast( "add a channel name first" );
+                showToast( `${t('addFirstChannelName')}` );
                 return;
             }
             if ( !img || img == "" ) {
-                showToast( "add a channel image first" );
+                showToast(  `${t('addFirstChannelImage')}` );
                 return;
             }
             document.getElementsByClassName( "create-channel-name" )[ 0 ].value = "";
@@ -2786,7 +2789,7 @@
             element.select();
             element.setSelectionRange( 0, 99999 );
             navigator.clipboard.writeText( element.value );
-            showToast( "copied" );
+            showToast( `${t('copied')}` );
         }
     </script>
     <script>
@@ -2799,7 +2802,7 @@
         }
         function importPrivkey( privkey ) {
             if ( privkey.length != 64 ) {
-                showToast( "Your private key must be a 32 byte hex-formatted string" );
+                showToast( `${t('mustBe32Byte')}` );
                 return;
             }
             if ( !(
@@ -2812,7 +2815,7 @@
                 && isHex( privkey.substring( 48, 56 ) )
                 && isHex( privkey.substring( 56, 64 ) )
                 ) ) {
-                showToast( "your private key is not hex" );
+                showToast( `${t('isNotHex')}` );
                 return;
             }
             var pubkey = nobleSecp256k1.getPublicKey( privkey, true );
@@ -2832,7 +2835,7 @@
             alterPubKey = nobleSecp256k1.getPublicKey( alterPrivKey, true ).substring( 2 );
             i_should_create_a_new_wallet = true;
             importWalletFromNostrOrMakeOne( alterPubKey );
-            showToast( "success, your account was imported" );
+            showToast( `${t('successAccountImported')}` );
         }
     </script>
     <script>
@@ -2861,7 +2864,7 @@
                     <div class="user-profile-inner">
                         <!-- //var picture = "https://hashvatar.vercel.app/" + pubKey; -->
                         <div class="name"><script>document.getElementsByClassName( "user-in-sidebar" )[ 0 ].getElementsByTagName( "span" )[ 0 ].className = "";document.getElementsByClassName( "user-in-sidebar" )[ 0 ].getElementsByTagName( "span" )[ 0 ].style="background-image: url('https://www.gravatar.com/avatar/" + pubKey + "?s=128&d=retro')";document.getElementsByClassName( "user-in-sidebar" )[ 0 ].onclick = function() {showProfile( pubKey, pubKey.substring( 0, 15 ) + "...", "https://www.gravatar.com/avatar/" + pubKey + "?s=128&d=retro" );document.getElementsByClassName( "user-profile-inner" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerHTML = pubKey.substring( 0, 15 ) + "...";}</script></div>
-                        <div class="message">View your profile</div>
+                        <div class="message" data-i18n-key="viewYourProfil"></div>
                     </div>
                 </a>
             </div>
@@ -2870,15 +2873,15 @@
                         <li class="search-outer">
                             <div class="search">
                                 <input type="text" placeholder="Search...">
-                                <i class="fa fa-search" onclick='showToast( "coming soon" );document.getElementsByClassName( "search" )[ 0 ].getElementsByTagName( "input" )[ 0 ].value = "";'></i>
+                                <i class="fa fa-search" onclick='showToast( `${t("comingSoon")}` );document.getElementsByClassName( "search" )[ 0 ].getElementsByTagName( "input" )[ 0 ].value = "";'></i>
                             </div>
                         </li>
                         <li class="manage-wallet-outer" onclick='manageWallet( this.getElementsByClassName( "message" )[ 0 ].innerText );'>
                             <a>
                                 <span class="plus-circle fa fa-wallet"></span>
                                 <div class="manage-channels-inner">
-                                    <div class="name">Manage wallet</div>
-                                    <div class="message">Loading...</div>
+                                    <div class="name" data-i18n-key="manageWallet"></div>
+                                    <div class="message" data-i18n-key="loading"></div>
                                 </div>
                                 <span class="notification" style="background-color: #05e632;">200+</span>
                             </a>
@@ -2887,8 +2890,8 @@
                             <a>
                                 <span class="plus-circle fa fa-list-check"></span>
                                 <div class="manage-channels-inner">
-                                    <div class="name">Manage channels</div>
-                                    <div class="message">Find/create/remove channels</div>
+                                    <div class="name" data-i18n-key="manageChannels"></div>
+                                    <div class="message" data-i18n-key="manageChannelsMessage"></div>
                                 </div>
                             </a>
                         </li>
@@ -2900,12 +2903,20 @@
                 <div class="channel-info">
                     <span style="background-image: url('./anigma-logo.png')"></span>
                     <div class="channel-wrapper">
-                        <div class="name">Anigma</div>
-                        <div class="message">Talk to people</div>
+                        <div class="name" data-i18n-key="NAME"></div>
+                        <div class="message" data-i18n-key="DESC"></div>
                     </div>
                 </div>
                 <div class="actions">
                     <ul>
+                        <li>
+                            <div>
+                                <select class="locale-switcher" onchange="setLocale(value)">
+                                    <option value="en" class="optionChild">English</option>
+                                    <option value="de" class="optionChild">Deutsch</option>
+                                </select>
+                            </div>
+                        </li>
                         <li class="hotdog">
                             <a>
                                 <i class="fa fa-ellipsis-v"></i>
@@ -2915,9 +2926,7 @@
                 </div>
             </div>
             <div class="message-content">
-                <div class="startup-message">
-                    Please select a channel on the left. You can also go to Settings (three dots in the top right) to import a private key or backup your current keys.
-                </div>
+                <div class="startup-message" data-i18n-key="startPageText"></div>
             </div>
         </div>
     </div>
@@ -2946,7 +2955,7 @@
         setTimeout( function() {
             document.getElementsByClassName( "search" )[ 0 ].getElementsByTagName( "input" )[ 0 ].addEventListener( 'keypress', function ( e ) {
                 if ( e.key === 'Enter' ) {
-                    showToast( "coming soon" );
+                    showToast( `${t("comingSoon")}` );
                     document.getElementsByClassName( "search" )[ 0 ].getElementsByTagName( "input" )[ 0 ].value = "";
                 }
             });
@@ -3330,7 +3339,7 @@
                 hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
             }
             if (hex.length !== 6) {
-                throw new Error('Invalid HEX color.');
+                throw new Error(`${t('invalidHexColor')}`);
             }
             var r = parseInt(hex.slice(0, 2), 16),
                 g = parseInt(hex.slice(2, 4), 16),
@@ -3394,11 +3403,12 @@
                 document.getElementsByClassName( "gallery-holder" )[ 0 ].append( div );
             });
             if ( !document.getElementsByClassName( "gallery-holder" )[ 0 ].innerHTML || document.getElementsByClassName( "gallery-holder" )[ 0 ].innerHTML == "" ) {
-                document.getElementsByClassName( "gallery-holder" )[ 0 ].innerHTML = "There are no image uploads, but fear not! Paste an image from the web into your message and the next time you click this image button your image will appear here for easy access. By the way, images must be hosted externally (such as on imgur or imgbb) because I don't want to store a bunch of images.";
+                document.getElementsByClassName( "gallery-holder" )[ 0 ].innerHTML = `${t('imageUploadInfo')}`;
             }
             document.getElementById( "black-bg" ).style.display = "block";
             document.getElementById( "modal" ).style.display = "block";
         }
     </script>
+      
 </body>
 </html>

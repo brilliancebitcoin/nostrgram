@@ -1,7 +1,6 @@
 {
   "name": "Anigma - Talk to people",
   "short_name": "Anigma",
-  "display": "minimal-ui",
   "start_url": "/index.html",
   "scope": "./",
   "icons": [
