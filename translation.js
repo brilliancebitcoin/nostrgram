@@ -192,4 +192,3 @@ function translateElement(element) {
 function t(key) {
    return translations[locale][key]
 }
- 
