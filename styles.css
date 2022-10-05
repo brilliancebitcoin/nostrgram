@@ -1105,3 +1105,13 @@ div.gallery:hover {
     }
 
 }
+
+.locale-switcher {
+    background-color: #c8def0;
+    font-size: large; 
+}
+
+select option {
+    padding: 10px;
+    font-size: larger; 
+}
