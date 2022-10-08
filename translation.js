@@ -64,7 +64,7 @@ let translations = {
     "unknown" : "Unknown",
     "unknownError" : "unknown error, could not add this channel -- please contact a developer for help",
     "viewThisEvent" : "View this event on nostr.com",
-    "viewYourProfil":"View your profil",
+    "viewYourProfil":"View your profile",
     "walletUrl":"Your wallet url",
     "year" : "year",
     "years" : "years",
