@@ -567,7 +567,7 @@
                     shortened_content_for_code = shortened_content.replace( /\'/g, "\\'" );
                     shortened_content_for_display = shortened_content.replace( /\'/g, "\'" );
                     document.getElementById( "modal" ).innerHTML = "";
-                    document.getElementById( "modal" ).innerHTML += `<div><strong>${t('unknownError')}</strong></div>`;
+                    document.getElementById( "modal" ).innerHTML += `<div><strong>Message</strong></div>`;
                     document.getElementById( "modal" ).innerHTML += shortened_content_for_display;
                     document.getElementById( "modal" ).innerHTML += `<hr style="border: 1px solid; margin-top: 20px;" />`;
                     document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="replyToMsg( '${event.id}', '${shortened_content_for_code}', '${event.pubkey}' )">${t('replyToThisMessage')}</button></div>`;
