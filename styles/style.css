@@ -25,10 +25,6 @@ body {
     background-color: var(--background-color-2);
 }
 
-img:not([src*='.svg']) {
-    filter: var(--image-filter);
-}
-
 .chat {
     height: 100%;
     display: flex;
@@ -199,7 +195,7 @@ img:not([src*='.svg']) {
     border-left: 1px solid var(--background-color-3);
     display: flex;
     flex-direction: column;
-    background: url("./cartoons.png") repeat center center fixed;
+    background: url("../cartoons.png") repeat center center fixed;
     background-size: 600px;
     overflow-y: scroll;
 }
