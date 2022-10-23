@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <script>
+        if (window.matchMedia('(prefers-color-scheme: dark)').media === 'not all') {
+            document.documentElement.style.display = 'none';
+            document.head.insertAdjacentHTML(
+            'beforeend',
+            '<link rel="stylesheet" href="/light.css" onload="document.documentElement.style.display = \'\'">',
+            );
+        }
+    </script>
+    <link rel="stylesheet" href="/dark.css" media="(prefers-color-scheme: dark)" />
+    <link rel="stylesheet" href="/light.css" media="(prefers-color-scheme: light)"/>
+    <!-- The main stylesheet -->
     <link rel="stylesheet" href="styles.css?v=57" />
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="manifest.json">
