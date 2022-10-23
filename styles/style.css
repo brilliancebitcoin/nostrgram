@@ -25,6 +25,10 @@ body {
     background-color: var(--background-color-2);
 }
 
+img:not([src*='.svg']) {
+    filter: var(--image-filter);
+}
+
 .chat {
     height: 100%;
     display: flex;
@@ -230,7 +234,7 @@ body {
 .chat .content .message-header .channel-info .channel-wrapper .name {
     font-size: 15px;
     font-weight: 500;
-    color: #222;
+    color: var(--color-accent-2);
 }
 
 .chat .content .message-header .channel-info .channel-wrapper .time {

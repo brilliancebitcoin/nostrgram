@@ -8,4 +8,5 @@
     --background-color-2: #555;
     --background-color-3: #999;
     --background-accent: lightblue;
+    --image-filter: grayscale(50%);
   }
