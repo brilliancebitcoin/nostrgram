@@ -1,0 +1,11 @@
+/* light.css: 👉 dark-on-light */
+:root {
+    --color-primary: #333;
+    --color-secondary: #999;
+    --color-accent: lightblue;
+    --color-accent-2: black;
+    --background-color: #fff;
+    --background-color-2: #eee;
+    --background-color-3: #ddd;
+    --background-accent: #2196f3;
+  }

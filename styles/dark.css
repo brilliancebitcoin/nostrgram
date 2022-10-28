@@ -1,0 +1,12 @@
+/* dark.css: 👉 light-on-dark */
+:root {
+    --color-primary: #eee;
+    --color-secondary: #bbb;
+    --color-accent: #2196f3;
+    --color-accent-2: white;
+    --background-color: #333;
+    --background-color-2: #555;
+    --background-color-3: #999;
+    --background-accent: lightblue;
+    --image-filter: grayscale(50%);
+  }

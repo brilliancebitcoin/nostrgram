@@ -1,5 +1,9 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css');
 
+:root {
+    color-scheme: light dark;
+}
+
 * {
     padding: 0;
     margin: 0;
@@ -18,7 +22,7 @@ html,
 body {
     height: 100%;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background-color: #f5f5f5;
+    background-color: var(--background-color-2);
 }
 
 .chat {
@@ -29,7 +33,7 @@ body {
 .chat .sidebar {
     width: 300px;
     min-width: 300px;
-    background: #f5f5f5;
+    background: var(--background-color-2);
     display: flex;
     flex-direction: column;
 }
@@ -38,7 +42,7 @@ body {
 .chat .sidebar .user-in-sidebar {
     height: 50px;
     min-height: 50px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--background-color-3);
     position: relative;
     padding: 0 10px;
     display: flex;
@@ -48,7 +52,7 @@ body {
 .chat .sidebar .search input {
     width: 100%;
     height: 30px;
-    background: #fff;
+    background: var(--background-color);
     border-radius: 30px;
     font-size: 14px;
     padding: 0 35px 0 15px;
@@ -63,7 +67,7 @@ body {
     display: flex;
     align-items: center;
     font-size: 14px;
-    color: #999;
+    color: var(--color-secondary);
 }
 
 .chat .sidebar .channels {
@@ -72,7 +76,7 @@ body {
 
 .chat .sidebar .plus-circle {
     display: inline-block;
-    border: 1px solid #999;
+    border: 1px solid var(--color-secondary);
     height: 40px;
     width: 40px;
     border-radius: 40px;
@@ -81,12 +85,12 @@ body {
     line-height: 40px;
     font-size: 20px;
     margin-right: 10px;
-    color: #999;
+    color: var(--color-secondary);
 }
 
 .chat .content .message-header .channel-info .plus-circle {
     display: inline-block;
-    border: 1px solid #999;
+    border: 1px solid var(--color-secondary);
     height: 40px;
     width: 40px;
     border-radius: 40px;
@@ -94,12 +98,12 @@ body {
     line-height: 40px;
     font-size: 20px;
     margin-right: 10px;
-    color: #999;
+    color: var(--color-secondary);
 }
 
 .message-header-alt .channel-info .plus-circle {
     display: inline-block;
-    border: 1px solid #999;
+    border: 1px solid var(--color-secondary);
     height: 40px;
     width: 40px;
     border-radius: 40px;
@@ -107,7 +111,7 @@ body {
     line-height: 40px;
     font-size: 20px;
     margin-right: 10px;
-    color: #999;
+    color: var(--color-secondary);
 }
 
 .chat .sidebar .channels ul li a,
@@ -122,7 +126,7 @@ body {
 .chat .sidebar .channels ul li a .manage-channels-inner .name,
 .chat .sidebar .user-in-sidebar a .user-profile-inner .name {
     font-size: 15px;
-    color: #333;
+    color: var(--color-primary);
     font-weight: 500;
     margin-bottom: 3px;
 }
@@ -130,12 +134,12 @@ body {
 .chat .sidebar .channels ul li a .manage-channels-inner .message,
 .chat .sidebar .user-in-sidebar a .user-profile-inner .message {
     font-size: 13px;
-    color: #999;
+    color: var(--color-secondary);
 }
 
 .chat .sidebar .channels ul li.active a,
 .chat .sidebar .channels ul li a:hover {
-    background: #fff;
+    background: var(--background-color);
 }
 
 .chat .sidebar .channels ul li a span,
@@ -157,7 +161,7 @@ body {
 .chat .sidebar .channels ul li a .channel-inner .name,
 .chat .sidebar .channels ul li a .dm-inner .name {
     font-size: 15px;
-    color: #333;
+    color: var(--color-primary);
     font-weight: 500;
     margin-bottom: 3px;
 }
@@ -165,7 +169,7 @@ body {
 .chat .sidebar .channels ul li a .channel-inner .message,
 .chat .sidebar .channels ul li a .dm-inner .message {
     font-size: 13px;
-    color: #999;
+    color: var(--color-secondary);
     word-break: break-word;
 }
 
@@ -174,9 +178,9 @@ body {
     width: 25px;
     height: 25px;
     border-radius: 50%;
-    background-color: #999;
+    background-color: var(--color-secondary);
     font-size: 11px;
-    color: #fff;
+    color: var(--background-color);
     text-align: center;
     line-height: 25px;
     margin-left: auto;
@@ -188,10 +192,10 @@ body {
 
 .chat .content {
     flex: 1;
-    border-left: 1px solid #ddd;
+    border-left: 1px solid var(--background-color-3);
     display: flex;
     flex-direction: column;
-    background: url("./cartoons.png") repeat center center fixed;
+    background: url("../cartoons.png") repeat center center fixed;
     background-size: 600px;
     overflow-y: scroll;
 }
@@ -199,12 +203,12 @@ body {
 .chat .content .message-header {
     height: 50px;
     min-height: 50px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--background-color-3);
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 15px;
-    background-color: white;
+    background-color: var(--background-color);
 }
 
 .chat .content .message-header .channel-info {
@@ -226,17 +230,17 @@ body {
 .chat .content .message-header .channel-info .channel-wrapper .name {
     font-size: 15px;
     font-weight: 500;
-    color: #222;
+    color: var(--color-accent-2);
 }
 
 .chat .content .message-header .channel-info .channel-wrapper .time {
     font-size: 13px;
-    color: #999;
+    color: var(--color-secondary);
 }
 
 .chat .content .message-header .channel-info .channel-wrapper .message {
     font-size: 13px;
-    color: #999;
+    color: var(--color-secondary);
 }
 
 .chat .content .message-header .actions ul {
@@ -250,7 +254,7 @@ body {
 
 .chat .content .message-header .actions ul li a {
     font-size: 19px;
-    color: #999;
+    color: var(--color-secondary);
     text-align: center;
     cursor: pointer;
 }
@@ -264,9 +268,9 @@ body {
     top: 0px;
     height: 50px;
     min-height: 50px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--background-color-3);
     padding: 0 15px;
-    background-color: white;
+    background-color: var(--background-color);
     display: none;
 }
 
@@ -275,11 +279,11 @@ body {
     top: 0px;
     height: 50px;
     min-height: 50px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--background-color-3);
     justify-content: space-between;
     align-items: center;
     padding: 0 15px;
-    background-color: white;
+    background-color: var(--background-color);
     display: none;
 }
 
@@ -307,12 +311,12 @@ body {
 
 .message-header-alt .channel-info .channel-wrapper .time {
     font-size: 13px;
-    color: #999;
+    color: var(--color-secondary);
 }
 
 .message-header-alt .channel-info .channel-wrapper .message {
     font-size: 13px;
-    color: #999;
+    color: var(--color-secondary);
 }
 
 .message-header-alt .actions ul {
@@ -326,7 +330,7 @@ body {
 
 .message-header-alt .actions ul li a {
     font-size: 19px;
-    color: #999;
+    color: var(--color-secondary);
     text-align: center;
     cursor: pointer;
 }
@@ -345,7 +349,7 @@ body {
     left: 0px;
     margin: 10px;
     text-align: center;
-    color: #333;
+    color: var(--color-primary);
 }
 
 .chat .content .message-content {
@@ -395,7 +399,7 @@ body {
 .chat .content .message-content .message .bubble {
     display: inline-block;
     padding: 6px 12px;
-    background-color: #f7f7f7;
+    background-color: var(--background-color-3);
     border-radius: 20px;
     font-size: 15px;
     margin-bottom: 5px;
@@ -438,11 +442,11 @@ body {
 }
 
 .chat .content .message-content .message .bubble .lightblue {
-    color: lightblue;
+    color: var(--color-accent)
 }
 
 .chat .content .message-content .message .bubble .blue {
-    color: #4287f5;
+    color: var(--background-accent);
 }
 
 .chat .content .message-content .message .bubble .purple {
@@ -451,13 +455,13 @@ body {
 
 .chat .content .message-content .message .time {
     font-size: 12px;
-    color: white;
+    color: var(--background-color);
 }
 
 .chat .content .message-content .message .bubbletime {
     font-size: 11px;
     text-align: right;
-    color: #999;
+    color: var(--color-secondary);
 }
 
 .chat .content .message-content .message.me {
@@ -466,18 +470,18 @@ body {
 
 .chat .content .message-content .message.me .time {
     text-align: right;
-    color: lightblue;
+    color: var(--color-accent);
 }
 
 .chat .content .message-content .message.me .bubble {
 
-    background: #2196f3;
-    color: #fff;
+    background: var(--background-accent);
+    color: var(--background-color);
 }
 
 .chat .content .message-form {
-    border-top: 1px solid #ddd;
-    background: #eee;
+    border-top: 1px solid var(--background-color-3);
+    background: var(--background-color-2);
     padding: 10px;
 }
 
@@ -500,7 +504,7 @@ body {
     box-sizing: border-box;
     height: 36px;
     line-height: 35px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--background-color-3);
     border-radius: 36px;
     font-size: 14px;
     padding: 0 15px;
@@ -513,8 +517,8 @@ body {
     height: 36px;
     display: block;
     border-radius: 50%;
-    background: #333;
-    color: #fff;
+    background: var(--color-primary);
+    color: var(--background-color);
     text-align: center;
     line-height: 36px;
     cursor: pointer;
@@ -525,7 +529,7 @@ body {
 }
 
 .chat .content .message-form ul li.send-btn a {
-    background: #4287f5;
+    background: var(--background-accent);
 }
 
 .chat .content .message-form ul li.send-btn a i::before {
@@ -547,7 +551,7 @@ body {
     width: 80%;
     box-sizing: border-box;
     height: 36px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--background-color-3);
     border-radius: 36px;
     font-size: 14px;
     padding: 0 15px
@@ -558,18 +562,18 @@ body {
     width: 100px;
     box-sizing: border-box;
     height: 36px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--background-color-3);
     border-radius: 36px;
     font-size: 14px;
     padding: 0 15px;
-    background-color: #ddd;
+    background-color: var(--background-color-3);
     cursor: pointer;
     margin-top: 20px;
 }
 
 .removable-channel {
     position: relative;
-    background-color: white;
+    background-color: var(--background-color);
     border-radius: 40px;
     margin: 10px;
     margin-top: 20px;
@@ -578,7 +582,7 @@ body {
 .x-circle {
     float: right;
     display: inline-block;
-    border: 1px solid #999;
+    border: 1px solid var(--color-secondary);
     vertical-align: middle;
     height: 40px;
     width: 40px;
@@ -587,12 +591,12 @@ body {
     text-align: center;
     line-height: 40px;
     font-size: 20px;
-    color: #999;
+    color: var(--color-secondary);
 }
 
 .img-circle {
     display: inline-block;
-    border: 1px solid #999;
+    border: 1px solid var(--color-secondary);
     vertical-align: middle;
     height: 40px;
     width: 40px;
@@ -616,7 +620,7 @@ body {
     width: 100%;
     box-sizing: border-box;
     height: 36px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--background-color-3);
     border-radius: 36px;
     font-size: 14px;
     padding: 0 15px
@@ -628,7 +632,7 @@ body {
     width: 100%;
     box-sizing: border-box;
     height: 36px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--background-color-3);
     border-radius: 36px;
     font-size: 14px;
     padding: 0 15px
@@ -640,11 +644,11 @@ body {
     width: 100px;
     box-sizing: border-box;
     height: 36px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--background-color-3);
     border-radius: 36px;
     font-size: 14px;
     padding: 0 15px;
-    background-color: #ddd;
+    background-color: var(--background-color-3);
     cursor: pointer;
 }
 
@@ -654,8 +658,8 @@ body {
     position: fixed;
     top: 51px;
     width: calc( 100% - 320px );
-    background-color: black;
-    color: white;
+    background-color: var(--color-accent-2);
+    color: var(--background-color);
     padding: 5px;
     z-index: 1;
     word-break: break-word;
@@ -702,11 +706,11 @@ body {
     width: 80%;
     box-sizing: border-box;
     height: 36px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--background-color-3);
     border-radius: 36px;
     font-size: 14px;
     padding: 0 15px;
-    background-color: #ddd;
+    background-color: var(--background-color-3);
     overflow: hidden;
     text-overflow: ellipsis;
     font-family: monospace;
@@ -717,11 +721,11 @@ body {
     width: 100px;
     box-sizing: border-box;
     height: 36px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--background-color-3);
     border-radius: 36px;
     font-size: 14px;
     padding: 0 15px;
-    background-color: white;
+    background-color: var(--background-color);
     cursor: pointer;
     margin-top: 20px;
 }
@@ -741,7 +745,7 @@ body {
     width: 80%;
     box-sizing: border-box;
     height: 36px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--background-color-3);
     border-radius: 36px;
     font-size: 14px;
     padding: 0 15px
@@ -756,11 +760,11 @@ body {
     width: 100px;
     box-sizing: border-box;
     height: 36px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--background-color-3);
     border-radius: 36px;
     font-size: 14px;
     padding: 0 15px;
-    background-color: #ddd;
+    background-color: var(--background-color-3);
     cursor: pointer;
     margin-top: 20px;
 }
@@ -770,8 +774,8 @@ body {
   visibility: hidden; /* Hidden by default. Visible on click */
   width: 250px; /* Set a default minimum width */
   margin-left: -125px; /* Divide value of min-width by 2 */
-  background-color: #4287f5; /* Blue background color */
-  color: #fff; /* White text color */
+  background-color: var(--background-accent); /* Blue background color */
+  color: var(--background-color); /* White text color */
   text-align: center; /* Centered text */
   border-radius: 2px; /* Rounded borders */
   padding: 16px; /* Padding */
@@ -822,7 +826,7 @@ body {
     position: fixed;
     top: 0px;
     left: 0px;
-    background-color: black;
+    background-color: var(--color-accent-2);
     opacity: .5;
     width: 100vw;
     height: 100vh;
@@ -837,10 +841,10 @@ body {
     transform: translate(-50%, -50%);;
     width: 100%;
     max-width: 560px;
-    background-color: white;
+    background-color: var(--background-color);
     border-radius: 10px;
     padding: 20px;
-    color: black;
+    color: var(--color-accent-2);
     text-align: center;
 }
 
@@ -850,7 +854,7 @@ body {
     width: calc( 100% - 130px );
     box-sizing: border-box;
     height: 36px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--background-color-3);
     border-radius: 36px;
     font-size: 14px;
     padding: 0 15px
@@ -861,11 +865,11 @@ body {
     width: 80px;
     box-sizing: border-box;
     height: 36px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--background-color-3);
     border-radius: 36px;
     font-size: 14px;
     padding: 0 15px;
-    background-color: #ddd;
+    background-color: var(--background-color-3);
     cursor: pointer;
     margin-top: 20px;
     margin-left: 20px;
@@ -879,7 +883,7 @@ body {
 }
 
 .emoji-in-modal:hover {
-    background-color: #4287f5;
+    background-color: var(--background-accent);
 }
 
 .modal-btn {
@@ -887,17 +891,17 @@ body {
     width: 100px;
     box-sizing: border-box;
     height: 36px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--background-color-3);
     border-radius: 36px;
     font-size: 14px;
     padding: 0 15px;
-    background-color: #ddd;
+    background-color: var(--background-color-3);
     cursor: pointer;
     margin-top: 20px;
 }
 
 .disabled {
-    background-color: #999;    
+    background-color: var(--color-secondary);    
 }
 
 .youtube-wrapper {
@@ -934,7 +938,7 @@ body {
     position: relative;
     box-sizing: border-box;
     z-index: 10;
-    color: #fff;
+    color: var(--background-color);
 }
 
 #vidDivheader .mover,
@@ -945,7 +949,7 @@ body {
     width: 20px;
     cursor: move;
     padding: 10px;
-    background-color: #4287f5;
+    background-color: var(--background-accent);
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     vertical-align: top;
@@ -967,7 +971,7 @@ body {
 .inner-vid {
     position: relative;
     z-index: 11;
-    background-color: black;
+    background-color: var(--color-accent-2);
 }
 
 div.gallery-holder {
@@ -1003,7 +1007,7 @@ div.gallery:hover {
 .reply-div {
     display: none;
     position: relative;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--color-primary);
     margin-bottom: 5px;
     padding-bottom: 5px;
     font-size: 14px;
@@ -1018,7 +1022,7 @@ div.gallery:hover {
 }
 
 .reply-prefix {
-    border-left: 1px solid #4287f5;
+    border-left: 1px solid var(--background-accent);
     margin-left: 5px;
     padding-left: 5px;
     margin-bottom: 10px;
@@ -1032,7 +1036,7 @@ div.gallery:hover {
 }
 
 .reply-in-blue {
-    border-left: 1px solid white;    
+    border-left: 1px solid var(--background-color);    
 }
 
 /* mobile */
@@ -1088,7 +1092,7 @@ div.gallery:hover {
 
     .message-header-alt .sidebar_arrow {
         display: inline-block;
-        border: 1px solid #333;
+        border: 1px solid var(--color-primary);
         height: 20px;
         width: 20px;
         border-radius: 20px;
