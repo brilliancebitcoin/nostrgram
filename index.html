@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, user-scalable=no" />
     <script>
-        if (window.matchMedia('(prefers-color-scheme: dark)').media === 'not all') {
+        if ( window.matchMedia( '(prefers-color-scheme: dark)' ).media === 'not all' || window.location.href.includes( "darkmode=true" ) ) {
             document.documentElement.style.display = 'none';
             document.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" href="./styles/light.css" onload="document.documentElement.style.display = \'\'">',);
         }
