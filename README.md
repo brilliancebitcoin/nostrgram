@@ -65,7 +65,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] search for channels & users
 * [ ] nip05 support (domain-based checkmarks)
 * [ ] nip07 support (likes and reactions)
-* [ ] dark mode
+* [x] dark mode
 * [ ] investigate why new messages don't always show up as the latest message in the sidebar
 * [ ] add a "messages not read" delineating line if you go to a channel or a dm with fewer than 200 unread messages in it, separating the messages you read from the messages you didn't
 * [ ] if a "messages not read" line exists when entering a channel or a dm containing unread messages, autoscroll to that instead of to the latest message
