@@ -400,7 +400,7 @@ body {
     display: inline-block;
     padding: 6px 12px;
     background-color: white;
-//    background-color: var(--background-color-3);
+/*    background-color: var(--background-color-3); */
     border-radius: 20px;
     font-size: 15px;
     margin-bottom: 5px;
