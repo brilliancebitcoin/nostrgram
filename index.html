@@ -1252,7 +1252,7 @@
                 hexToBytes( key ),
                 hexToBytes( base64ToHex( iv ) )
             );
-            var decryptedMessage = decipher.update( emsg, "base64" );
+            var decryptedMessage = decipher.update( emsg, "base64", "utf8" );
             dmsg = decryptedMessage + decipher.final( "utf8" );
             return dmsg;
         }
