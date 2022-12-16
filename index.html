@@ -23,6 +23,7 @@
     <script src="https://supertestnet.github.io/bitcoin-chess/js/qrcode.js"></script>
     <script src="https://bundle.run/buffer@6.0.3"></script>
     <script src="https://bundle.run/bech32@2.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
     <script src="translation.js?v=64"></script>
 </head>
 <body>
@@ -451,16 +452,16 @@
                     if ( "name" in JSON.parse( content ) && !( !JSON.parse( content )[ "name" ] || JSON.parse( content )[ "name" ] == "" ) ) {
                         //stop if the metadata you are getting belongs to a different user
                         if ( document.querySelector( ".profile-pubkey" ) && event.pubkey != pubkeyFromNpub( document.querySelector( ".profile-pubkey" ).innerText ) ) return;
-                        namemap[ event.pubkey ] = JSON.parse( content )[ "name" ];
+                        namemap[ event.pubkey ] = DOMPurify.sanitize( JSON.parse( content )[ "name" ] );
                         localStorage[ "namemap" ] = JSON.stringify( namemap );
                         var i; for ( i=0; i<document.getElementsByClassName( event.pubkey ).length; i++ ) {
-                            document.getElementsByClassName( event.pubkey )[ i ].innerText = JSON.parse( content )[ "name" ];
+                            document.getElementsByClassName( event.pubkey )[ i ].innerText = DOMPurify.sanitize( JSON.parse( content )[ "name" ] );
                         }
                         if ( document.getElementsByClassName( "profile-name" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && pubkeyFromNpub( document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText ) == event.pubkey ) {
-                            document.getElementsByClassName( "profile-name" )[ 0 ].innerText = JSON.parse( content )[ "name" ];
+                            document.getElementsByClassName( "profile-name" )[ 0 ].innerText = DOMPurify.sanitize( JSON.parse( content )[ "name" ] );
                         }
                         if ( document.getElementsByClassName( "profile-pubkey-title" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && pubkeyFromNpub( document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText ) == event.pubkey ) {
-                            document.getElementsByClassName( "profile-pubkey-title" )[ 0 ].innerText = JSON.parse( content )[ "name" ] + "'s public key";
+                            document.getElementsByClassName( "profile-pubkey-title" )[ 0 ].innerText = DOMPurify.sanitize( JSON.parse( content )[ "name" ] ) + "'s public key";
                         }
                     } else {
                         namemap[ event.pubkey ] = "none";
@@ -469,15 +470,15 @@
                     if ( "about" in JSON.parse( content ) && !( !JSON.parse( content )[ "about" ] || JSON.parse( content )[ "about" ] == "" ) ) {
                         //stop if the metadata you are getting belongs to a different user
                         if ( document.querySelector( ".profile-pubkey" ) && event.pubkey != pubkeyFromNpub( document.querySelector( ".profile-pubkey" ).innerText ) ) return;
-                        if ( document.getElementsByClassName( "profile-about" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText == event.pubkey ) {
-                            document.getElementsByClassName( "profile-about" )[ 0 ].innerHTML = markdownify( JSON.parse( content )[ "about" ] );
+                        if ( document.getElementsByClassName( "profile-about" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && pubkeyFromNpub( document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText ) == event.pubkey ) {
+                            document.getElementsByClassName( "profile-about" )[ 0 ].innerHTML = markdownify( DOMPurify.sanitize( JSON.parse( content )[ "about" ] ) );
                             document.getElementsByClassName( "profile-about" )[ 0 ].style.display = "block";
                         }
                     }
                     if ( "lud06" in JSON.parse( content ) && !( !JSON.parse( content )[ "lud06" ] || JSON.parse( content )[ "lud06" ] == "" ) ) {
                         //stop if the metadata you are getting belongs to a different user
                         if ( document.querySelector( ".profile-pubkey" ) && event.pubkey != pubkeyFromNpub( document.querySelector( ".profile-pubkey" ).innerText ) ) return;
-                        if ( document.getElementsByClassName( "profile-lud06" )[ 0 ] && !document.getElementsByClassName( "tipper" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText == event.pubkey ) {
+                        if ( document.getElementsByClassName( "profile-lud06" )[ 0 ] && !document.getElementsByClassName( "tipper" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && pubkeyFromNpub( document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText ) == event.pubkey ) {
                             var button = document.createElement( "button" );
                             button.className = "tipper";
                             button.innerText = "Tip this user";
@@ -485,7 +486,7 @@
                                 var a = document.createElement( "a" );
                                 a.href = "lightning:" + JSON.parse( content )[ "lud06" ].toLowerCase();
                                 a.target = "_blank";
-                                a.append( createQR( JSON.parse( content )[ "lud06" ] ) );
+                                a.append( createQR( DOMPurify.sanitize( JSON.parse( content )[ "lud06" ] ) ) );
                                 document.getElementById( "modal" ).innerHTML = "";
                                 document.getElementById( "modal" ).append( a );
                                 document.getElementById( "modal" ).innerHTML += '<div align="center" style="font-weight: bold;">click or scan</div>';
@@ -499,15 +500,15 @@
                     if ( "picture" in JSON.parse( content ) && !( !JSON.parse( content )[ "picture" ] || JSON.parse( content )[ "picture" ] == "" ) ) {
                         //stop if the metadata you are getting belongs to a different user
                         if ( document.querySelector( ".profile-pubkey" ) && event.pubkey != pubkeyFromNpub( document.querySelector( ".profile-pubkey" ).innerText ) ) return;
-                        imagemap[ event.pubkey ] = JSON.parse( content )[ "picture" ];
+                        imagemap[ event.pubkey ] = DOMPurify.sanitize( JSON.parse( content )[ "picture" ] );
                         localStorage[ "imagemap" ] = JSON.stringify( imagemap );
                         var i; for ( i=0; i<document.getElementsByClassName( event.pubkey ).length; i++ ) {
                             if ( document.getElementsByClassName( event.pubkey )[ i ] && document.getElementsByClassName( event.pubkey )[ i ].parentElement && document.getElementsByClassName( event.pubkey )[ i ].parentElement.parentElement && document.getElementsByClassName( event.pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ] ) {
-                                document.getElementsByClassName( event.pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + JSON.parse( content )[ "picture" ] + ")";
+                                document.getElementsByClassName( event.pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + DOMPurify.sanitize( JSON.parse( content )[ "picture" ] ) + ")";
                             }
                         }
                         if ( document.getElementsByClassName( "big-picture" )[ 0 ] && document.getElementsByClassName( "channel-wrapper" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerText != `${t('settings')}` && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText == event.pubkey ) {
-                            document.getElementsByClassName( "big-picture" )[ 0 ].src = JSON.parse( content )[ "picture" ];
+                            document.getElementsByClassName( "big-picture" )[ 0 ].src = DOMPurify.sanitize( JSON.parse( content )[ "picture" ] );
                         }
                     } else {
                         imagemap[ event.pubkey ] = "none";
@@ -618,6 +619,7 @@
                             content = await decrypt(privKey, otherKey, content)
                         }
                     }
+                    content = DOMPurify.sanitize( content );
                     var shortened_content = content.replace( /\n/g, " " ).substring( 0, 50 );
                     if ( content.length > 50 ) {
                         shortened_content = shortened_content + "...";
@@ -643,7 +645,7 @@
                 if ( isError ) {
                     showToast( `${t('unknownError')}` );
                 } else {
-                    document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayChannel( JSON.parse( content )[ "picture" ], JSON.parse( content )[ "name" ], "", event.id, event.created_at );
+                    document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayChannel( DOMPurify.sanitize( JSON.parse( content )[ "picture" ] ), DOMPurify.sanitize( JSON.parse( content )[ "name" ] ), "", event.id, event.created_at );
                     getLatestMessage( event.id );
                     addDmsToSidebar();
                     var channel = document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( event.id )[ 0 ];
@@ -680,6 +682,7 @@
                     array_of_replies.push( [ event.id, replyingTo ] );
                 }
                 content = content.replace( /&/g, "&#38;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
+                content = DOMPurify.sanitize( content );
                 var shortened_content = content.replace( /\n/g, " " ).substring( 0, 50 );
                 if ( content.length > 50 ) {
                     shortened_content = shortened_content + "...";
@@ -932,10 +935,12 @@
                 }
                 content = content.replace( /&/g, "&#38;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
                 var shortened_content = content.replace( /\n/g, " " ).substring( 0, 50 );
+                shortened_content = DOMPurify.sanitize( shortened_content );
                 if ( content.length > 50 ) {
                     shortened_content = shortened_content + "...";
                 }
                 content = markdownify( content, isMine );
+                content = DOMPurify.sanitize( content );
                 var events_replied_to = [];
                 var pubkeys_replied_to = [];
                 var i; for ( i=0; i<event.tags.length; i++ ) {
@@ -1178,6 +1183,7 @@
                 }
                 content = content.replace( /&/g, "&#38;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
                 content = markdownify( content, isMine );
+                content = DOMPurify.sanitize( content );
                 //If the current message is already in the message cache, return, otherwise add to the number of unread messages
                 var messageIsKnown = false;
                 msg_cache[ parent ].forEach( function( message, index ) {
@@ -1236,10 +1242,12 @@
                 }
                 content = content.replace( /&/g, "&#38;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
                 var shortened_content = content.replace( /\n/g, " " ).substring( 0, 50 );
+                shortened_content = DOMPurify.sanitize( shortened_content );
                 if ( content.length > 50 ) {
                     shortened_content = shortened_content + "...";
                 }
                 content = markdownify( content, isMine );
+                content = DOMPurify.sanitize( content );
                 array_of_replies.forEach( function( item ) {
                     if ( item[ 0 ] == event.id ) {
                         var replyPubkey = event.pubkey;
@@ -3569,11 +3577,11 @@
             if ( pubkey in imagemap && imagemap[ pubkey ] != "none" ) {
                 var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
                     if ( !document.getElementsByClassName( pubkey )[ i ].classList.contains( "removable-channel" ) && document.getElementsByClassName( pubkey )[ i ].parentElement && document.getElementsByClassName( pubkey )[ i ].parentElement.parentElement && document.getElementsByClassName( pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ] ) {
-                        document.getElementsByClassName( pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + imagemap[ pubkey ] + ")";
+                        document.getElementsByClassName( pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + DOMPurify.sanitize( imagemap[ pubkey ] ) + ")";
                     }
                 }
                 var i; for ( i=0; i<document.getElementsByClassName( pubkey.substring( 0, 20 ) ).length; i++ ) {
-                    document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ i ].getElementsByTagName( "span" )[ 0 ].style.backgroundImage = "url(" + imagemap[ pubkey ] + ")";
+                    document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ i ].getElementsByTagName( "span" )[ 0 ].style.backgroundImage = "url(" + DOMPurify.sanitize( imagemap[ pubkey ] ) + ")";
                 }
             } else if ( !( pubkey in imagemap ) ) {
                 var newsubId   = "00000001" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 )
@@ -3588,11 +3596,11 @@
             if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
                 var i; for ( i=0; i<document.getElementsByClassName( pubkey ).length; i++ ) {
                     if ( !document.getElementsByClassName( pubkey )[ i ].classList.contains( "removable-channel" ) ) {
-                        document.getElementsByClassName( pubkey )[ i ].innerText = namemap[ pubkey ];
+                        document.getElementsByClassName( pubkey )[ i ].innerText = DOMPurify.sanitize( namemap[ pubkey ] );
                     }
                 }
                 var i; for ( i=0; i<document.getElementsByClassName( pubkey.substring( 0, 20 ) ).length; i++ ) {
-                    document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ i ].getElementsByClassName( "name" )[ 0 ].innerText = namemap[ pubkey ];
+                    document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ i ].getElementsByClassName( "name" )[ 0 ].innerText = DOMPurify.sanitize( namemap[ pubkey ] );
                 }
             } else if ( !( pubkey in namemap ) ) {
                 var newsubId   = "00000001" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 )
@@ -3610,14 +3618,14 @@
         function addPubkeyToSidebar( pubkey ) {
             //check if pubkey is mapped to image
             if ( pubkey in imagemap && imagemap[ pubkey ] != "none" ) {
-                var picture = imagemap[ pubkey ];
+                var picture = DOMPurify.sanitize( imagemap[ pubkey ] );
             } else {
                 //var picture = "https://hashvatar.vercel.app/" + event.pubkey;
                 var picture = "https://www.gravatar.com/avatar/" + pubkey + "?s=128&d=retro";
             }
             //check if pubkey is mapped to name
             if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
-                var name = namemap[ pubkey ];
+                var name = DOMPurify.sanitize( namemap[ pubkey ] );
             } else {
                 var name = pubkeyToNpub( pubkey ).substring( 0, 15 ) + "...";
             }
@@ -3697,14 +3705,14 @@
                 } else {
                     var messagecounter = 0;
                 }
-                var name = dms_info[ pubkey ][ "name" ];
-                var picture = dms_info[ pubkey ][ "picture" ];
+                var name = DOMPurify.sanitize( dms_info[ pubkey ][ "name" ] );
+                var picture = DOMPurify.sanitize( dms_info[ pubkey ][ "picture" ] );
                 if ( namemap[ pubkey ] && namemap[ pubkey ] != "none" ) {
-                    name = namemap[ pubkey ];
+                    name = DOMPurify.sanitize( namemap[ pubkey ] );
                     dms_info[ pubkey ][ "name" ] = name;
                 }
                 if ( imagemap[ pubkey ] && imagemap[ pubkey ] != "none" ) {
-                    picture = imagemap[ pubkey ];
+                    picture = DOMPurify.sanitize( imagemap[ pubkey ] );
                     dms_info[ pubkey ][ "picture" ] = picture;
                 }
                 var num_of_new_messages = messagecounter;
@@ -3716,6 +3724,9 @@
     </script>
     <script>
         function addMessageToCache( pubkey, id, event_time, parent, color, name, picture, content, replyingTo ) {
+            name = DOMPurify.sanitize( name );
+            picture = DOMPurify.sanitize( picture );
+            content = DOMPurify.sanitize( content );
             if ( !msg_cache[ parent ] ) {
                 msg_cache[ parent ] = [];
             }
