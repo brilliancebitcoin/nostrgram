@@ -45,6 +45,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] fix the same bug on mobile
 * [x] add message replies via long press or right click (I ended up going with a short click or tap)
 * [x] dark mode
+* [x] let people link a user directly into a channel like this: https://anigma.io?channel=whatever
 * [ ] private groups with shared decryption keys
 * [ ] make an option to set and modify relays in settings
 * [ ] connect to at least two relays by default
