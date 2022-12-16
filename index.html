@@ -21,10 +21,28 @@
     <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
     <script src="https://bundle.run/browserify-cipher@1.0.1"></script>
     <script src="https://supertestnet.github.io/bitcoin-chess/js/qrcode.js"></script>
+    <script src="https://bundle.run/buffer@6.0.3"></script>
+    <script src="https://bundle.run/bech32@2.0.0"></script>
     <script src="translation.js"></script>
 </head>
 <body>
     <!-- based on this: https://github.com/YunusEmreNalbant/css-chat-interface -->
+    <script>
+        function isBech32( string ) {
+            try {
+                var words = bech32.bech32.decode( string ).words;
+                return true;
+            } catch( e ) {
+                return false;
+            }
+        }
+        function pubkeyToNpub( hex ) {
+            return bech32.bech32.encode( "npub", bech32.bech32.toWords( buffer.Buffer.from( hex, "hex" ) ) );
+        }
+        function pubkeyFromNpub( npub ) {
+            return buffer.Buffer.from( bech32.bech32.fromWords( bech32.bech32.decode( npub ).words ) ).toString( "hex" );
+        }
+    </script>
     <script>
         admin = false;
         if ( window.location.href.includes( "admin=true" ) ) {
@@ -260,9 +278,12 @@
         var getRand = size => crypto.getRandomValues(new Uint8Array(size))
         var sha256  = bitcoinjs.crypto.sha256
         const urlParams = new URLSearchParams(window.location.search);
-        const channelParam = urlParams.get( 'channel' );
-        const profileParam = urlParams.get( 'profile' );
-        const relayParam = urlParams.get( 'relay' );
+        var channelParam = urlParams.get( 'channel' );
+        var profileParam = urlParams.get( 'profile' );
+        if ( profileParam && profileParam.startsWith( "npub" ) && isBech32( profileParam ) ) {
+            profileParam = pubkeyFromNpub( profileParam );
+        }
+        var relayParam = urlParams.get( 'relay' );
         if ( localStorage[ "backup" ] ) {
             var backup = JSON.parse( localStorage[ "backup" ] );
             var privKey = backup[ "privkey" ];
@@ -391,6 +412,12 @@
                             if ( document.getElementsByClassName( "user-profile-inner" )[ 0 ] && document.getElementsByClassName( "user-profile-inner" )[ 0 ].getElementsByClassName( "name" )[ 0 ] && JSON.parse( content )[ "name" ] && JSON.parse( content )[ "name" ] != "" ) {
                                 document.getElementsByClassName( "user-profile-inner" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerHTML = JSON.parse( content )[ "name" ];
                             }
+                            if ( document.getElementsByClassName( "profile-name" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && pubkeyFromNpub( document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText ) == event.pubkey ) {
+                                document.getElementsByClassName( "profile-name" )[ 0 ].innerText = JSON.parse( content )[ "name" ];
+                            }
+                            if ( document.getElementsByClassName( "profile-pubkey-title" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && pubkeyFromNpub( document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText ) == event.pubkey ) {
+                                document.getElementsByClassName( "profile-pubkey-title" )[ 0 ].innerText = JSON.parse( content )[ "name" ] + "'s public key";
+                            }
                             sessionStorage[ "my-name" ] = JSON.parse( content )[ "name" ];
                         }
                         if ( "about" in JSON.parse( content ) ) {
@@ -417,16 +444,16 @@
                     //path if I am updating someone else's info
                     if ( "name" in JSON.parse( content ) && !( !JSON.parse( content )[ "name" ] || JSON.parse( content )[ "name" ] == "" ) ) {
                         //stop if the metadata you are getting belongs to a different user
-                        if ( document.querySelector( ".profile-pubkey" ) && event.pubkey != document.querySelector( ".profile-pubkey" ).innerText ) return;
+                        if ( document.querySelector( ".profile-pubkey" ) && event.pubkey != pubkeyFromNpub( document.querySelector( ".profile-pubkey" ).innerText ) ) return;
                         namemap[ event.pubkey ] = JSON.parse( content )[ "name" ];
                         localStorage[ "namemap" ] = JSON.stringify( namemap );
                         var i; for ( i=0; i<document.getElementsByClassName( event.pubkey ).length; i++ ) {
                             document.getElementsByClassName( event.pubkey )[ i ].innerText = JSON.parse( content )[ "name" ];
                         }
-                        if ( document.getElementsByClassName( "profile-name" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText == event.pubkey ) {
+                        if ( document.getElementsByClassName( "profile-name" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && pubkeyFromNpub( document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText ) == event.pubkey ) {
                             document.getElementsByClassName( "profile-name" )[ 0 ].innerText = JSON.parse( content )[ "name" ];
                         }
-                        if ( document.getElementsByClassName( "profile-pubkey-title" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText == event.pubkey ) {
+                        if ( document.getElementsByClassName( "profile-pubkey-title" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && pubkeyFromNpub( document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText ) == event.pubkey ) {
                             document.getElementsByClassName( "profile-pubkey-title" )[ 0 ].innerText = JSON.parse( content )[ "name" ] + "'s public key";
                         }
                     } else {
@@ -435,7 +462,7 @@
                     }
                     if ( "about" in JSON.parse( content ) && !( !JSON.parse( content )[ "about" ] || JSON.parse( content )[ "about" ] == "" ) ) {
                         //stop if the metadata you are getting belongs to a different user
-                        if ( document.querySelector( ".profile-pubkey" ) && event.pubkey != document.querySelector( ".profile-pubkey" ).innerText ) return;
+                        if ( document.querySelector( ".profile-pubkey" ) && event.pubkey != pubkeyFromNpub( document.querySelector( ".profile-pubkey" ).innerText ) ) return;
                         if ( document.getElementsByClassName( "profile-about" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText == event.pubkey ) {
                             document.getElementsByClassName( "profile-about" )[ 0 ].innerHTML = markdownify( JSON.parse( content )[ "about" ] );
                             document.getElementsByClassName( "profile-about" )[ 0 ].style.display = "block";
@@ -443,7 +470,7 @@
                     }
                     if ( "lud06" in JSON.parse( content ) && !( !JSON.parse( content )[ "lud06" ] || JSON.parse( content )[ "lud06" ] == "" ) ) {
                         //stop if the metadata you are getting belongs to a different user
-                        if ( document.querySelector( ".profile-pubkey" ) && event.pubkey != document.querySelector( ".profile-pubkey" ).innerText ) return;
+                        if ( document.querySelector( ".profile-pubkey" ) && event.pubkey != pubkeyFromNpub( document.querySelector( ".profile-pubkey" ).innerText ) ) return;
                         if ( document.getElementsByClassName( "profile-lud06" )[ 0 ] && !document.getElementsByClassName( "tipper" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText == event.pubkey ) {
                             var button = document.createElement( "button" );
                             button.className = "tipper";
@@ -465,7 +492,7 @@
                     }
                     if ( "picture" in JSON.parse( content ) && !( !JSON.parse( content )[ "picture" ] || JSON.parse( content )[ "picture" ] == "" ) ) {
                         //stop if the metadata you are getting belongs to a different user
-                        if ( document.querySelector( ".profile-pubkey" ) && event.pubkey != document.querySelector( ".profile-pubkey" ).innerText ) return;
+                        if ( document.querySelector( ".profile-pubkey" ) && event.pubkey != pubkeyFromNpub( document.querySelector( ".profile-pubkey" ).innerText ) ) return;
                         imagemap[ event.pubkey ] = JSON.parse( content )[ "picture" ];
                         localStorage[ "imagemap" ] = JSON.stringify( imagemap );
                         var i; for ( i=0; i<document.getElementsByClassName( event.pubkey ).length; i++ ) {
@@ -498,7 +525,7 @@
             if ( subId.startsWith( "00000003" ) ) {
                 if ( JSON.parse( message[ "data" ] )[ 0 ] == "EOSE" && ( !localStorage[ "wallet_info" ] || localStorage[ "wallet_info" ] == "" ) ) {
                     if ( !i_should_create_a_new_wallet ) return;
-                    var mywallet = await getData( "https://legend.lnbits.com/wallet?nme=" + pubKey.substring( 0, 15 ) );
+                    var mywallet = await getData( "https://legend.lnbits.com/wallet?nme=" + pubkeyToNpub( pubKey ).substring( 0, 15 ) );
                     var key1prep = mywallet.split( "Wallet ID:" );
                     wallet_id = key1prep[ 1 ].substring( 14, 46 );
                     var key2prep = mywallet.split( "Admin key:" );
@@ -693,7 +720,7 @@
                 if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 2 ) {
                     color = "purple";
                 };
-                var name = event.pubkey.substring( 0, 15 ) + "...";
+                var name = pubkeyToNpub( event.pubkey ).substring( 0, 15 ) + "...";
                 //var picture = "https://hashvatar.vercel.app/" + event.pubkey;
                 var picture = "https://www.gravatar.com/avatar/" + event.pubkey + "?s=128&d=retro";
                 if ( event.pubkey in namemap && namemap[ event.pubkey ] != "none" ) {
@@ -880,7 +907,7 @@
                 if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 2 ) {
                     color = "purple";
                 };
-                var name = event.pubkey.substring( 0, 15 ) + "...";
+                var name = pubkeyToNpub( event.pubkey ).substring( 0, 15 ) + "...";
                 //var picture = "https://hashvatar.vercel.app/" + event.pubkey;
                 var picture = "https://www.gravatar.com/avatar/" + event.pubkey + "?s=128&d=retro";
                 if ( event.pubkey in namemap && namemap[ event.pubkey ] != "none" ) {
@@ -1118,7 +1145,7 @@
                 if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 2 ) {
                     color = "purple";
                 };
-                var name = event.pubkey.substring( 0, 15 ) + "...";
+                var name = pubkeyToNpub( event.pubkey ).substring( 0, 15 ) + "...";
                 //var picture = "https://hashvatar.vercel.app/" + event.pubkey;
                 var picture = "https://www.gravatar.com/avatar/" + event.pubkey + "?s=128&d=retro";
                 if ( event.pubkey in namemap && namemap[ event.pubkey ] != "none" ) {
@@ -1209,6 +1236,17 @@
         }
 
         socket.addEventListener( 'open', openConnection );
+
+        function forceUpdateUserMeta( pubkey ) {
+            var newsubId   = "00000001" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 );
+            var newfilter  = { "authors": [ pubkey ], "kinds": [0], "limit": 1 }
+            var newsubmo = [ "REQ", newsubId, newfilter ]
+            socket.send(JSON.stringify( newsubmo ));
+            setTimeout( function() {
+                var closer = [ "CLOSE", newsubId ];
+                socket.send(JSON.stringify( closer ));
+            }, 1500 );
+        }
 
         async function getSignedEvent(event, privateKey) {
             var eventArray = [
@@ -2259,8 +2297,9 @@
                     <p class="image-instructions">${t('imageInstructions')}</p>
                     <button class="submit-user-info" onclick='submitUserInfo();showToast( "${t('yourInfoProcessed')}" );'>${t('submit')}</button>
                     <h2 style="margin-top: 20px;">${t('publicKey')}</h2>
-                    <input class="public-key" type="text" value="${pubKey}" disabled />
+                    <input class="public-key" type="text" value="${pubkeyToNpub( pubKey )}" disabled />
                     <button class="copy-pubkey-btn">${t('copy')}</button>
+                    <button class="convert-pubkey-btn">Convert</button>
                     <h2 style="margin-top: 20px;">${t('privateKey')}</h2>
                     <input class="private-key" type="text" value="${privKey}" disabled />
                     <button class="copy-privkey-btn">${t('copy')}</button>
@@ -2329,6 +2368,13 @@
             document.getElementsByClassName( "copy-pubkey-btn" )[ 0 ].addEventListener( "click", function() {
                 copyText( document.getElementsByClassName( "public-key" )[ 0 ] );
             });
+            document.getElementsByClassName( "convert-pubkey-btn" )[ 0 ].addEventListener( "click", function() {
+                if ( isBech32( document.querySelector( ".public-key" ).value ) ) {
+                    document.querySelector( ".public-key" ).value = pubkeyFromNpub( document.querySelector( ".public-key" ).value );
+                } else {
+                    document.querySelector( ".public-key" ).value = pubkeyToNpub( document.querySelector( ".public-key" ).value );
+                }
+            });
             document.getElementsByClassName( "copy-privkey-btn" )[ 0 ].addEventListener( "click", function() {
                 copyText( document.getElementsByClassName( "private-key" )[ 0 ] );
             });
@@ -2391,7 +2437,7 @@
                     <p class="profile-about" style="display: none;">${name} ${t('nameLives')}</p>
                     <p class="profile-lud06" style="display: none;"></p>
                     <h2 style="margin-top: 20px;" class="profile-pubkey-title">${name}'s ${t('_publicKey')}</h2>
-                    <p class="profile-pubkey">${pubkey}</p>
+                    <p class="profile-pubkey">${pubkeyToNpub( pubkey )}</p>
                     <button class="dm" onclick="dmThisUser( '${pubkey}', '${name}', '${picture}' )">${t('directMessage')}</button>
                 </div>
             `;
@@ -2825,6 +2871,9 @@
             return final === string
         }
         function importPrivkey( privkey ) {
+            if ( privkey.startsWith( "npriv" ) && isBech32( privkey ) ) {
+                privkey = buffer.Buffer.from( bech32.bech32.fromWords( bech32.bech32.decode( privkey ).words ) ).toString( "hex" );
+            }
             if ( privkey.length != 64 ) {
                 showToast( `${t('mustBe32Byte')}` );
                 return;
@@ -3094,7 +3143,7 @@
             if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
                 var name = namemap[ pubkey ];
             } else {
-                var name = pubkey.substring( 0, 15 ) + "...";
+                var name = pubkeyToNpub( pubkey ).substring( 0, 15 ) + "...";
             }
             var obj = {}
             obj[ "pubkey" ] = pubkey;
@@ -3108,18 +3157,6 @@
                     document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( pubkey, name, picture, 1 );
                 }
             }, 1000 );
-        }
-    </script>
-    <script>
-        function forceUpdateUserMeta( pubkey ) {
-            var newsubId   = "00000001" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 );
-            var newfilter  = { "authors": [ pubkey ], "kinds": [0], "limit": 1 }
-            var newsubmo = [ "REQ", newsubId, newfilter ]
-            socket.send(JSON.stringify( newsubmo ));
-            setTimeout( function() {
-                var closer = [ "CLOSE", newsubId ];
-                socket.send(JSON.stringify( closer ));
-            }, 1500 );
         }
     </script>
     <script>
