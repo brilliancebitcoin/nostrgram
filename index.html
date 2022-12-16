@@ -259,19 +259,25 @@
         var crypto  = window.crypto 
         var getRand = size => crypto.getRandomValues(new Uint8Array(size))
         var sha256  = bitcoinjs.crypto.sha256
+        const urlParams = new URLSearchParams(window.location.search);
+        const channelParam = urlParams.get( 'channel' );
+        const relayParam = urlParams.get( 'relay' );
         if ( localStorage[ "backup" ] ) {
             var backup = JSON.parse( localStorage[ "backup" ] );
             var privKey = backup[ "privkey" ];
             var pubKey = backup[ "pubkey" ];
             var subscribed_channels = JSON.parse( backup[ "channels" ] );
+            if ( channelParam && !subscribed_channels.includes(channelParam) ) {
+                subscribed_channels.push( channelParam );
+            }
             var relay = JSON.parse( backup[ "relays" ] )[ 0 ];
         } else {
             var keypair = bitcoinjs.ECPair.makeRandom()
             var privKey = keypair.privateKey.toString( "hex" )
             var pubKey  = keypair.publicKey.toString( "hex" )
             pubKey      = pubKey.substring( 2 )
-            var subscribed_channels = [ "25e5c82273a271cb1a840d0060391a0bf4965cafeb029d5ab55350b418953fbb" ];
-            var relay = "wss://relay.damus.io";
+            var subscribed_channels = [ channelParam || "25e5c82273a271cb1a840d0060391a0bf4965cafeb029d5ab55350b418953fbb" ];
+            var relay = relayParam || "wss://relay.damus.io";
             var stuff_to_backup = {}
             stuff_to_backup[ "privkey" ] = privKey;
             stuff_to_backup[ "pubkey" ] = pubKey;
@@ -2957,6 +2963,17 @@
         </div>
         <div class="inner-vid"></div>
     </div>
+    <script>
+        function joinChannelOnStart() {
+            if ( channelParam && document.getElementsByClassName( "channels" )[ 0 ] && document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( channelParam )[ 0 ] ) {
+                var channel = document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( channelParam )[ 0 ];
+                selectChannel( channel );
+            } else if ( channelParam ) {
+                setTimeout( function() {joinChannelOnStart();}, 100 );
+            }
+        }
+        joinChannelOnStart();
+    </script>
     <script>
         document.getElementsByClassName( "hotdog" )[ 0 ].addEventListener( "click", function() {
             showSettings();
