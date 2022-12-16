@@ -1237,7 +1237,7 @@
                 var parent = "globalfeed";
                 var replyingTo = "";
                 if ( events_replied_to[ 0 ] ) {
-                    replyingTo = events_replied_to[ 0 ];
+                    replyingTo = events_replied_to[ events_replied_to.length - 1 ];
                     array_of_replies.push( [ event.id, replyingTo ] );
                 }
                 content = content.replace( /&/g, "&#38;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
