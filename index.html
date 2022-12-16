@@ -42,11 +42,11 @@
         function pubkeyFromNpub( npub ) {
             return buffer.Buffer.from( bech32.bech32.fromWords( bech32.bech32.decode( npub ).words ) ).toString( "hex" );
         }
-        function privkeyToNpriv( hex ) {
-            return bech32.bech32.encode( "npriv", bech32.bech32.toWords( buffer.Buffer.from( hex, "hex" ) ) );
+        function privkeyToNpsec( hex ) {
+            return bech32.bech32.encode( "nsec", bech32.bech32.toWords( buffer.Buffer.from( hex, "hex" ) ) );
         }
-        function privkeyFromNpriv( npriv ) {
-            return buffer.Buffer.from( bech32.bech32.fromWords( bech32.bech32.decode( npriv ).words ) ).toString( "hex" );
+        function privkeyFromNsec( nsec ) {
+            return buffer.Buffer.from( bech32.bech32.fromWords( bech32.bech32.decode( nsec ).words ) ).toString( "hex" );
         }
     </script>
     <script>
@@ -2612,7 +2612,7 @@
             }
             var mypriv = privKey;
             if ( mypriv ) {
-                mypriv = privkeyToNpriv( mypriv );
+                mypriv = privkeyToNsec( mypriv );
             }
             var html = `
                 <div class="message-header">
@@ -2725,9 +2725,9 @@
             });
             document.getElementsByClassName( "convert-privkey-btn" )[ 0 ].addEventListener( "click", function() {
                 if ( isBech32( document.querySelector( ".private-key" ).value ) ) {
-                    document.querySelector( ".private-key" ).value = privkeyFromNpriv( document.querySelector( ".private-key" ).value );
+                    document.querySelector( ".private-key" ).value = privkeyFromNsec( document.querySelector( ".private-key" ).value );
                 } else {
-                    document.querySelector( ".private-key" ).value = privkeyToNpriv( document.querySelector( ".private-key" ).value );
+                    document.querySelector( ".private-key" ).value = privkeyToNsec( document.querySelector( ".private-key" ).value );
                 }
             });
             document.getElementsByClassName( "copy-walleturl-btn" )[ 0 ].addEventListener( "click", function() {
@@ -3337,7 +3337,7 @@
             return final === string
         }
         function importPrivkey( privkey ) {
-            if ( privkey.startsWith( "npriv" ) && isBech32( privkey ) ) {
+            if ( privkey.startsWith( "nsec" ) && isBech32( privkey ) ) {
                 privkey = buffer.Buffer.from( bech32.bech32.fromWords( bech32.bech32.decode( privkey ).words ) ).toString( "hex" );
             }
             if ( privkey.length != 64 ) {
