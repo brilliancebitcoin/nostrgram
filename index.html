@@ -735,6 +735,8 @@
                 if ( event.pubkey in namemap && namemap[ event.pubkey ] != "none" ) {
                     name = namemap[ event.pubkey ];
                 }
+                name = encodeURIComponent( name );
+                name.replace( /%20/g, " " );
                 if ( event.pubkey in imagemap && imagemap[ event.pubkey ] != "none" ) {
                     picture = imagemap[ event.pubkey ];
                 }
@@ -923,6 +925,8 @@
                 if ( event.pubkey in namemap && namemap[ event.pubkey ] != "none" ) {
                     name = namemap[ event.pubkey ];
                 }
+                name = encodeURIComponent( name );
+                name.replace( /%20/g, " " );
                 if ( event.pubkey in imagemap && imagemap[ event.pubkey ] != "none" ) {
                     picture = imagemap[ event.pubkey ];
                 }
@@ -1162,6 +1166,8 @@
                 if ( event.pubkey in namemap && namemap[ event.pubkey ] != "none" ) {
                     name = namemap[ event.pubkey ];
                 }
+                name = encodeURIComponent( name );
+                name.replace( /%20/g, " " );
                 if ( event.pubkey in imagemap && imagemap[ event.pubkey ] != "none" ) {
                     picture = imagemap[ event.pubkey ];
                 }
@@ -1284,6 +1290,8 @@
                 if ( event.pubkey in namemap && namemap[ event.pubkey ] != "none" ) {
                     name = namemap[ event.pubkey ];
                 }
+                name = encodeURIComponent( name );
+                name.replace( /%20/g, " " );
                 if ( event.pubkey in imagemap && imagemap[ event.pubkey ] != "none" ) {
                     picture = imagemap[ event.pubkey ];
                 }
@@ -1826,6 +1834,8 @@
                 if ( pubkey in imagemap && imagemap[ pubkey ] != "none" ) {
                     picture = imagemap[ pubkey ];
                 }
+                name = encodeURIComponent( name );
+                name.replace( /%20/g, " " );
                 div.classList.add( "message" );
                 div.classList.add( id );
                 var isMine = ( pubkey == pubKey );
