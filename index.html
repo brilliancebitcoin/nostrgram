@@ -622,8 +622,7 @@
                     if ( content.length > 50 ) {
                         shortened_content = shortened_content + "...";
                     }
-                    shortened_content_for_code = shortened_content.replace( /\'/g, "\\'" );
-                    shortened_content_for_code = shortened_content.replace( /\"/g, "tisaquoteaquoteaquoteisay" );
+                    shortened_content_for_code = buffer.Buffer.from( shortened_content ).toString( "hex" );
                     shortened_content_for_display = shortened_content;
                     document.getElementById( "modal" ).innerHTML = "";
                     document.getElementById( "modal" ).innerHTML += `<div><strong>Message</strong></div>`;
@@ -2263,8 +2262,7 @@
     </script>
     <script>
         function replyToMsg( id, content, pubkey ) {
-            content = content.replace( /\\'/g, "'" );
-            content = content.replace( /tisaquoteaquoteaquoteisay/g, '"' );
+            content = buffer.Buffer.from( content, "hex" ).toString();
             document.getElementById( "black-bg" ).style.display = "none";
             document.getElementById( "modal" ).style.display = "none";
             document.getElementsByClassName( "reply-div" )[ 0 ].innerHTML = `<span class="reply-x" onclick="removeReply();">&times; </span>`;
