@@ -434,12 +434,16 @@
                         localStorage[ "namemap" ] = JSON.stringify( namemap );
                     }
                     if ( "about" in JSON.parse( content ) && !( !JSON.parse( content )[ "about" ] || JSON.parse( content )[ "about" ] == "" ) ) {
+                        //stop if the metadata you are getting belongs to a different user
+                        if ( document.querySelector( ".profile-pubkey" ) && event.pubkey != document.querySelector( ".profile-pubkey" ).innerText ) return;
                         if ( document.getElementsByClassName( "profile-about" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText == event.pubkey ) {
                             document.getElementsByClassName( "profile-about" )[ 0 ].innerHTML = markdownify( JSON.parse( content )[ "about" ] );
                             document.getElementsByClassName( "profile-about" )[ 0 ].style.display = "block";
                         }
                     }
                     if ( "lud06" in JSON.parse( content ) && !( !JSON.parse( content )[ "lud06" ] || JSON.parse( content )[ "lud06" ] == "" ) ) {
+                        //stop if the metadata you are getting belongs to a different user
+                        if ( document.querySelector( ".profile-pubkey" ) && event.pubkey != document.querySelector( ".profile-pubkey" ).innerText ) return;
                         if ( document.getElementsByClassName( "profile-lud06" )[ 0 ] && !document.getElementsByClassName( "tipper" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText == event.pubkey ) {
                             var button = document.createElement( "button" );
                             button.className = "tipper";
@@ -460,6 +464,8 @@
                         }
                     }
                     if ( "picture" in JSON.parse( content ) && !( !JSON.parse( content )[ "picture" ] || JSON.parse( content )[ "picture" ] == "" ) ) {
+                        //stop if the metadata you are getting belongs to a different user
+                        if ( document.querySelector( ".profile-pubkey" ) && event.pubkey != document.querySelector( ".profile-pubkey" ).innerText ) return;
                         imagemap[ event.pubkey ] = JSON.parse( content )[ "picture" ];
                         localStorage[ "imagemap" ] = JSON.stringify( imagemap );
                         var i; for ( i=0; i<document.getElementsByClassName( event.pubkey ).length; i++ ) {
