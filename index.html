@@ -388,6 +388,7 @@
             heartbeat = true;
             var [ type, subId, event ] = JSON.parse( message.data );
             var { kind, content } = event || {}
+            if ( content && content.length > 3000 ) return;
             if ( kind && subId.startsWith( "00000000" ) ) {
                 if ( kind != 40 ) {
                     showToast( `${t('unknownError')}` );
@@ -1823,6 +1824,7 @@
                 if ( document.getElementsByClassName( msg[ Object.keys( msg )[ 0 ] ][ "id" ] )[ 0 ] ) return;
                 var color = msg[ Object.keys( msg )[ 0 ] ][ "color" ];
                 var content = msg[ Object.keys( msg )[ 0 ] ][ "content" ];
+                if ( content.length > 3000 ) return;
                 var event_time = msg[ Object.keys( msg )[ 0 ] ][ "event_time" ];                
                 var id = msg[ Object.keys( msg )[ 0 ] ][ "id" ];
                 var name = msg[ Object.keys( msg )[ 0 ] ][ "name" ];
