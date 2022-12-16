@@ -42,7 +42,7 @@
         function pubkeyFromNpub( npub ) {
             return buffer.Buffer.from( bech32.bech32.fromWords( bech32.bech32.decode( npub ).words ) ).toString( "hex" );
         }
-        function privkeyToNpsec( hex ) {
+        function privkeyToNsec( hex ) {
             return bech32.bech32.encode( "nsec", bech32.bech32.toWords( buffer.Buffer.from( hex, "hex" ) ) );
         }
         function privkeyFromNsec( nsec ) {
