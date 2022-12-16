@@ -46,6 +46,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] add message replies via long press or right click (I ended up going with a short click or tap)
 * [x] dark mode
 * [x] let people link a user directly into a channel like this: https://anigma.io?channel=whatever
+* [x] let people link a user directly to a profile like this: https://anigma.io?profile=whatever
 * [ ] private groups with shared decryption keys
 * [ ] make an option to set and modify relays in settings
 * [ ] connect to at least two relays by default
