@@ -10,10 +10,10 @@
             document.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" href="./styles/light.css" onload="document.documentElement.style.display = \'\'">',);
         }
     </script>
-    <link rel="stylesheet" href="./styles/dark.css?v=1" media="(prefers-color-scheme: dark)" />
-    <link rel="stylesheet" href="./styles/light.css?v=1" media="(prefers-color-scheme: light)"/>
+    <link rel="stylesheet" href="./styles/dark.css?v=64" media="(prefers-color-scheme: dark)" />
+    <link rel="stylesheet" href="./styles/light.css?v=64" media="(prefers-color-scheme: light)"/>
     <!-- The main stylesheet -->
-    <link rel="stylesheet" href="./styles/style.css?v=61" />
+    <link rel="stylesheet" href="./styles/style.css?v=64" />
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="manifest.json">
     <title>Anigma</title>
@@ -23,7 +23,7 @@
     <script src="https://supertestnet.github.io/bitcoin-chess/js/qrcode.js"></script>
     <script src="https://bundle.run/buffer@6.0.3"></script>
     <script src="https://bundle.run/bech32@2.0.0"></script>
-    <script src="translation.js"></script>
+    <script src="translation.js?v=64"></script>
 </head>
 <body>
     <!-- based on this: https://github.com/YunusEmreNalbant/css-chat-interface -->
@@ -41,6 +41,12 @@
         }
         function pubkeyFromNpub( npub ) {
             return buffer.Buffer.from( bech32.bech32.fromWords( bech32.bech32.decode( npub ).words ) ).toString( "hex" );
+        }
+        function privkeyToNpriv( hex ) {
+            return bech32.bech32.encode( "npriv", bech32.bech32.toWords( buffer.Buffer.from( hex, "hex" ) ) );
+        }
+        function privkeyFromNpriv( npriv ) {
+            return buffer.Buffer.from( bech32.bech32.fromWords( bech32.bech32.decode( npriv ).words ) ).toString( "hex" );
         }
     </script>
     <script>
@@ -590,6 +596,7 @@
             }
             //this runs when a message is clicked or tapped. It populates a context menu with action options such as Reply
             if ( subId.startsWith( "00000004" ) ) {
+                if ( JSON.parse( message[ "data" ] )[ 0 ] == "EOSE" ) return;
                 if ( content ) {
                     if ( event.pubkey == pubKey ) {
                         var otherKey = "";
@@ -630,6 +637,7 @@
                 }
             }
             if ( kind == 40 ) {
+                if ( JSON.parse( message[ "data" ] )[ 0 ] == "EOSE" ) return;
                 if ( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( event.id )[ 0 ] ) return
                 var isError = checkForChannelSubscriptionErrors( content );
                 if ( isError ) {
@@ -647,6 +655,7 @@
                 socket.send(JSON.stringify( closer ));
             }
             if ( kind == 42 && subId.includes( "latest-message" ) ) {
+                if ( JSON.parse( message[ "data" ] )[ 0 ] == "EOSE" ) return;
                 var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
                 var event_time = event.created_at
                 var how_long_ago = convertHMS( now - event_time )
@@ -855,6 +864,7 @@
             }
             //this code runs whenever a dm is clicked, it should also work for "closed dms" where you only see someone's dms if you first add them to your sidebar
             if ( kind === 4 && subId.includes( "encrypted-dms" ) ) {
+                if ( JSON.parse( message[ "data" ] )[ 0 ] == "EOSE" ) return;
                 if ( document.getElementsByClassName( event.id )[ 0 ] ) return
                 var isMine = ( event.pubkey == pubKey );
                 if ( !isMine && !array_of_pubkeys.includes( event.pubkey ) ) {
@@ -1085,6 +1095,7 @@
                 }
             }
             if ( kind === 4 && subId.includes( "encrypted-open-dms" ) ) {
+                if ( JSON.parse( message[ "data" ] )[ 0 ] == "EOSE" ) return;
                 var thereAreEncryptionErrors = await checkForEncryptionErrors( privKey, event.pubkey, event[ "content" ] );
                 if ( !document.getElementsByClassName( event.pubkey.substring( 0, 20 ) )[ 0 ] && !thereAreEncryptionErrors ) {
                     addPubkeyToSidebar( event.pubkey );
@@ -1192,12 +1203,231 @@
                     }
                 }
             }
+            if ( kind == 1 && subId.includes( "00000005" ) ) {
+                if ( JSON.parse( message[ "data" ] )[ 0 ] == "EOSE" ) return;
+                var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
+                var event_time = event.created_at
+                var how_long_ago = convertHMS( now - event_time )
+                var isMine = ( event.pubkey == pubKey );
+                if ( !isMine && !array_of_pubkeys.includes( event.pubkey ) ) {
+                    array_of_pubkeys.push( event.pubkey );
+                }
+                var events_replied_to = [];
+                var pubkeys_replied_to = [];
+                var i; for ( i=0; i<event.tags.length; i++ ) {
+                    if ( event[ "tags" ][ i ][ 0 ] == "e" ) {
+                        events_replied_to.push( event[ "tags" ][ i ][ 1 ] );
+                    }
+                    if ( event[ "tags" ][ i ][ 0 ] == "p" ) {
+                        pubkeys_replied_to.push( event[ "tags" ][ i ][ 1 ] );
+                    }
+                }
+                var parent = "globalfeed";
+                var replyingTo = "";
+                if ( events_replied_to[ 0 ] ) {
+                    replyingTo = events_replied_to[ 0 ];
+                    array_of_replies.push( [ event.id, replyingTo ] );
+                }
+                content = content.replace( /&/g, "&#38;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
+                var shortened_content = content.replace( /\n/g, " " ).substring( 0, 50 );
+                if ( content.length > 50 ) {
+                    shortened_content = shortened_content + "...";
+                }
+                content = markdownify( content, isMine );
+                array_of_replies.forEach( function( item ) {
+                    if ( item[ 1 ] == event.id ) {
+                        var replyPubkey = event.pubkey;
+                        if ( event.pubkey in namemap && namemap[ event.pubkey ] != "none" ) {
+                            var person_name = namemap[ event.pubkey ];
+                        } else {
+                            var person_name = replyPubkey.substring( 0, 15 );
+                        }
+                        if ( replyPubkey != pubKey ) {
+                            replyAuthor = `<span class="reply-author ${replyPubkey}">` + person_name + `</span>`;
+                        } else {
+                            replyAuthor = `<span class="reply-author ${replyPubkey}">` + sessionStorage[ "my-name" ] + `</span>`;
+                        }
+                        replyContent = shortened_content;
+                        if ( document.getElementsByClassName( item[ 0 ] )[ 0 ] ) {
+                            document.getElementsByClassName( item[ 0 ] )[ 0 ].getElementsByClassName( "reply-prefix" )[ 0 ].innerHTML = replyAuthor + '<br>' + replyContent;
+                        }
+                    }
+                });
+                var color = "";
+                if ( isNaN( event.pubkey.substring( 0, 1 ) ) && ( event.pubkey.substring( 0, 1 ) == "e" || event.pubkey.substring( 0, 1 ) == "f" ) ) {
+                    color = "red";
+                }
+                if ( isNaN( event.pubkey.substring( 0, 1 ) ) && ( event.pubkey.substring( 0, 1 ) == "c" || event.pubkey.substring( 0, 1 ) == "d" ) ) {
+                    color = "pink";
+                };
+                if ( isNaN( event.pubkey.substring( 0, 1 ) ) && ( event.pubkey.substring( 0, 1 ) == "a" || event.pubkey.substring( 0, 1 ) == "b" ) ) {
+                    color = "orange";
+                };
+                if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 10 ) {
+                    color = "yellow";
+                };
+                if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 8 ) {
+                    color = "green";
+                };
+                if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 6 ) {
+                    color = "lightblue";
+                };
+                if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 4 ) {
+                    color = "blue";
+                };
+                if ( !isNaN( event.pubkey.substring( 0, 1 ) ) && event.pubkey.substring( 0, 1 ) < 2 ) {
+                    color = "purple";
+                };
+                var name = pubkeyToNpub( event.pubkey ).substring( 0, 15 ) + "...";
+                //var picture = "https://hashvatar.vercel.app/" + event.pubkey;
+                var picture = "https://www.gravatar.com/avatar/" + event.pubkey + "?s=128&d=retro";
+                if ( event.pubkey in namemap && namemap[ event.pubkey ] != "none" ) {
+                    name = namemap[ event.pubkey ];
+                }
+                if ( event.pubkey in imagemap && imagemap[ event.pubkey ] != "none" ) {
+                    picture = imagemap[ event.pubkey ];
+                }
+                if ( !msg_cache[ parent ] ) {
+                    msg_cache[ parent ] = [];
+                }
+                if ( document.getElementsByClassName( parent )[ 0 ].classList.contains( "active" ) ) {
+                    if ( document.getElementsByClassName( "message-header" )[ 0 ] && Number( document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
+                        document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
+                        document.getElementsByClassName( "message-header" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
+                    }
+                    if ( window.innerWidth < 601 && Number( document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
+                        document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].setAttribute( "data-timestamp", event_time );
+                        document.getElementsByClassName( "message-header-alt" )[ 0 ].getElementsByClassName( "time" )[ 0 ].innerText = how_long_ago;
+                    }
+                }
+                if ( Number( document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].getAttribute( "data-timestamp" ) ) < Number( event_time ) ) {
+                    document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].innerText = shortened_content;
+                    document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestring", how_long_ago );
+                    document.getElementsByClassName( parent )[ 0 ].getElementsByClassName( "message" )[ 0 ].setAttribute( "data-timestamp", event_time );
+                }
+                //If the current message is not already in the message cache, add it, and also add to the number of unread messages
+                var messageIsKnown = false;
+                msg_cache[ parent ].forEach( function( message, index ) {
+                    if ( Object.keys( message )[ 0 ] == event.id ) {
+                        messageIsKnown = true;
+                    }
+                });
+                if ( !messageIsKnown ) {
+                    addMessageToCache( event.pubkey, event.id, event_time, parent, color, name, picture, content, replyingTo );
+                    if ( !document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].classList.contains( "active" ) ) {
+                        var old_num_of_new_messages = Number( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].getAttribute( "data-num-of-new-messages" ) );
+                        new_num_of_new_messages = old_num_of_new_messages + 1;
+                        document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].setAttribute( "data-num-of-new-messages", String( new_num_of_new_messages ) );
+                        if ( new_num_of_new_messages > 0 ) {
+                            document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].getElementsByClassName( "notification" )[ 0 ].innerText = String( new_num_of_new_messages );
+                            if ( new_num_of_new_messages > 199 ) {
+                                document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].getElementsByClassName( "notification" )[ 0 ].innerText += "+";
+                            }
+                            document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( parent )[ 0 ].getElementsByClassName( "notification" )[ 0 ].style.display = "inline";
+                        }
+                    }
+                }
+                //if you are currently looking at the channel, add the message to the channel
+                if ( !document.getElementsByClassName( parent )[ 0 ].classList.contains( "active" ) ) return;
+                if ( document.getElementsByClassName( event.id )[ 0 ] ) return;
+                var div = document.createElement( "div" );
+                div.classList.add( "message" );
+                div.classList.add( event.id );
+                div.setAttribute( "data-author", event.pubkey );
+                div.onclick = function() {msgContext( event.id );}
+                if ( isMine ) {
+                    div.align = "right";
+                }
+                if ( isMine ) {
+                    var replyclass = "reply-in-blue";
+                } else {
+                    var replyclass = "reply-in-white";
+                }
+                var replyAuthor = `<span class="reply-author">${t('unknown')}</span>`;
+                var replyPubkey = null;
+                if ( document.getElementsByClassName( replyingTo )[ 0 ] ) {
+                    replyPubkey = document.getElementsByClassName( replyingTo )[ 0 ].getAttribute( "data-author" );
+                }
+                if ( replyPubkey == pubKey ) {
+                    replyAuthor = `<span class="reply-author">${sessionStorage[ "my-name" ]}</span>`;
+                }
+                var replyContent = `${t('replyToMessageNotFound')}`;
+                var replyPrefix = "";
+                if ( replyingTo && replyingTo != "" ) {
+                    if ( document.getElementsByClassName( replyingTo )[ 0 ] && document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ] && document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ] ) {
+                        if ( replyPubkey != pubKey ) {
+                            replyAuthor = `<span class="reply-author ${replyPubkey}">` + document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "author" )[ 0 ].innerHTML + `</span>`;
+                        }
+                        replyContent = document.getElementsByClassName( replyingTo )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].getElementsByClassName( "msgtext" )[ 0 ].innerText;
+                        shortened_reply_content = replyContent.replace( /\n/g, " " ).substring( 0, 50 );
+                        if ( replyContent.length > 50 ) {
+                            shortened_reply_content = shortened_reply_content + "...";
+                        }
+                        replyContent = shortened_reply_content;
+                    }
+                    div.setAttribute( "data-replying-to", replyingTo );
+                    replyPrefix = `<div class="reply-prefix ${replyclass}" onclick='document.getElementsByClassName( "${replyingTo}" )[ 0 ].scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});document.getElementsByClassName( "${replyingTo}" )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].style.boxShadow = "0px 0px 25px 2px yellow";setTimeout( function() {document.getElementsByClassName( "${replyingTo}" )[ 0 ].getElementsByClassName( "bubble" )[ 0 ].style.boxShadow = "";}, 600 );event.stopPropagation();'>${replyAuthor}<br>${replyContent}</div>`
+                }
+                if ( isMine ) {
+                    div.classList.add( "me" );
+                    var html = `<div class="bubble" align="left">${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>`;
+                    div.innerHTML = html;
+                } else {
+                    var html = `
+                        <span class="picture" style="background-image: url('${picture}')" onclick="event.stopPropagation();showProfile( '${event.pubkey}', '${name}', '${picture}' )"></span>
+                        <div class="bubble"><div class="author ${color} ${event.pubkey}">${name}</div>${replyPrefix}<div class="msgtext">${content}</div><div data-timestamp="${event_time}" class="time bubbletime">${how_long_ago}</div></div>
+                    `;
+                    div.innerHTML = html;
+                }
+                document.getElementsByClassName( "message-content" )[ 0 ].append( div );
+                var last_200_messages = [];
+                var i; for ( i=0; i<document.getElementsByClassName( "bubble" ).length; i++ ) {
+                    last_200_messages.push( document.getElementsByClassName( "bubble" )[ i ].parentElement );
+                }
+                last_200_messages.sort(function( a, b ) {return b.getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" ) - a.getElementsByClassName( "time" )[ 0 ].getAttribute( "data-timestamp" )});
+                var i; for ( i=0; i<document.getElementsByClassName( "bubble" ).length; i++ ) {
+                    document.getElementsByClassName( "bubble" )[ i ].parentElement.remove();
+                    i = i - 1;
+                }
+                last_200_messages.reverse();
+                last_200_messages.forEach( function( item ) {
+                    document.getElementsByClassName( "message-content" )[ 0 ].append( item );
+                });
+                if ( window.innerWidth < 601 ) {
+                    var scrollto = document.getElementsByClassName( "content" )[ 0 ].scrollTop;
+                    var offset = 0;
+                    if ( document.getElementsByClassName( "message-content" )[ 0 ] && document.getElementsByClassName( "message-content" )[ 0 ].getElementsByClassName( "message" )[ 0 ] ) {
+                        offset = document.getElementsByClassName( "message-content" )[ 0 ].getElementsByClassName( "message" )[ document.getElementsByClassName( "message-content" )[ 0 ].getElementsByClassName( "message" ).length - 1 ].offsetHeight;
+                    }
+                    if ( offset > 20 ) {
+                        offset = offset - 20;
+                    }
+                    if ( ( document.getElementsByClassName( "content" )[ 0 ].scrollHeight - document.getElementsByClassName( "content" )[ 0 ].scrollTop ) > 1500 ) {
+                        document.getElementsByClassName( "content" )[ 0 ].scrollTo( 0, scrollto + offset );
+                    } else {
+                        document.getElementsByClassName( "content" )[ 0 ].scrollTop = document.getElementsByClassName( "content" )[ 0 ].scrollHeight;
+                        if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {
+                            document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();
+                        }
+                    }
+                } else {
+                    if ( ( document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight - document.getElementsByClassName( "message-content" )[ 0 ].scrollTop ) > 1500 ) {
+                        return
+                    } else {
+                        document.getElementsByClassName( "message-content" )[ 0 ].scrollTop = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;
+                        if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {
+                            document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();
+                        }
+                    }
+                }
+            }
         }
 
         socket.addEventListener( 'message', handleMessage );
 
         async function openConnection( e ) {
             getWallet();
+            getGlobalMessages();
             if ( !admin && window.nostr ) {
                 pubKey = await window.nostr.getPublicKey();
                 privKey = "";
@@ -1502,6 +1732,18 @@
         }
     </script>
     <script>
+        function clickSendPublicWithReply( e ) {
+            keymap[ "Shift" ] = false;
+            var event_id = document.getElementsByClassName( "reply-div" )[ 0 ].getAttribute( "data-event-id" );
+            var pubkey = document.getElementsByClassName( "reply-div" )[ 0 ].getAttribute( "data-pubkey" );
+            sendNoteWithReply( event_id, pubkey );
+            if ( window.innerWidth < 601 ) {
+                document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                document.getElementsByClassName( "note-input" )[ 0 ].select();
+            }
+        }
+    </script>
+    <script>
         function clickSendPublic( e ) {
             keymap[ "Shift" ] = false;
             sendNote();
@@ -1512,11 +1754,45 @@
         }
     </script>
     <script>
-        function clickSendPublicWithReply( e ) {
+        function clickSendGlobal( e ) {
+            keymap[ "Shift" ] = false;
+            sendGlobalNote();
+            if ( window.innerWidth < 601 ) {
+                document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                document.getElementsByClassName( "note-input" )[ 0 ].select();
+            }
+        }
+    </script>
+    <script>
+        function enterSendGlobal( e ) {
+            if ( e.key === 'Enter' && !isShiftDown() ) {
+                sendGlobalNote();
+                if ( window.innerWidth < 601 ) {
+                    document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                    document.getElementsByClassName( "note-input" )[ 0 ].select();
+                }
+            }
+        }
+    </script>
+    <script>
+        function enterSendGlobalWithReply( e ) {
+            if ( e.key === 'Enter' && !isShiftDown() ) {
+                var event_id = document.getElementsByClassName( "reply-div" )[ 0 ].getAttribute( "data-event-id" );
+                var pubkey = document.getElementsByClassName( "reply-div" )[ 0 ].getAttribute( "data-pubkey" );
+                sendGlobalNoteWithReply( event_id, pubkey );
+                if ( window.innerWidth < 601 ) {
+                    document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                    document.getElementsByClassName( "note-input" )[ 0 ].select();
+                }
+            }
+        }
+    </script>
+    <script>
+        function clickSendGlobalWithReply( e ) {
             keymap[ "Shift" ] = false;
             var event_id = document.getElementsByClassName( "reply-div" )[ 0 ].getAttribute( "data-event-id" );
             var pubkey = document.getElementsByClassName( "reply-div" )[ 0 ].getAttribute( "data-pubkey" );
-            sendNoteWithReply( event_id, pubkey );
+            sendGlobalNoteWithReply( event_id, pubkey );
             if ( window.innerWidth < 601 ) {
                 document.getElementsByClassName( "note-input" )[ 0 ].focus();
                 document.getElementsByClassName( "note-input" )[ 0 ].select();
@@ -1743,7 +2019,18 @@
                 "#e": [id],
                 "limit": 200
             }
-            var subscription = [ "REQ", subId, filter ]
+            var subscription = [ "REQ", subId, filter ];
+            socket.send(JSON.stringify( subscription ));
+        }
+    </script>
+    <script>
+        function getGlobalMessages() {
+            var subId   = "00000005" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 0, 20 );
+            var filter  = {
+                "kinds": [ 1 ],
+                "limit": 200
+            }
+            var subscription = [ "REQ", subId, filter ];
             socket.send(JSON.stringify( subscription ));
         }
     </script>
@@ -1758,6 +2045,23 @@
                 "created_at" : now,
                 "kind"       : 42,
                 "tags"       : [ [ "e", id ] ],
+                "pubkey"     : pubKey,
+            }
+            var signedEvent = await getSignedEvent( event, privKey );
+            socket.send( JSON.stringify( [ "EVENT", signedEvent ] ) );
+            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
+        }
+    </script>
+    <script>
+        async function sendGlobalNote() {
+            var note = document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value;
+            if ( !note || note == "" ) return;
+            var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
+            var event = {
+                "content"    : note,
+                "created_at" : now,
+                "kind"       : 1,
+                "tags"       : [],
                 "pubkey"     : pubKey,
             }
             var signedEvent = await getSignedEvent( event, privKey );
@@ -1786,6 +2090,28 @@
             document.getElementsByClassName( "send-btn" )[ 0 ].removeEventListener( 'click', clickSendPublicWithReply );
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendPublic );
             document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendPublic );
+        }
+    </script>
+    <script>
+        async function sendGlobalNoteWithReply( id_of_post_being_replied_to, pubkey_of_person_being_replied_to ) {
+            var note = document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value;
+            if ( !note || note == "" ) return;
+            var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
+            var event = {
+                "content"    : note,
+                "created_at" : now,
+                "kind"       : 1,
+                "tags"       : [ [ "e", id_of_post_being_replied_to ], [ "p", pubkey_of_person_being_replied_to ] ],
+                "pubkey"     : pubKey,
+            }
+            var signedEvent = await getSignedEvent( event, privKey );
+            socket.send( JSON.stringify( [ "EVENT", signedEvent ] ) );
+            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
+            document.getElementsByClassName( "reply-div" )[ 0 ].style.display = "none";
+            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.removeEventListener( 'keypress', enterSendGlobalWithReply );
+            document.getElementsByClassName( "send-btn" )[ 0 ].removeEventListener( 'click', clickSendGlobalWithReply );
+            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendGlobal );
+            document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendGlobal );
         }
     </script>
     <script>
@@ -1944,16 +2270,21 @@
             document.getElementsByClassName( "reply-div" )[ 0 ].setAttribute( "data-event-id", id );
             document.getElementsByClassName( "reply-div" )[ 0 ].setAttribute( "data-pubkey", pubkey );
             document.getElementsByClassName( "reply-div" )[ 0 ].style.display = "block";
-            if ( !document.getElementsByClassName( "active" )[ 0 ].getAttribute( "data-pubkey" ) ) {
+            if ( !document.getElementsByClassName( "active" )[ 0 ].getAttribute( "data-pubkey" ) && !document.getElementsByClassName( "active" )[ 0 ].classList.contains( "manage-channels-outer" ) ) {
                 document.getElementsByClassName( "input" )[ 0 ].firstElementChild.removeEventListener( 'keypress', enterSendPublic );
                 document.getElementsByClassName( "send-btn" )[ 0 ].removeEventListener( 'click', clickSendPublic );
                 document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendPublicWithReply );
                 document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendPublicWithReply );
-            } else {
+            } else if ( !document.getElementsByClassName( "active" )[ 0 ].classList.contains( "manage-channels-outer" ) ) {
                 document.getElementsByClassName( "input" )[ 0 ].firstElementChild.removeEventListener( 'keypress', enterSendPrivate );
                 document.getElementsByClassName( "send-btn" )[ 0 ].removeEventListener( 'click', clickSendPrivate );
                 document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendPrivateWithReply );
                 document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendPrivateWithReply );
+            } else if ( document.getElementsByClassName( "active" )[ 0 ].classList.contains( "manage-channels-outer" ) ) {
+                document.getElementsByClassName( "input" )[ 0 ].firstElementChild.removeEventListener( 'keypress', enterSendGlobal );
+                document.getElementsByClassName( "send-btn" )[ 0 ].removeEventListener( 'click', clickSendGlobal );
+                document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendGlobalWithReply );
+                document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendGlobalWithReply );
             }
             document.getElementsByClassName( "note-input" )[ 0 ].focus();
             document.getElementsByClassName( "note-input" )[ 0 ].select();
@@ -2269,6 +2600,10 @@
             if ( !picture_to_show || picture_to_show == "" ) {
                 picture_to_show = autoavatar;
             }
+            var mypriv = privKey;
+            if ( mypriv ) {
+                mypriv = privkeyToNpriv( mypriv );
+            }
             var html = `
                 <div class="message-header">
                     <div class="channel-info">
@@ -2299,10 +2634,11 @@
                     <h2 style="margin-top: 20px;">${t('publicKey')}</h2>
                     <input class="public-key" type="text" value="${pubkeyToNpub( pubKey )}" disabled />
                     <button class="copy-pubkey-btn">${t('copy')}</button>
-                    <button class="convert-pubkey-btn">Convert</button>
+                    <button class="convert-pubkey-btn">${t('convert')}</button>
                     <h2 style="margin-top: 20px;">${t('privateKey')}</h2>
-                    <input class="private-key" type="text" value="${privKey}" disabled />
+                    <input class="private-key" type="text" value="${mypriv}" disabled />
                     <button class="copy-privkey-btn">${t('copy')}</button>
+                    <button class="convert-privkey-btn">${t('convert')}</button>
                     <h2 style="margin-top: 20px;">${t('importAccount')}</h2>
                     <input class="import-privkey-input" type="text" placeholder="${t('pastePrivateKey')}" />
                     <button class="import-privkey-btn">${t('import')}</button>
@@ -2322,7 +2658,6 @@
             document.getElementsByClassName( "message-content" )[ 0 ].style.display = "block";
             document.getElementsByClassName( "message-content" )[ 0 ].style.flexDirection = "initial";
             
-
             if ( window.innerWidth < 601 ) {
                 var html2 = `
                     <span class="sidebar_arrow">&rsaquo;</span>
@@ -2378,6 +2713,13 @@
             document.getElementsByClassName( "copy-privkey-btn" )[ 0 ].addEventListener( "click", function() {
                 copyText( document.getElementsByClassName( "private-key" )[ 0 ] );
             });
+            document.getElementsByClassName( "convert-privkey-btn" )[ 0 ].addEventListener( "click", function() {
+                if ( isBech32( document.querySelector( ".private-key" ).value ) ) {
+                    document.querySelector( ".private-key" ).value = privkeyFromNpriv( document.querySelector( ".private-key" ).value );
+                } else {
+                    document.querySelector( ".private-key" ).value = privkeyToNpriv( document.querySelector( ".private-key" ).value );
+                }
+            });
             document.getElementsByClassName( "copy-walleturl-btn" )[ 0 ].addEventListener( "click", function() {
                 copyText( document.getElementsByClassName( "wallet-url" )[ 0 ] );
             });
@@ -2404,6 +2746,120 @@
                 var sendable = JSON.stringify( openSubscription )
                 socket.send( sendable );
             });
+        }
+    </script>
+    <script>
+        async function showGlobal() {
+            var i; for ( i=0; i<document.getElementsByClassName( "active" ).length; i++ ) {
+                document.getElementsByClassName( "active" )[ i ].classList.remove( "active" );
+            }
+            document.getElementsByClassName( "globalfeed" )[ 0 ].classList.add( "active" );
+            document.querySelector( ".globalfeed" ).getElementsByClassName( "notification" )[ 0 ].style.display = "none";
+            document.querySelector( ".globalfeed" ).getElementsByClassName( "notification" )[ 0 ].innerText = "0";
+            document.querySelector( ".globalfeed" ).setAttribute( "data-num-of-new-messages", "0" );
+            var html = `
+                <div class="message-header">
+                    <div class="channel-info">
+                        <span class="plus-circle fa fa-globe"></span>
+                        <div class="channel-wrapper">
+                            <div class="name">${t('global')}</div>
+                            <div class="time"></div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <ul>
+                            <li class="hotdog">
+                                <a>
+                                    <i class="fa fa-ellipsis-v"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="message-content">
+                </div>
+                <div class="message-form">
+                    <div class="reply-div"></div>
+                    <ul>
+                        <li class="emoji-btn" onclick="showEmojis( 0 )">
+                            <a>
+                                <i class="fa fa-laugh"></i>
+                            </a>
+                        </li>
+                        <li class="input">
+                            <textarea class="note-input" rows="1" cols="70" type="text" placeholder="${t('saySomething')}" onfocus='setTimeout( function() {if ( window.innerWidth < 601 && ( window.innerHeight < Number( sessionStorage[ "full-window-height" ] ) * 0.9 ) ) {sessionStorage[ "keyboard_is_open" ] = String( 1 );var size_difference = Number( sessionStorage[ "full-window-height" ] ) - window.innerHeight;if ( !sessionStorage[ "keyboard_size" ] ) {sessionStorage[ "keyboard_size" ] = String( size_difference );}var current_height = document.getElementsByClassName( "message-content" )[ 0 ].scrollTop;var new_height = current_height + size_difference + 50;var max_height = document.getElementsByClassName( "message-content" )[ 0 ].scrollHeight;if ( new_height > max_height ) {new_height = max_height;} document.getElementsByClassName( "message-content" )[ 0 ].scrollTo({top: new_height, left: 0, behavior: "smooth"});}}, 600 );'></textarea>
+                        </li>
+                        <li class="send-btn">
+                            <a>
+                                <i class="fa fa-paper-plane"></i>
+                            </a>
+                        </li>
+                        <li class="sound-btn">
+                            <a>
+                                <i class="fa fa-microphone"></i>
+                            </a>
+                        </li>
+                        <li class="image-btn">
+                            <a>
+                                <i class="fa fa-image"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            `;
+            document.getElementsByClassName( "content" )[ 0 ].innerHTML = html;
+            //document.getElementsByClassName( "message-content" )[ 0 ].style.display = "block";
+            //document.getElementsByClassName( "message-content" )[ 0 ].style.flexDirection = "initial";
+            
+            if ( window.innerWidth < 601 ) {
+                var html2 = `
+                    <span class="sidebar_arrow">&rsaquo;</span>
+                    <div class="channel-info">
+                        <span class="plus-circle fa fa-globe"></span>
+                        <div class="channel-wrapper">
+                            <div class="name">${t('global')}</div>
+                            <div class="message">${t('globalDesc')}</div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <ul>
+                            <li class="hotdog">
+                                <a>
+                                    <i class="fa fa-ellipsis-v"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                `;
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].innerHTML = html2;
+                document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.width = "100%";
+                document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.display = "flex";
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "flex";
+                document.getElementsByClassName( "message-header-alt" )[ 0 ].style.width = window.innerWidth - 38 + "px";
+            }
+            if ( window.innerWidth < 601 ) {
+                document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
+                document.getElementsByClassName( "content" )[ 0 ].style.display = "flex";
+            }
+            if ( document.getElementsByClassName( "sidebar_arrow" )[ 0 ] ) {
+                document.getElementsByClassName( "sidebar_arrow" )[ 0 ].addEventListener( "click", function() {
+                    document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "block";
+                    document.getElementsByClassName( "content" )[ 0 ].style.display = "none";
+                    document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.display = "none";
+                    document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "none";
+                })
+            }
+            document.getElementsByClassName( "hotdog" )[ 0 ].addEventListener( "click", function() {
+                showSettings();
+            });
+            document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendGlobal );
+            document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendGlobal );
+            document.getElementsByClassName( "sound-btn" )[ 0 ].addEventListener( "click", function() {showToast( `${t('comingSoon')}` );});
+            document.getElementsByClassName( "image-btn" )[ 0 ].addEventListener( "click", function() {
+                showImgs();
+            });
+            addMessages( "globalfeed" );
         }
     </script>
     <script>
@@ -2943,31 +3399,41 @@
             </div>
             <div class="channels">
                 <ul>
-                        <li class="search-outer">
-                            <div class="search">
-                                <input type="text" placeholder="Search...">
-                                <i class="fa fa-search" onclick='showToast( `${t("comingSoon")}` );document.getElementsByClassName( "search" )[ 0 ].getElementsByTagName( "input" )[ 0 ].value = "";'></i>
+                    <li class="search-outer">
+                        <div class="search">
+                            <input type="text" placeholder="Search...">
+                            <i class="fa fa-search" onclick='showToast( `${t("comingSoon")}` );document.getElementsByClassName( "search" )[ 0 ].getElementsByTagName( "input" )[ 0 ].value = "";'></i>
+                        </div>
+                    </li>
+                    <li class="manage-wallet-outer" onclick='manageWallet( this.getElementsByClassName( "message" )[ 0 ].innerText );'>
+                        <a>
+                            <span class="plus-circle fa fa-wallet"></span>
+                            <div class="manage-channels-inner">
+                                <div class="name" data-i18n-key="manageWallet"></div>
+                                <div class="message" data-i18n-key="loading"></div>
                             </div>
-                        </li>
-                        <li class="manage-wallet-outer" onclick='manageWallet( this.getElementsByClassName( "message" )[ 0 ].innerText );'>
-                            <a>
-                                <span class="plus-circle fa fa-wallet"></span>
-                                <div class="manage-channels-inner">
-                                    <div class="name" data-i18n-key="manageWallet"></div>
-                                    <div class="message" data-i18n-key="loading"></div>
-                                </div>
-                                <span class="notification" style="background-color: #05e632;">200+</span>
-                            </a>
-                        </li>
-                        <li class="manage-channels-outer" onclick="manageChannels();">
-                            <a>
-                                <span class="plus-circle fa fa-list-check"></span>
-                                <div class="manage-channels-inner">
-                                    <div class="name" data-i18n-key="manageChannels"></div>
-                                    <div class="message" data-i18n-key="manageChannelsMessage"></div>
-                                </div>
-                            </a>
-                        </li>
+                            <span class="notification" style="background-color: #05e632;">200+</span>
+                        </a>
+                    </li>
+                    <li class="manage-channels-outer" onclick="manageChannels();">
+                        <a>
+                            <span class="plus-circle fa fa-list-check"></span>
+                            <div class="manage-channels-inner">
+                                <div class="name" data-i18n-key="manageChannels"></div>
+                                <div class="message" data-i18n-key="manageChannelsMessage"></div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="manage-channels-outer globalfeed" onclick="showGlobal();">
+                        <a>
+                            <span class="plus-circle fa fa-globe"></span>
+                            <div class="manage-channels-inner">
+                                <div class="name" data-i18n-key="global"></div>
+                                <div class="message" data-i18n-key="globalDesc"></div>
+                            </div>
+                            <span class="notification" style="display: none;">0</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>

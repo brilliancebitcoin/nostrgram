@@ -73,7 +73,10 @@ let translations = {
     "yourInfoImagePlaceholder":"user picture e.g. https://i.ibb.co/Q8X9cQL/bitcoin-chess.png",
     "yourInfoNamePlaceholder":"display name",
     "yourInfoProcessed":"Your info was processed",
-    "NAME":"Anigma"
+    "NAME":"Anigma",
+    "convert":"Convert",
+    "global":"Global",
+    "globalDesc":"What everyone's talking about"
   },
 
   // German translations
@@ -146,7 +149,10 @@ let translations = {
     "yourInfoImagePlaceholder": "Benutzerbild z.B. https://i.ibb.co/Q8X9cQL/bitcoin-chess.png",
     "yourInfoNamePlaceholder": "angezeigter Name",
     "yourInfoProcessed": "Deine Info wurde bearbeitet",
-    "NAME":"Anigma"
+    "NAME":"Anigma",
+    "convert":"verwandeln",
+    "global":"Global",
+    "globalDesc":"Worüber alle reden"
   },
 };
 
@@ -190,5 +196,6 @@ function translateElement(element) {
 }
  
 function t(key) {
+   if ( !locale ) return;
    return translations[locale][key]
 }
