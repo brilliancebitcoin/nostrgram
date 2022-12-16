@@ -21,8 +21,8 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] when a mobile user starts typing, make the mic and attach-image buttons disappear
 * [x] parse youtube video urls and display them as embedded
 * [x] keep the keyboard visible after you send a message on mobile
-* [x] multi select emojis before closing emoji window
-* [x] create a mini player for youtube videos so you can leave the channel and keep the video playing
+* [x] multi-select emojis before closing the emoji window
+* [x] create a mini-player for youtube videos so you can leave the channel and keep the video playing
 * [x] if that's not possible, at least make videos not scroll up when someone posts a message while a video is playing
 * [x] fix bug where picture-in-picture youtube videos go to the bottom of the channel on mobile instead of wherever you clicked
 * [x] fix bug where picture-in-picture youtube videos move weirdly on mobile
@@ -84,7 +84,7 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] write a function that checks if the penultimate message was by the same person as the most recent message, and if so, reduce the margin between them and only display the profile picture of the "top" post in the chain
 * [ ] add support for replaceable events (nip16) and use them to sync account-specific private data across devices
 * [ ] add support for ephemeral events (nip16) and use them to display "typing..." indicators
-* [ ] add several hard coded channels in a hidden way and expose them via the search bar
+* [ ] add several hard-coded channels in a hidden way and expose them via the search bar
 * [ ] fix the metadata overwrite bug -- I think this is caused by anigma sometimes running the function that creates a local metadata cache and then pushing it to nostr before it checks if you already have metadata on nostr
 * [ ] on mobile, when someone clicks to view the sidebar, scroll it to the top
 * [ ] on mobile, when someone clicks to view the sidebar, remove the "active" class from the channel they were just in so they can see the unread message count
