@@ -261,6 +261,7 @@
         var sha256  = bitcoinjs.crypto.sha256
         const urlParams = new URLSearchParams(window.location.search);
         const channelParam = urlParams.get( 'channel' );
+        const profileParam = urlParams.get( 'profile' );
         const relayParam = urlParams.get( 'relay' );
         if ( localStorage[ "backup" ] ) {
             var backup = JSON.parse( localStorage[ "backup" ] );
@@ -1321,7 +1322,7 @@
                     </div>
                 </div>
                 <div class="infobox">
-                    <span class="infobox-text">${t('channelId')}: ${channel.getAttribute( "data-id" )}</span>
+                    <span class="infobox-text">${t('channelId')}: ${channel.getAttribute( "data-id" )}<br>Test</span>
                     <span class="infobox-x">&times;</span>
                 </div>
                 <div class="message-content">
@@ -2965,10 +2966,16 @@
     </div>
     <script>
         function joinChannelOnStart() {
-            if ( channelParam && document.getElementsByClassName( "channels" )[ 0 ] && document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( channelParam )[ 0 ] ) {
+            if ( channelParam && !profileParam && document.getElementsByClassName( "channels" )[ 0 ] && document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( channelParam )[ 0 ] ) {
                 var channel = document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( channelParam )[ 0 ];
                 selectChannel( channel );
-            } else if ( channelParam ) {
+            }
+            if ( profileParam ) {
+                showProfile( profileParam, profileParam.substring( 0, 15 ) + "...", `https://www.gravatar.com/avatar/${profileParam}?s=128&d=retro` )
+            }
+            var channelIsSelected = document.querySelectorAll( ".active" ).length > 0;
+            var profileIsSelected = document.querySelector( ".channel-wrapper" ).querySelector( ".name" ).innerText == "Profile";
+            if ( !( channelIsSelected || profileIsSelected ) && ( channelParam || profileParam ) ) {
                 setTimeout( function() {joinChannelOnStart();}, 100 );
             }
         }
