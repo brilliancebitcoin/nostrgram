@@ -416,6 +416,8 @@
                     }
                     //path if I am updating someone else's info
                     if ( "name" in JSON.parse( content ) && !( !JSON.parse( content )[ "name" ] || JSON.parse( content )[ "name" ] == "" ) ) {
+                        //stop if the metadata you are getting belongs to a different user
+                        if ( document.querySelector( ".profile-pubkey" ) && event.pubkey != document.querySelector( ".profile-pubkey" ).innerText ) return;
                         namemap[ event.pubkey ] = JSON.parse( content )[ "name" ];
                         localStorage[ "namemap" ] = JSON.stringify( namemap );
                         var i; for ( i=0; i<document.getElementsByClassName( event.pubkey ).length; i++ ) {
