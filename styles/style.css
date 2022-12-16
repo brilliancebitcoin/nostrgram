@@ -123,6 +123,10 @@ body {
     cursor: pointer;
 }
 
+.chat .sidebar .channels ul li a .manage-channels-inner {
+    max-width: calc( 100% - 100px );    
+}
+
 .chat .sidebar .channels ul li a .manage-channels-inner .name,
 .chat .sidebar .user-in-sidebar a .user-profile-inner .name {
     font-size: 15px;
@@ -717,7 +721,7 @@ body {
     font-family: monospace;
 }
 
-.copy-pubkey-btn, .convert-pubkey-btn, .copy-privkey-btn, .dm, .copy-walleturl-btn, .copy-adminkey-btn, .copy-readkey-btn, .tipper, .tip-em, .msg-context-btn {
+.copy-pubkey-btn, .convert-pubkey-btn, .copy-privkey-btn, .convert-privkey-btn, .dm, .copy-walleturl-btn, .copy-adminkey-btn, .copy-readkey-btn, .tipper, .tip-em, .msg-context-btn {
     display: inline-block;
     width: 100px;
     box-sizing: border-box;
@@ -729,6 +733,10 @@ body {
     background-color: var(--background-color);
     cursor: pointer;
     margin-top: 20px;
+}
+
+.convert-pubkey-btn, .convert-privkey-btn {
+    width: auto;
 }
 
 .dm, .tipper, .msg-context-btn {
