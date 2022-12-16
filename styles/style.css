@@ -400,7 +400,7 @@ body {
     display: inline-block;
     padding: 6px 12px;
 /*    background-color: white; */
-    background-color: var(--background-color-3);
+    background-color: var(--background-color-4);
     border-radius: 20px;
     font-size: 15px;
     margin-bottom: 5px;
@@ -717,7 +717,7 @@ body {
     font-family: monospace;
 }
 
-.copy-pubkey-btn, .copy-privkey-btn, .dm, .copy-walleturl-btn, .copy-adminkey-btn, .copy-readkey-btn, .tipper, .tip-em, .msg-context-btn {
+.copy-pubkey-btn, .convert-pubkey-btn, .copy-privkey-btn, .dm, .copy-walleturl-btn, .copy-adminkey-btn, .copy-readkey-btn, .tipper, .tip-em, .msg-context-btn {
     display: inline-block;
     width: 100px;
     box-sizing: border-box;
