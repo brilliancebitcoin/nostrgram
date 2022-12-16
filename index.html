@@ -1236,7 +1236,7 @@
                 }
                 content = markdownify( content, isMine );
                 array_of_replies.forEach( function( item ) {
-                    if ( item[ 1 ] == event.id ) {
+                    if ( item[ 0 ] == event.id ) {
                         var replyPubkey = event.pubkey;
                         if ( event.pubkey in namemap && namemap[ event.pubkey ] != "none" ) {
                             var person_name = namemap[ event.pubkey ];
