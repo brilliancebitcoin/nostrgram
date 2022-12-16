@@ -2305,12 +2305,19 @@
         function removeReply( id, content, pubkey ) {
             document.getElementsByClassName( "reply-div" )[ 0 ].style.display = "none";
             document.getElementsByClassName( "reply-div" )[ 0 ].innerHTML = '';
-            if ( !document.getElementsByClassName( "active" )[ 0 ].getAttribute( "data-pubkey" ) ) {
+            if ( document.getElementsByClassName( "active" )[ 0 ].classList.contains( "globalfeed" ) ) {
+                document.getElementsByClassName( "input" )[ 0 ].firstElementChild.removeEventListener( 'keypress', enterSendGlobalWithReply );
+                document.getElementsByClassName( "send-btn" )[ 0 ].removeEventListener( 'click', clickSendGlobalWithReply );
+                document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendGlobal );
+                document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendGlobal );
+            }
+            if ( !document.getElementsByClassName( "active" )[ 0 ].classList.contains( "globalfeed" ) && !document.getElementsByClassName( "active" )[ 0 ].getAttribute( "data-pubkey" ) ) {
                 document.getElementsByClassName( "input" )[ 0 ].firstElementChild.removeEventListener( 'keypress', enterSendPublicWithReply );
                 document.getElementsByClassName( "send-btn" )[ 0 ].removeEventListener( 'click', clickSendPublicWithReply );
                 document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendPublic );
                 document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendPublic );
-            } else {
+            }
+            if ( !document.getElementsByClassName( "active" )[ 0 ].classList.contains( "globalfeed" ) && document.getElementsByClassName( "active" )[ 0 ].getAttribute( "data-pubkey" ) ) {
                 document.getElementsByClassName( "input" )[ 0 ].firstElementChild.removeEventListener( 'keypress', enterSendPrivateWithReply );
                 document.getElementsByClassName( "send-btn" )[ 0 ].removeEventListener( 'click', clickSendPrivateWithReply );
                 document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendPrivate );
