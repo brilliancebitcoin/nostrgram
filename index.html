@@ -801,7 +801,8 @@
                 div.classList.add( "message" );
                 div.classList.add( event.id );
                 div.setAttribute( "data-author", event.pubkey );
-                div.onclick = function() {msgContext( event.id );}
+                var what_for_reply = ( replyingTo ) ? replyingTo:event.pubkey;
+                div.onclick = function() {msgContext( event.id, event.pubkey, what_for_reply, content );}
                 if ( isMine ) {
                     div.align = "right";
                 }
@@ -1012,7 +1013,8 @@
                 if ( isMine ) {
                     div.align = "right";
                 }
-                div.onclick = function() {msgContext( event.id );}
+                var what_for_reply = ( replyingTo ) ? replyingTo:event.pubkey;
+                div.onclick = function() {msgContext( event.id, event.pubkey, what_for_reply, content );}
                 if ( isMine ) {
                     var replyclass = "reply-in-blue";
                 } else {
@@ -1373,7 +1375,8 @@
                 div.classList.add( "message" );
                 div.classList.add( event.id );
                 div.setAttribute( "data-author", event.pubkey );
-                div.onclick = function() {msgContext( event.id );}
+                var what_for_reply = ( replyingTo ) ? replyingTo:event.pubkey;
+                div.onclick = function() {msgContext( event.id, event.pubkey, what_for_reply, content );}
                 if ( isMine ) {
                     div.align = "right";
                 }
@@ -1876,7 +1879,8 @@
                 if ( isMine ) {
                     div.align = "right";
                 }
-                div.onclick = function() {msgContext( id );}
+                var what_for_reply = ( replyingTo ) ? replyingTo:pubkey;
+                div.onclick = function() {msgContext( id, pubkey, what_for_reply, content );}
                 if ( isMine ) {
                     var replyclass = "reply-in-blue";
                 } else {
@@ -1973,7 +1977,8 @@
                     if ( isMine ) {
                         div.align = "right";
                     }
-                    div.onclick = function() {msgContext( id );}
+                    var what_for_reply = ( replyingTo ) ? replyingTo:pubkey;
+                    div.onclick = function() {msgContext( id, pubkey, what_for_reply, content );}
                     var replyAuthor = `<span class="reply-author">${t('unknown')}</span>`;
                     var replyContent = `${t('replyToMessageNotFound')}`;
                     var replyPrefix = "";
@@ -2285,20 +2290,25 @@
         }
     </script>
     <script>
-        function msgContext( id ) {
-            if ( isTextSelected() ) return;
-            var msgSubId   = "00000004" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 );
-            var msgFilter  = { "ids": [ id ] }
-            var msgSub     = [ "REQ", msgSubId, msgFilter ];
-            if ( socket && socket.readyState != 0 ) {
-                socket.send( JSON.stringify( msgSub ) );
+        function msgContext( id, pubkey, replyingTo, content ) {
+            otherKey = replyingTo;
+            content = DOMPurify.sanitize( content );
+            var shortened_content = content.replace( /\n/g, " " ).substring( 0, 50 );
+            if ( content.length > 50 ) {
+                shortened_content = shortened_content + "...";
             }
-            setTimeout( function() {
-                var closer = [ "CLOSE", msgSubId ];
-                if ( socket && socket.readyState != 0 ) {
-                    socket.send( JSON.stringify( closer ) );
-                }
-            }, 1500 );
+            shortened_content_for_code = buffer.Buffer.from( shortened_content ).toString( "hex" );
+            shortened_content_for_display = shortened_content;
+            document.getElementById( "modal" ).innerHTML = "";
+            document.getElementById( "modal" ).innerHTML += `<div><strong>Message</strong></div>`;
+            document.getElementById( "modal" ).innerHTML += shortened_content_for_display;
+            document.getElementById( "modal" ).innerHTML += `<hr style="border: 1px solid; margin-top: 20px;" />`;
+            document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="replyToMsg( '${id}', '${shortened_content_for_code}', '${pubkey}' )">${t('replyToThisMessage')}</button></div>`;
+            //document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="atAUser( '${event.pubkey}' )">@ this user</button></div>`;
+            document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="window.open( 'https://nostr.com/e/${id}', '_blank' )">${t('viewThisEvent')}</button></div>`;
+            document.getElementById( "black-bg" ).style.display = "block";
+            document.getElementById( "modal" ).style.display = "block";
+            document.getElementById( "modal" ).style.textAlign = "left";
         }
     </script>
     <script>
