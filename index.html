@@ -618,9 +618,7 @@
             }
             //this runs when a message is clicked or tapped. It populates a context menu with action options such as Reply
             if ( subId.startsWith( "00000004" ) ) {
-                console.log( [2] );
                 if ( JSON.parse( message[ "data" ] )[ 0 ] == "EOSE" ) return;
-                console.log( [3] );
                 if ( content ) {
                     if ( event.pubkey == pubKey ) {
                         var otherKey = "";
