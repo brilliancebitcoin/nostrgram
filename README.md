@@ -47,6 +47,8 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] dark mode
 * [x] let people link a user directly into a channel like this: https://anigma.io?channel=whatever
 * [x] let people link a user directly to a profile like this: https://anigma.io?profile=whatever
+* [x] let users add individuals to a local blacklist
+* [x] let users block individuals from appearing in their dms
 * [ ] private groups with shared decryption keys
 * [ ] make an option to set and modify relays in settings
 * [ ] connect to at least two relays by default
@@ -60,7 +62,6 @@ Click here: [https://anigma.io](https://anigma.io)
 * [ ] make the mic button record and broadcast voice chats powered by [https://relay.nostr.info/test/chat.html](https://relay.nostr.info/test/chat.html)
 * [ ] show "last seen" indicators for people in your dm list
 * [ ] when a dm is closed, don't show it again til the dm'd person says something
-* [ ] let users block individuals from appearing in their dms
 * [ ] let users close their dms so people can't show up unannounced
 * [ ] let users close their dms except to people who pay a fee
 * [ ] if a user types /me at the start of their message their bubble should display their name inline as the first word of their message
