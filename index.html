@@ -2283,6 +2283,7 @@
     </script>
     <script>
         function msgContext( id, pubkey, replyingTo, content ) {
+            if( isTextSelected() ) return;
             otherKey = replyingTo;
             content = DOMPurify.sanitize( content );
             var shortened_content = content.replace( /\n/g, " " ).substring( 0, 50 );
