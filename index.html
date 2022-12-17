@@ -313,7 +313,8 @@
             if ( channelParam && !subscribed_channels.includes(channelParam) ) {
                 subscribed_channels.push( channelParam );
             }
-            var relay = relayParam || JSON.parse( backup[ "relays" ] )[ 0 ];
+//            var relay = relayParam || JSON.parse( backup[ "relays" ] )[ 0 ];
+            var relay = relayParam || "wss://nostr-pub.semisol.dev";
         } else {
             var keypair = bitcoinjs.ECPair.makeRandom()
             var privKey = keypair.privateKey.toString( "hex" )
