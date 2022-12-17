@@ -320,7 +320,8 @@
             var pubKey  = keypair.publicKey.toString( "hex" )
             pubKey      = pubKey.substring( 2 )
             var subscribed_channels = [ channelParam || "25e5c82273a271cb1a840d0060391a0bf4965cafeb029d5ab55350b418953fbb" ];
-            var relay = relayParam || "wss://relay.damus.io";
+//            var relay = relayParam || "wss://relay.damus.io";
+            var relay = relayParam || "wss://nostr-pub.semisol.dev";
             var stuff_to_backup = {}
             stuff_to_backup[ "privkey" ] = privKey;
             stuff_to_backup[ "pubkey" ] = pubKey;
@@ -616,7 +617,9 @@
             }
             //this runs when a message is clicked or tapped. It populates a context menu with action options such as Reply
             if ( subId.startsWith( "00000004" ) ) {
+                console.log( [2] );
                 if ( JSON.parse( message[ "data" ] )[ 0 ] == "EOSE" ) return;
+                console.log( [3] );
                 if ( content ) {
                     if ( event.pubkey == pubKey ) {
                         var otherKey = "";
@@ -2274,12 +2277,14 @@
     </script>
     <script>
         function msgContext( id ) {
+            console.log( [0] );
             if ( isTextSelected() ) return;
             var msgSubId   = "00000004" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 );
             var msgFilter  = { "ids": [ id ] }
             var msgSub     = [ "REQ", msgSubId, msgFilter ];
             if ( socket && socket.readyState != 0 ) {
                 socket.send( JSON.stringify( msgSub ) );
+                console.log( [1] );
             }
             setTimeout( function() {
                 var closer = [ "CLOSE", msgSubId ];
