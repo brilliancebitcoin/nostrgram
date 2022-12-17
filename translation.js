@@ -76,7 +76,9 @@ let translations = {
     "NAME":"Anigma",
     "convert":"Convert",
     "global":"Global",
-    "globalDesc":"What everyone's talking about"
+    "globalDesc":"What everyone's talking about",
+    "blockThisUser":"Block this user",
+    "confirmUserBlock":"Are you sure you want to block all posts by this user? This will only affect what you see, not what others see"
   },
 
   // German translations
@@ -152,7 +154,9 @@ let translations = {
     "NAME":"Anigma",
     "convert":"verwandeln",
     "global":"Global",
-    "globalDesc":"Worüber alle reden"
+    "globalDesc":"Worüber alle reden",
+    "blockThisUser":"diesen Benutzer blockieren",
+    "confirmUserBlock":"Möchten Sie wirklich alle Beiträge dieses Benutzers blockieren? Dies wirkt sich nur auf das aus, was Sie sehen, nicht auf das, was andere sehen"
   },
 };
 
