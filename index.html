@@ -314,7 +314,7 @@
                 subscribed_channels.push( channelParam );
             }
 //            var relay = relayParam || JSON.parse( backup[ "relays" ] )[ 0 ];
-            var relay = relayParam || "wss://nostr-pub.semisol.dev";
+            var relay = relayParam || "wss://relay.grunch.dev";
         } else {
             var keypair = bitcoinjs.ECPair.makeRandom()
             var privKey = keypair.privateKey.toString( "hex" )
@@ -322,7 +322,7 @@
             pubKey      = pubKey.substring( 2 )
             var subscribed_channels = [ channelParam || "25e5c82273a271cb1a840d0060391a0bf4965cafeb029d5ab55350b418953fbb" ];
 //            var relay = relayParam || "wss://relay.damus.io";
-            var relay = relayParam || "wss://nostr-pub.semisol.dev";
+            var relay = relayParam || "wss://relay.grunch.dev";
             var stuff_to_backup = {}
             stuff_to_backup[ "privkey" ] = privKey;
             stuff_to_backup[ "pubkey" ] = pubKey;
@@ -618,7 +618,9 @@
             }
             //this runs when a message is clicked or tapped. It populates a context menu with action options such as Reply
             if ( subId.startsWith( "00000004" ) ) {
+                console.log( [2] );
                 if ( JSON.parse( message[ "data" ] )[ 0 ] == "EOSE" ) return;
+                console.log( [3] );
                 if ( content ) {
                     if ( event.pubkey == pubKey ) {
                         var otherKey = "";
