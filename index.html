@@ -680,8 +680,9 @@
             if ( kind == 42 && subId.includes( "latest-message" ) ) {
                 if ( JSON.parse( message[ "data" ] )[ 0 ] == "EOSE" ) return;
                 var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
-                var event_time = event.created_at
-                var how_long_ago = convertHMS( now - event_time )
+                var event_time = event.created_at;
+                var how_long_ago = convertHMS( now - event_time );
+                if ( now - event_time < -600 ) return;
                 var isMine = ( event.pubkey == pubKey );
                 if ( !isMine && !array_of_pubkeys.includes( event.pubkey ) ) {
                     array_of_pubkeys.push( event.pubkey );
@@ -896,8 +897,9 @@
                     array_of_pubkeys.push( event.pubkey );
                 }
                 var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
-                var event_time = event.created_at
-                var how_long_ago = convertHMS( now - event_time )
+                var event_time = event.created_at;
+                var how_long_ago = convertHMS( now - event_time );
+                if ( now - event_time < -600 ) return;
                 if ( event.pubkey == pubKey ) {
                     var otherKey = "";
                     var i; for ( i=0; i<event.tags.length; i++ ) {
@@ -1236,8 +1238,9 @@
             if ( kind == 1 && subId.includes( "00000005" ) ) {
                 if ( JSON.parse( message[ "data" ] )[ 0 ] == "EOSE" ) return;
                 var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
-                var event_time = event.created_at
-                var how_long_ago = convertHMS( now - event_time )
+                var event_time = event.created_at;
+                var how_long_ago = convertHMS( now - event_time );
+                if ( now - event_time < -600 ) return;
                 var isMine = ( event.pubkey == pubKey );
                 if ( !isMine && !array_of_pubkeys.includes( event.pubkey ) ) {
                     array_of_pubkeys.push( event.pubkey );
@@ -1852,7 +1855,8 @@
                     replyingTo = msg[ Object.keys( msg )[ 0 ] ][ "replyingTo" ];
                 }
                 var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
-                var how_long_ago = convertHMS( now - event_time )
+                var how_long_ago = convertHMS( now - event_time );
+                if ( now - event_time < -600 ) return;
                 var div = document.createElement( "div" );
                 if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
                     name = namemap[ pubkey ];
@@ -1948,7 +1952,8 @@
                         replyingTo = msg[ Object.keys( msg )[ 0 ] ][ "replyingTo" ];
                     }
                     var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
-                    var how_long_ago = convertHMS( now - event_time )
+                    var how_long_ago = convertHMS( now - event_time );
+                    if ( now - event_time < -600 ) return;
                     var div = document.createElement( "div" );
                     if ( pubkey in namemap && namemap[ pubkey ] != "none" ) {
                         name = namemap[ pubkey ];
