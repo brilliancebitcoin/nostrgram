@@ -167,6 +167,20 @@
             var match = url.match( regExp );
             return ( match && match[ 7 ].length == 11 ) ? match[ 7 ] : false;
         }
+        function isStringUrl( string ) {
+            if ( string.indexOf( " " ) >= 0 || string.indexOf( "<" ) >= 0 || string.indexOf( ">" ) >= 0 || string.indexOf( "&gt;" ) >= 0 || string.indexOf( "&lt;" ) >= 0 ) {
+                return;
+            }
+            try {
+                var arr = string.match( /\S+\.{1}[a-zA-Z0-9\?\=\&\$\+\,\;\@\#\%\-\_]{2,}\/?[a-zA-Z0-9/\\?\=\&\$\+\,\;\@\#\%\-\_\.]*/g );
+                if ( typeof( arr ) == "object" && arr.length == 1 ) {
+                    return true;
+                }
+                return;
+            } catch( e ) {
+                return;
+            }
+        }
         function urlify( text, isMine ) {
             var ytRegex = /(http:|https:)?\/\/(www\.)?(youtube.com|youtu.be)\/(watch)?(\?v=)?(\S+)?/g
             var imgRegex = /\b(https?:\/\/\S+(?:\.png|\.jpe?g|\.gif|\.webp|\.PNG|\.JPE?G|\.GIF|\.WEBP)\S*)\b/g;
@@ -299,7 +313,7 @@
             if ( channelParam && !subscribed_channels.includes(channelParam) ) {
                 subscribed_channels.push( channelParam );
             }
-            var relay = JSON.parse( backup[ "relays" ] )[ 0 ];
+            var relay = relayParam || JSON.parse( backup[ "relays" ] )[ 0 ];
         } else {
             var keypair = bitcoinjs.ECPair.makeRandom()
             var privKey = keypair.privateKey.toString( "hex" )
@@ -501,11 +515,15 @@
                     if ( "picture" in JSON.parse( content ) && !( !JSON.parse( content )[ "picture" ] || JSON.parse( content )[ "picture" ] == "" ) ) {
                         //stop if the metadata you are getting belongs to a different user
                         if ( document.querySelector( ".profile-pubkey" ) && event.pubkey != pubkeyFromNpub( document.querySelector( ".profile-pubkey" ).innerText ) ) return;
-                        imagemap[ event.pubkey ] = DOMPurify.sanitize( JSON.parse( content )[ "picture" ] );
+                        picture = JSON.parse( content )[ "picture" ];
+                        if ( !isStringUrl( picture ) ) {
+                            picture = `https://www.gravatar.com/avatar/${event.pubkey}?s=128&d=retro`;
+                        }
+                        imagemap[ event.pubkey ] = DOMPurify.sanitize( picture );
                         localStorage[ "imagemap" ] = JSON.stringify( imagemap );
                         var i; for ( i=0; i<document.getElementsByClassName( event.pubkey ).length; i++ ) {
                             if ( document.getElementsByClassName( event.pubkey )[ i ] && document.getElementsByClassName( event.pubkey )[ i ].parentElement && document.getElementsByClassName( event.pubkey )[ i ].parentElement.parentElement && document.getElementsByClassName( event.pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ] ) {
-                                document.getElementsByClassName( event.pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + DOMPurify.sanitize( JSON.parse( content )[ "picture" ] ) + ")";
+                                document.getElementsByClassName( event.pubkey )[ i ].parentElement.parentElement.getElementsByClassName( "picture" )[ 0 ].style.backgroundImage = "url(" + DOMPurify.sanitize( picture ) + ")";
                             }
                         }
                         if ( document.getElementsByClassName( "big-picture" )[ 0 ] && document.getElementsByClassName( "channel-wrapper" )[ 0 ].getElementsByClassName( "name" )[ 0 ].innerText != `${t('settings')}` && document.getElementsByClassName( "profile-pubkey" )[ 0 ] && document.getElementsByClassName( "profile-pubkey" )[ 0 ].innerText == event.pubkey ) {
@@ -2965,6 +2983,9 @@
     </script>
     <script>
         function dmThisUser( pubkey, name, picture ) {
+            if ( !isStringUrl( picture ) ) {
+                picture = `https://www.gravatar.com/avatar/${pubkey}?s=128&d=retro`;
+            }
             if ( !document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ] ) {
                 document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( pubkey, name, picture );
                 var obj = {}
@@ -2992,6 +3013,9 @@
             var displayer = "";
             if ( old_num_of_new_messages > 0 ) {
                 displayer = 'display: inline;'
+            }
+            if ( !isStringUrl( picture ) ) {
+                picture = `https://www.gravatar.com/avatar/${pubkey}?s=128&d=retro`;
             }
             var html = `
                         <li class="dm-outer ${pubkey.substring( 0, 20 )}" data-pubkey="${pubkey}" data-img="${picture}" data-num-of-new-messages="${String( old_num_of_new_messages )}" onclick="selectDM( '${pubkey}', '${name}', '${picture}' );">
