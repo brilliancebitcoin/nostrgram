@@ -314,7 +314,7 @@
                 subscribed_channels.push( channelParam );
             }
 //            var relay = relayParam || JSON.parse( backup[ "relays" ] )[ 0 ];
-            var relay = relayParam || "wss://relay.grunch.dev";
+            var relay = relayParam || "wss://nostr.ono.re";
         } else {
             var keypair = bitcoinjs.ECPair.makeRandom()
             var privKey = keypair.privateKey.toString( "hex" )
@@ -322,7 +322,7 @@
             pubKey      = pubKey.substring( 2 )
             var subscribed_channels = [ channelParam || "25e5c82273a271cb1a840d0060391a0bf4965cafeb029d5ab55350b418953fbb" ];
 //            var relay = relayParam || "wss://relay.damus.io";
-            var relay = relayParam || "wss://relay.grunch.dev";
+            var relay = relayParam || "wss://nostr.ono.re";
             var stuff_to_backup = {}
             stuff_to_backup[ "privkey" ] = privKey;
             stuff_to_backup[ "pubkey" ] = pubKey;
