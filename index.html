@@ -316,10 +316,10 @@
 //            var relay = relayParam || JSON.parse( backup[ "relays" ] )[ 0 ];
             var relay = relayParam || "wss://nostr.ono.re";
         } else {
-            var keypair = bitcoinjs.ECPair.makeRandom()
-            var privKey = keypair.privateKey.toString( "hex" )
-            var pubKey  = keypair.publicKey.toString( "hex" )
-            pubKey      = pubKey.substring( 2 )
+            var keypair = bitcoinjs.ECPair.makeRandom();
+            var privKey = keypair.privateKey.toString( "hex" );
+            var pubKey  = keypair.publicKey.toString( "hex" );
+            pubKey      = pubKey.substring( 2 );
             var subscribed_channels = [ channelParam || "25e5c82273a271cb1a840d0060391a0bf4965cafeb029d5ab55350b418953fbb" ];
 //            var relay = relayParam || "wss://relay.damus.io";
             var relay = relayParam || "wss://nostr.ono.re";
@@ -356,6 +356,11 @@
                 msg_cache[ pubkey ] = [];
             });
             localStorage[ "msg_cache" ] = JSON.stringify( msg_cache );
+        }
+        if ( localStorage[ "local_pubkey_blacklist" ] ) {
+            var local_pubkey_blacklist = JSON.parse( localStorage[ "local_pubkey_blacklist" ] );
+        } else {
+            var local_pubkey_blacklist = [];
         }
         var wallet_id = "";
         var adminkey = "";
@@ -636,6 +641,12 @@
             }
             if ( kind == 42 && subId.includes( "latest-message" ) ) {
                 if ( JSON.parse( message[ "data" ] )[ 0 ] == "EOSE" ) return;
+                if ( localStorage[ "local_pubkey_blacklist" ] ) {
+                    var local_pubkey_blacklist = JSON.parse( localStorage[ "local_pubkey_blacklist" ] );
+                } else {
+                    var local_pubkey_blacklist = [];
+                }
+                if ( local_pubkey_blacklist.includes( event.pubkey ) ) return;
                 var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
                 var event_time = event.created_at;
                 var how_long_ago = convertHMS( now - event_time );
@@ -850,7 +861,13 @@
             //this code runs whenever a dm is clicked, it should also work for "closed dms" where you only see someone's dms if you first add them to your sidebar
             if ( kind === 4 && subId.includes( "encrypted-dms" ) ) {
                 if ( JSON.parse( message[ "data" ] )[ 0 ] == "EOSE" ) return;
-                if ( document.getElementsByClassName( event.id )[ 0 ] ) return
+                if ( document.getElementsByClassName( event.id )[ 0 ] ) return;
+                if ( localStorage[ "local_pubkey_blacklist" ] ) {
+                    var local_pubkey_blacklist = JSON.parse( localStorage[ "local_pubkey_blacklist" ] );
+                } else {
+                    var local_pubkey_blacklist = [];
+                }
+                if ( local_pubkey_blacklist.includes( event.pubkey ) ) return;
                 var isMine = ( event.pubkey == pubKey );
                 if ( !isMine && !array_of_pubkeys.includes( event.pubkey ) ) {
                     array_of_pubkeys.push( event.pubkey );
@@ -1088,6 +1105,12 @@
             }
             if ( kind === 4 && subId.includes( "encrypted-open-dms" ) ) {
                 if ( JSON.parse( message[ "data" ] )[ 0 ] == "EOSE" ) return;
+                if ( localStorage[ "local_pubkey_blacklist" ] ) {
+                    var local_pubkey_blacklist = JSON.parse( localStorage[ "local_pubkey_blacklist" ] );
+                } else {
+                    var local_pubkey_blacklist = [];
+                }
+                if ( local_pubkey_blacklist.includes( event.pubkey ) ) return;
                 var thereAreEncryptionErrors = await checkForEncryptionErrors( privKey, event.pubkey, event[ "content" ] );
                 if ( !document.getElementsByClassName( event.pubkey.substring( 0, 20 ) )[ 0 ] && !thereAreEncryptionErrors ) {
                     addPubkeyToSidebar( event.pubkey );
@@ -1199,6 +1222,12 @@
             }
             if ( kind == 1 && subId.includes( "00000005" ) ) {
                 if ( JSON.parse( message[ "data" ] )[ 0 ] == "EOSE" ) return;
+                if ( localStorage[ "local_pubkey_blacklist" ] ) {
+                    var local_pubkey_blacklist = JSON.parse( localStorage[ "local_pubkey_blacklist" ] );
+                } else {
+                    var local_pubkey_blacklist = [];
+                }
+                if ( local_pubkey_blacklist.includes( event.pubkey ) ) return;
                 var now = Math.floor( Date.now() / 1000 ) + Number( sessionStorage[ "time-offset" ] );
                 var event_time = event.created_at;
                 var how_long_ago = convertHMS( now - event_time );
@@ -1814,6 +1843,12 @@
                 var parent = msg[ Object.keys( msg )[ 0 ] ][ "parent" ];
                 var picture = msg[ Object.keys( msg )[ 0 ] ][ "picture" ];
                 var pubkey = msg[ Object.keys( msg )[ 0 ] ][ "pubkey" ];
+                if ( localStorage[ "local_pubkey_blacklist" ] ) {
+                    var local_pubkey_blacklist = JSON.parse( localStorage[ "local_pubkey_blacklist" ] );
+                } else {
+                    var local_pubkey_blacklist = [];
+                }
+                if ( local_pubkey_blacklist.includes( pubkey ) ) return;
                 var replyingTo = "";
                 if ( "replyingTo" in msg[ Object.keys( msg )[ 0 ] ] ) {
                     replyingTo = msg[ Object.keys( msg )[ 0 ] ][ "replyingTo" ];
@@ -2263,9 +2298,30 @@
             document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="replyToMsg( '${id}', '${shortened_content_for_code}', '${pubkey}' )">${t('replyToThisMessage')}</button></div>`;
             //document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="atAUser( '${event.pubkey}' )">@ this user</button></div>`;
             document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="window.open( 'https://nostr.com/e/${id}', '_blank' )">${t('viewThisEvent')}</button></div>`;
+            document.getElementById( "modal" ).innerHTML += `<div class="msg-context-option"><button class="msg-context-btn" onclick="blockPubkey( '${otherKey}' )", '_blank' )">${t('blockThisUser')}</button></div>`;
             document.getElementById( "black-bg" ).style.display = "block";
             document.getElementById( "modal" ).style.display = "block";
             document.getElementById( "modal" ).style.textAlign = "left";
+        }
+    </script>
+    <script>
+        function blockPubkey( pubkey ) {
+            var conf = confirm( `${t('confirmUserBlock')}` );
+            if ( !conf ) return;
+            if ( localStorage[ "local_pubkey_blacklist" ] ) {
+                var local_pubkey_blacklist = JSON.parse( localStorage[ "local_pubkey_blacklist" ] );
+            } else {
+                var local_pubkey_blacklist = [];
+            }
+            local_pubkey_blacklist.push( otherKey );
+            localStorage[ "local_pubkey_blacklist" ] = JSON.stringify( local_pubkey_blacklist );
+            document.querySelectorAll( `div[ data-author="${pubkey}"]` ).forEach( function( msg ) {
+                msg.style.display = "none";
+            });
+            document.getElementById( "black-bg" ).style.display = "none";
+            document.getElementById( "modal" ).style.display = "none";
+            document.getElementsByClassName( "note-input" )[ 0 ].focus();
+            document.getElementsByClassName( "note-input" )[ 0 ].select();
         }
     </script>
     <script>
