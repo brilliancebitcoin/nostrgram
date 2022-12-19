@@ -310,7 +310,7 @@ body {
 .message-header-alt .channel-info .channel-wrapper .name {
     font-size: 15px;
     font-weight: 500;
-    color: #222;
+    color: var(--color-accent-2);
 }
 
 .message-header-alt .channel-info .channel-wrapper .time {
