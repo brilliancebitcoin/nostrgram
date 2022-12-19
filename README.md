@@ -49,9 +49,9 @@ Click here: [https://anigma.io](https://anigma.io)
 * [x] let people link a user directly to a profile like this: https://anigma.io?profile=whatever
 * [x] let users add individuals to a local blacklist
 * [x] let users block individuals from appearing in their dms
+* [x] connect to at least two relays by default
 * [ ] private groups with shared decryption keys
 * [ ] make an option to set and modify relays in settings
-* [ ] connect to at least two relays by default
 * [ ] import channels and other backed up data when you import an account
 * [ ] parse and display @[username] and @[pubkey] as links to profile pages (see nip08 for a spec)
 * [ ] show a green message counter in channels where someone @'d you or dm'd you or replied to you
