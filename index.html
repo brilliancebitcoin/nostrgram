@@ -168,7 +168,7 @@
             return ( match && match[ 7 ].length == 11 ) ? match[ 7 ] : false;
         }
         function isStringUrl( string ) {
-            if ( string.indexOf( " " ) >= 0 || string.indexOf( "<" ) >= 0 || string.indexOf( ">" ) >= 0 || string.indexOf( "&gt;" ) >= 0 || string.indexOf( "&lt;" ) >= 0 ) {
+            if ( string.indexOf( " " ) >= 0 || string.indexOf( "<" ) >= 0 || string.indexOf( ">" ) >= 0 || string.indexOf( "&gt;" ) >= 0 || string.indexOf( "&lt;" ) >= 0 || string.indexOf( "'" ) >= 0 || string.indexOf( '"' ) >= 0 ) {
                 return;
             }
             try {
