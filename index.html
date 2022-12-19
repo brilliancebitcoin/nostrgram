@@ -195,7 +195,7 @@
                     if ( !url.startsWith( "http://" ) && !url.startsWith( "https://" ) ) {
                         url2 = "http://" + url;
                     }
-                    return `<a onclick="event.stopPropagation()" href="${url2}" target="_blank" rel="nofollow noopener" style="color: #4287f5;" data-test="test1">${url}</a>`;
+                    return `<a onclick="event.stopPropagation()" href="${url2}" target="_blank" rel="nofollow noopener" style="color: #4287f5;">${url}</a>`;
                 })                
             }
             if ( isMine && !text.match( ytRegex ) && !text.match( imgRegex ) ) {
@@ -207,7 +207,7 @@
                     if ( !url.startsWith( "http://" ) && !url.startsWith( "https://" ) ) {
                         url2 = "http://" + url;
                     }
-                    return `<a onclick="event.stopPropagation()" href="${url2}" target="_blank" rel="nofollow noopener" style="color: white;" data-test="test2">${url}</a>`;
+                    return `<a onclick="event.stopPropagation()" href="${url2}" target="_blank" rel="nofollow noopener" style="color: white;">${url}</a>`;
                 })
             }
             if ( text.match( imgRegex ) ) {
@@ -830,6 +830,7 @@
                     document.getElementsByClassName( "message-content" )[ 0 ].append( item );
                     document.querySelectorAll( "a" ).forEach( function( a ) {if ( a.rel ) {a.target="_blank"}});
                 });
+                //scroll to bottom if near bottom, otherwise don't
                 if ( window.innerWidth < 601 ) {
                     var scrollto = document.getElementsByClassName( "content" )[ 0 ].scrollTop;
                     var offset = 0;
@@ -1422,6 +1423,7 @@
                     document.getElementsByClassName( "message-content" )[ 0 ].append( item );
                     document.querySelectorAll( "a" ).forEach( function( a ) {if ( a.rel ) {a.target="_blank"}});
                 });
+                //scroll to bottom if near bottom, otherwise not
                 if ( window.innerWidth < 601 ) {
                     var scrollto = document.getElementsByClassName( "content" )[ 0 ].scrollTop;
                     var offset = 0;
@@ -1627,7 +1629,7 @@
                     </div>
                 </div>
                 <div class="infobox">
-                    <span class="infobox-text">${t('channelId')}: ${channel.getAttribute( "data-id" )}<br>Test</span>
+                    <span class="infobox-text">${t('channelId')}: ${channel.getAttribute( "data-id" )}<br>URL: ${window.location.protocol + "//" + window.location.hostname + window.location.pathname + "?channel=" + channel.getAttribute( "data-id" )}</span>
                     <span class="infobox-x">&times;</span>
                 </div>
                 <div class="message-content">
@@ -2909,10 +2911,18 @@
                 document.getElementsByClassName( "message-header-hinder" )[ 0 ].style.display = "flex";
                 document.getElementsByClassName( "message-header-alt" )[ 0 ].style.display = "flex";
                 document.getElementsByClassName( "message-header-alt" )[ 0 ].style.width = window.innerWidth - 38 + "px";
+            } else {
+                document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                document.getElementsByClassName( "note-input" )[ 0 ].select();
             }
             if ( window.innerWidth < 601 ) {
                 document.getElementsByClassName( "sidebar" )[ 0 ].style.display = "none";
-                document.getElementsByClassName( "content" )[ 0 ].style.display = "flex";
+                document.getElementsByClassName( "content" )[ 0 ].style.display = "block";
+                document.getElementsByClassName( "content" )[ 0 ].scrollTop = document.getElementsByClassName( "content" )[ 0 ].scrollHeight;
+                if ( document.getElementsByClassName( "bubbletime" ).length > 0 ) {
+                    document.getElementsByClassName( "bubbletime" )[ document.getElementsByClassName( "bubbletime" ).length - 1 ].scrollIntoView();
+                }
+                document.getElementsByClassName( "message-header" )[ 0 ].remove();
             }
             if ( document.getElementsByClassName( "sidebar_arrow" )[ 0 ] ) {
                 document.getElementsByClassName( "sidebar_arrow" )[ 0 ].addEventListener( "click", function() {
