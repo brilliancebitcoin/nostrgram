@@ -294,10 +294,10 @@
         if ( window.location.href.includes( "brilliancebitcoin.github.io/nostrgram" ) && !window.location.href.includes( "brilliancebitcoin.github.io/nostrgram-test" ) ) {
             window.location.href = "https://anigma.io/";
         }
-        var { getSharedSecret, schnorr, utils } = nobleSecp256k1
-        var crypto  = window.crypto 
-        var getRand = size => crypto.getRandomValues(new Uint8Array(size))
-        var sha256  = bitcoinjs.crypto.sha256
+        var { getSharedSecret, schnorr, utils } = nobleSecp256k1;
+        var crypto  = window.crypto;
+        var getRand = size => crypto.getRandomValues( new Uint8Array( size ) );
+        var sha256  = bitcoinjs.crypto.sha256;
         const urlParams = new URLSearchParams(window.location.search);
         var channelParam = urlParams.get( 'channel' );
         var profileParam = urlParams.get( 'profile' );
@@ -1572,6 +1572,240 @@
         }
     </script>
     <script>
+        function waitSomeSeconds( num ) {
+            var num = num.toString() + "000";
+            num = Number( num );
+            return new Promise( function( resolve, reject ) {
+                setTimeout( function() { resolve( "" ); }, num );
+            });
+        }
+
+        function isValidJson( content ) {
+            try {
+                var json = JSON.parse( content );
+            } catch ( e ) {
+                return false;
+            }
+            return true;
+        }
+
+        async function dupNote( getrelay, note ) {
+            var mysocket = new WebSocket( getrelay );
+            var id = "";
+            mysocket.addEventListener( 'open', async function open() {
+                mysocket.send( note );
+                possible_id = JSON.parse( note )[ 1 ][ "id" ];
+                var is_set = await getNote( getrelay, id );
+                if ( is_set ) {
+                    id = possible_id;
+                }
+                setTimeout( function() {mysocket.close();}, 300 );
+            });
+            async function isNoteSetYet( note_i_seek ) {
+              return new Promise( function( resolve, reject ) {
+                    if ( note_i_seek == "" ) {
+                        setTimeout( async function() {
+                            var msg = await isNoteSetYet( id );
+                            resolve( msg );
+                        }, 100 );
+                    } else {
+                        resolve( note_i_seek );
+                    }
+                });
+            }
+            async function getTimeoutData() {
+                var note_i_seek = await isNoteSetYet( id );
+                return note_i_seek;
+            }
+            var returnable = await getTimeoutData();
+            return returnable;
+        }
+
+        async function setNote( getrelay, note ) {
+                var mysocket = new WebSocket( getrelay );
+                var id = "";
+                mysocket.addEventListener( 'open', function open() {
+                        function makeNote( note, recipientpubkey ) {
+                                var now = Math.floor( ( new Date().getTime() ) / 1000 );
+                                var newevent = [
+                                        0,
+                                        pubKey,
+                                        now,
+                                        70202,
+                                        [],
+                                        note
+                                ];
+                                var message = JSON.stringify( newevent );
+                                var msghash = sha256( message ).toString( "hex" );
+                                nobleSecp256k1.schnorr.sign( buffer.Buffer.from( msghash, "hex" ), privKey ).then(
+                                        value => {
+                                                sig = buffer.Buffer.from( value ).toString( "hex" );
+                                                nobleSecp256k1.schnorr.verify(
+                                                        sig,
+                                                        msghash,
+                                                        pubKey
+                                                ).then(
+                                                        value => {
+                                                                if ( value ) {
+                                                                        var fullevent = {
+                                                                                "id": msghash,
+                                                                                "pubkey": pubKey,
+                                                                                "created_at": now,
+                                                                                "kind": 70202,
+                                                                                "tags": [],
+                                                                                "content": note,
+                                                                                "sig": sig
+                                                                        }
+                                                                        var sendable = [ "EVENT", fullevent ];
+                                                                        sendable = JSON.stringify( sendable );
+                                                                        mysocket.send( sendable );
+                                                                        id = msghash;
+                                                                        setTimeout( function() {mysocket.close();}, 300 );
+                                                                 }
+                                                        }
+                                               );
+                                        }
+                                );
+                        }
+                        makeNote( note, pubKey );
+                });
+                async function isNoteSetYet( note_i_seek ) {
+                  return new Promise( function( resolve, reject ) {
+                            if ( note_i_seek == "" ) {
+                                    setTimeout( async function() {
+                                            var msg = await isNoteSetYet( id );
+                                            resolve( msg );
+                                    }, 100 );
+                            } else {
+                                    resolve( note_i_seek );
+                            }
+                    });
+                }
+                async function getTimeoutData() {
+                    var note_i_seek = await isNoteSetYet( id );
+                    return note_i_seek;
+                }
+                var returnable = await getTimeoutData();
+                return returnable;
+        }
+
+        async function getNote( getrelay, id ) {
+            var timer = 0;
+            var mysocket = new WebSocket( getrelay );
+            var note = "";
+            mysocket.addEventListener( 'error', async function( event ) {
+                note = "none";
+            });
+            mysocket.addEventListener( 'message', async function( event ) {
+                if ( event[ "data" ] && isValidJson( event[ "data" ] ) && JSON.parse( event[ "data" ] )[ 0 ] && JSON.parse( event[ "data" ] )[ 0 ] == "EVENT" ) {
+                        note = ( JSON.parse( event[ "data" ] )[ 2 ] );
+                }
+            });
+            mysocket.addEventListener( 'open', function open() {
+                var filter = {
+                    "ids": [
+                        id
+                    ]
+                }
+                var subscription = [ "REQ", "test", filter ];
+                subscription = JSON.stringify( subscription );
+                var chaser = [ "CLOSE", "test" ];
+                chaser = JSON.stringify( chaser );
+                mysocket.send( subscription );
+                setTimeout( function() {mysocket.send( chaser );}, 1000 );
+                setTimeout( function() {mysocket.close();}, 2000 );
+            });
+            async function isNoteSetYet( note_i_seek ) {
+                timer = timer + 1;
+                if ( timer == 20 ) {
+                    note = "none";
+                }
+                return new Promise( function( resolve, reject ) {
+                    if ( note_i_seek == "" ) {
+                        setTimeout( async function() {
+                            var msg = await isNoteSetYet( note );
+                            resolve( msg );
+                        }, 100 );
+                    } else {
+                        resolve( note_i_seek );
+                    }
+                });
+            }
+            async function getTimeoutData() {
+                var note_i_seek = await isNoteSetYet( note );
+                return note_i_seek;
+            }
+            var returnable = await getTimeoutData();
+            return returnable;
+        }
+
+        var stage_1_relays = [
+            "wss://no.str.cr",
+            "wss://relay.sovereign-stack.org",
+            "wss://relay.farscapian.com",
+            "wss://relay.oldcity-bitcoiners.info",
+            "wss://nostr-2.zebedee.cloud",
+            "wss://nostr.fly.dev",
+            "wss://relay.nostr.ch",
+            "wss://nostr.zebedee.cloud",
+            "wss://nostr-relay.lnmarkets.com",
+            "wss://relay.nostr.pro",
+            "wss://relay.r3d.red",
+            "wss://nostr.rdfriedl.com",
+            "wss://relay.cryptocculture.com"
+        ];
+        var stage_2_relays = [];
+        var stage_3_relays = [];
+        var stage_1_relays_tested = [];
+        var stage_2_relays_tested = [];
+        async function passThroughStage( myrelay, num ) {
+            if ( num == 1 ) {
+                if ( stage_1_relays_tested.length < stage_1_relays.length && !stage_1_relays_tested.includes( myrelay ) ) {
+                    stage_1_relays_tested.push( myrelay );
+                }
+                //console.log( "number of stage", num, "relays tested:", stage_1_relays_tested.length, "out of", stage_1_relays.length );
+                var note = await getNote( myrelay, "25e5c82273a271cb1a840d0060391a0bf4965cafeb029d5ab55350b418953fbb" );
+                if ( note != "none" && !stage_2_relays.includes( myrelay ) ) {
+                    stage_2_relays.push( myrelay );
+                }
+                if ( stage_1_relays_tested.length == stage_1_relays.length ) {
+                    testSocketsStage2();
+                }
+            }
+            if ( num == 2 ) {
+                if ( stage_2_relays_tested.length < stage_2_relays.length && !stage_2_relays_tested.includes( myrelay ) ) {
+                    stage_2_relays_tested.push( myrelay );
+                }
+                //console.log( "number of stage", num, "relays tested:", stage_2_relays_tested.length, "out of", stage_2_relays.length );
+                var id = await setNote( myrelay, "test" );
+                var is_set = await getNote( myrelay, id );
+                if ( note != "none" && !stage_3_relays.includes( myrelay ) ) {
+                    stage_3_relays.push( myrelay );
+                }        
+                if ( stage_2_relays_tested.length == stage_2_relays.length ) {
+                    testSocketsStage1();
+                }
+            }
+        }
+        async function testSocketsStage1() {
+            stage_1_relays_tested = [];
+            stage_2_relays = [];
+            var i; for ( i=0; i<stage_1_relays.length; i++ ) {
+                passThroughStage( stage_1_relays[ i ], 1 );
+                var timeout = await waitSomeSeconds( 2 );
+            }
+        }
+        async function testSocketsStage2() {
+            stage_2_relays_tested = [];
+            stage_3_relays = [];
+            var i; for ( i=0; i<stage_2_relays.length; i++ ) {
+                passThroughStage( stage_2_relays[ i ], 2 );
+                var timeout = await waitSomeSeconds( 2 );
+            }
+        }
+        testSocketsStage1();
+    </script>
+    <script>
         function displayChannel( image, name, message, id, timestamp ) {
             var old_num_of_new_messages = 0;
             if ( document.getElementsByClassName( "channels" )[ 0 ].getElementsByClassName( id )[ 0 ] ) {
@@ -2090,6 +2324,11 @@
             var signedEvent = await getSignedEvent( event, privKey );
             socket.send( JSON.stringify( [ "EVENT", signedEvent ] ) );
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
+            //duplicate to other relays
+            var i; for ( i=0; i<stage_3_relays.length; i++ ) {
+                var dup_id = await dupNote( stage_3_relays[ i ], JSON.stringify( [ "EVENT", signedEvent ] ) );
+                var timeout = await waitSomeSeconds( 2 );
+            }
         }
     </script>
     <script>
@@ -2107,6 +2346,11 @@
             var signedEvent = await getSignedEvent( event, privKey );
             socket.send( JSON.stringify( [ "EVENT", signedEvent ] ) );
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
+            //duplicate to other relays
+            var i; for ( i=0; i<stage_3_relays.length; i++ ) {
+                var dup_id = await dupNote( stage_3_relays[ i ], JSON.stringify( [ "EVENT", signedEvent ] ) );
+                var timeout = await waitSomeSeconds( 2 );
+            }
         }
     </script>
     <script>
@@ -2130,6 +2374,11 @@
             document.getElementsByClassName( "send-btn" )[ 0 ].removeEventListener( 'click', clickSendPublicWithReply );
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendPublic );
             document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendPublic );
+            //duplicate to other relays
+            var i; for ( i=0; i<stage_3_relays.length; i++ ) {
+                var dup_id = await dupNote( stage_3_relays[ i ], JSON.stringify( [ "EVENT", signedEvent ] ) );
+                var timeout = await waitSomeSeconds( 2 );
+            }
         }
     </script>
     <script>
@@ -2152,6 +2401,11 @@
             document.getElementsByClassName( "send-btn" )[ 0 ].removeEventListener( 'click', clickSendGlobalWithReply );
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendGlobal );
             document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendGlobal );
+            //duplicate to other relays
+            var i; for ( i=0; i<stage_3_relays.length; i++ ) {
+                var dup_id = await dupNote( stage_3_relays[ i ], JSON.stringify( [ "EVENT", signedEvent ] ) );
+                var timeout = await waitSomeSeconds( 2 );
+            }
         }
     </script>
     <script>
@@ -2174,6 +2428,11 @@
             socket.send( JSON.stringify( [ "EVENT", signedEvent ] ) );
             if ( document.getElementsByClassName( "input" )[ 0 ] && document.getElementsByClassName( "input" )[ 0 ].firstElementChild ) {
                 document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value = "";
+            }
+            //duplicate to other relays
+            var i; for ( i=0; i<stage_3_relays.length; i++ ) {
+                var dup_id = await dupNote( stage_3_relays[ i ], JSON.stringify( [ "EVENT", signedEvent ] ) );
+                var timeout = await waitSomeSeconds( 2 );
             }
         }
     </script>
@@ -2206,6 +2465,11 @@
             document.getElementsByClassName( "send-btn" )[ 0 ].removeEventListener( 'click', clickSendPrivateWithReply );
             document.getElementsByClassName( "input" )[ 0 ].firstElementChild.addEventListener( 'keypress', enterSendPrivate );
             document.getElementsByClassName( "send-btn" )[ 0 ].addEventListener( 'click', clickSendPrivate );
+            //duplicate to other relays
+            var i; for ( i=0; i<stage_3_relays.length; i++ ) {
+                var dup_id = await dupNote( stage_3_relays[ i ], JSON.stringify( [ "EVENT", signedEvent ] ) );
+                var timeout = await waitSomeSeconds( 2 );
+            }
         }
     </script>
     <script>
@@ -2248,7 +2512,19 @@
         }
     </script>
     <script>
-        function checkHeartbeat() {
+        async function checkHeartbeat() {
+            if ( !relayParam && !stage_3_relays.includes( relay ) && stage_3_relays.length > 0 ) {
+                var note = await getNote( relay, "25e5c82273a271cb1a840d0060391a0bf4965cafeb029d5ab55350b418953fbb" );
+                if ( note == "none" ) {
+                    var rando = Math.floor( Math.random() * stage_3_relays.length );
+                    relay = stage_3_relays[ rando ];
+                    socket.removeEventListener( 'open', openConnection );
+                    socket.removeEventListener( 'message', handleMessage );
+                    socket = new WebSocket( relay );
+                    socket.addEventListener( 'message', handleMessage );
+                    socket.addEventListener( 'open', openConnection );
+                }
+            }
             heartbeat = false;
             var heartbeatsubId   = "00000002" + bitcoinjs.ECPair.makeRandom().privateKey.toString( "hex" ).substring( 8 )
             var heartbeatfilter  = { "ids": [ "41ce9bc50da77dda5542f020370ecc2b056d8f2be93c1cedf1bf57efcab095b0" ] }
@@ -2264,13 +2540,11 @@
             }, 1500 );
             setTimeout( function() {
                 if ( !heartbeat && socket.readyState == 3 ) {
-                    //heartbeat tests
-                    //showToast( "the heartbeat function needed activation" );
                     socket.removeEventListener( 'open', openConnection );
                     socket.removeEventListener( 'message', handleMessage );
                     socket = new WebSocket( relay );
-                    socket.addEventListener( 'open', openConnection );
                     socket.addEventListener( 'message', handleMessage );
+                    socket.addEventListener( 'open', openConnection );
                 }
             }, 2000 );
         }
@@ -3334,6 +3608,11 @@
             var signedEvent = await getSignedEvent(event, privKey);
             socket.send(JSON.stringify([ "EVENT", signedEvent ]))
             setTimeout( function() {addChannel( signedEvent.id );}, 1500 );
+            //duplicate to other relays
+            var i; for ( i=0; i<stage_3_relays.length; i++ ) {
+                var dup_id = await dupNote( stage_3_relays[ i ], JSON.stringify( [ "EVENT", signedEvent ] ) );
+                var timeout = await waitSomeSeconds( 2 );
+            }
         }
     </script>
     <script>
@@ -3761,6 +4040,11 @@
             var signedEvent = await getSignedEvent(event, privKey);
             socket.send(JSON.stringify([ "EVENT", signedEvent ]));
             setTimeout( function() {forceUpdateUserMeta( pubKey );}, 1500 );
+            //duplicate to other relays
+            var i; for ( i=0; i<stage_3_relays.length; i++ ) {
+                var dup_id = await dupNote( stage_3_relays[ i ], JSON.stringify( [ "EVENT", signedEvent ] ) );
+                var timeout = await waitSomeSeconds( 2 );
+            }
         }
     </script>
     <script>
