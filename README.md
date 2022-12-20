@@ -2,6 +2,10 @@
 
 A clone of telegram built on nostr
 
+# Warning
+
+Due to my incompetence, anigma has security vulnerabilities that allow remote siphoning of your private key. I haven't fixed them yet. Don't use anigma with a private key you're not okay with leaking.
+
 # How to try
 
 Click here: [https://anigma.io](https://anigma.io)
