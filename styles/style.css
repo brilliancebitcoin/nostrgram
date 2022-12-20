@@ -28,6 +28,7 @@ body {
 .chat {
     height: 100%;
     display: flex;
+    margin-top: 2rem;
 }
 
 .chat .sidebar {
