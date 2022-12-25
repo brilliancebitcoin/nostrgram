@@ -257,6 +257,35 @@
         }
     </script>
     <script>
+        function addDmsToSidebar() {
+            var i; for ( i=0; i<document.getElementsByClassName( "dm-outer" ).length; i++ ) {
+                document.getElementsByClassName( "dm-outer" )[ i ].remove();
+                i = i - 1;
+            }
+            Object.keys( dms_info ).forEach( function( pubkey ) {
+                if ( sessionStorage[ pubkey + "-counter" ] ) {
+                    var messagecounter = Number( sessionStorage[ pubkey + "-counter" ] );
+                } else {
+                    var messagecounter = 0;
+                }
+                var name = DOMPurify.sanitize( dms_info[ pubkey ][ "name" ] );
+                var picture = DOMPurify.sanitize( dms_info[ pubkey ][ "picture" ] );
+                if ( namemap[ pubkey ] && namemap[ pubkey ] != "none" ) {
+                    name = DOMPurify.sanitize( namemap[ pubkey ] );
+                    dms_info[ pubkey ][ "name" ] = name;
+                }
+                if ( imagemap[ pubkey ] && imagemap[ pubkey ] != "none" ) {
+                    picture = DOMPurify.sanitize( imagemap[ pubkey ] );
+                    dms_info[ pubkey ][ "picture" ] = picture;
+                }
+                var num_of_new_messages = messagecounter;
+                if ( !document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ] ) {
+                    document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( pubkey, name, picture, messagecounter );
+                }
+            });
+        }
+    </script>
+    <script>
         function shutKeyboard() {
             if ( Number( sessionStorage[ "keyboard_is_open" ] ) && window.innerHeight > ( Number( sessionStorage[ "full-window-height" ] ) * 0.9 ) ) {
                 document.getElementsByClassName( "input" )[ 0 ].firstElementChild.blur();
@@ -4059,35 +4088,6 @@
                 var dup_id = await dupNote( stage_3_relays[ i ], JSON.stringify( [ "EVENT", signedEvent ] ) );
                 var timeout = await waitSomeSeconds( 2 );
             }
-        }
-    </script>
-    <script>
-        function addDmsToSidebar() {
-            var i; for ( i=0; i<document.getElementsByClassName( "dm-outer" ).length; i++ ) {
-                document.getElementsByClassName( "dm-outer" )[ i ].remove();
-                i = i - 1;
-            }
-            Object.keys( dms_info ).forEach( function( pubkey ) {
-                if ( sessionStorage[ pubkey + "-counter" ] ) {
-                    var messagecounter = Number( sessionStorage[ pubkey + "-counter" ] );
-                } else {
-                    var messagecounter = 0;
-                }
-                var name = DOMPurify.sanitize( dms_info[ pubkey ][ "name" ] );
-                var picture = DOMPurify.sanitize( dms_info[ pubkey ][ "picture" ] );
-                if ( namemap[ pubkey ] && namemap[ pubkey ] != "none" ) {
-                    name = DOMPurify.sanitize( namemap[ pubkey ] );
-                    dms_info[ pubkey ][ "name" ] = name;
-                }
-                if ( imagemap[ pubkey ] && imagemap[ pubkey ] != "none" ) {
-                    picture = DOMPurify.sanitize( imagemap[ pubkey ] );
-                    dms_info[ pubkey ][ "picture" ] = picture;
-                }
-                var num_of_new_messages = messagecounter;
-                if ( !document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ] ) {
-                    document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( pubkey, name, picture, messagecounter );
-                }
-            });
         }
     </script>
     <script>
