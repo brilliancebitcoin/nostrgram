@@ -418,12 +418,15 @@
                 if ( isError ) {
                     showToast( `${t('unknownError')}` );
                 } else {
-                    var picture = 
+                    const idPurified = DOMPurify.sanitize( event.id, { USE_PROFILES: { html: false, xml: false, svgFilters: false, mathMl: false } });
+                    const picPurified = DOMPurify.sanitize( JSON.parse( content )[ "picture" ], { USE_PROFILES: { html: false, xml: false, svgFilters: false, mathMl: false } } );
+                    const namePurified = DOMPurify.sanitize( JSON.parse( content )[ "name" ], { USE_PROFILES: { html: false, xml: false, svgFilters: false, mathMl: false } } );
+                    var picture =
                     document.getElementsByClassName( "removable-channels" )[ 0 ].innerHTML += `
                             <div class="removable-channel ${event.id}">
-                                <span class="x-circle" onclick="removeChannel( '${event.id}' )">&times;</span>
-                                <span class="img-circle" style="background-image: url('${JSON.parse( content )[ "picture" ]}')"></span>
-                                <span class="removable-channel-name">${JSON.parse( content )[ "name" ]}</span>
+                                <span class="x-circle" onclick="removeChannel( '${idPurified}' )">&times;</span>
+                                <span class="img-circle" style="background-image: url('${picPurified}')"></span>
+                                <span class="removable-channel-name">${namePurified}</span>
                                 <div style="clear: both"></div>
                             </div>
                     `;
