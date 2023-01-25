@@ -290,6 +290,7 @@ body {
     padding: 0 15px;
     background-color: var(--background-color);
     display: none;
+    margin-top: 30px;
 }
 
 .message-header-alt .channel-info {
