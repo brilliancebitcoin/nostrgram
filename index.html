@@ -24,6 +24,7 @@
     <script src="https://bundle.run/buffer@6.0.3"></script>
     <script src="https://bundle.run/bech32@2.0.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+    <script src="https://unpkg.com/axios@0.24.0/dist/axios.min.js"></script>
     <script src="translation.js?v=68"></script>
 </head>
 <body>
@@ -184,9 +185,10 @@
         function urlify( text, isMine ) {
             var ytRegex = /(http:|https:)?\/\/(www\.)?(youtube.com|youtu.be)\/(watch)?(\?v=)?(\S+)?/g
             var imgRegex = /\b(https?:\/\/\S+(?:\.png|\.jpe?g|\.gif|\.webp|\.PNG|\.JPE?G|\.GIF|\.WEBP)\S*)\b/g;
+            var imgRegex2 = /\b(https?:\/\/nostr\.crustapps\.net\/ipfs\/\S+)\b/g;
             var urlRegex = /\S+\.{1}[a-zA-Z0-9\?\=\&\$\+\,\;\@\#\%\-\_]{2,}\/?[a-zA-Z0-9/\\?\=\&\$\+\,\;\@\#\%\-\_\.]*/g;
             var returnable = "";
-            if ( !isMine && !text.match( ytRegex ) && !text.match( imgRegex ) ) {
+            if ( !isMine && !text.match( ytRegex ) && !text.match( imgRegex ) && !text.match( imgRegex2 ) ) {
                 returnable = text.replace( urlRegex, ( url ) => {
                     if ( url.includes( ".." ) ) {
                         return url;
@@ -198,7 +200,7 @@
                     return `<a onclick="event.stopPropagation()" href="${url2}" target="_blank" rel="nofollow noopener" style="color: #4287f5;">${url}</a>`;
                 })                
             }
-            if ( isMine && !text.match( ytRegex ) && !text.match( imgRegex ) ) {
+            if ( isMine && !text.match( ytRegex ) && !text.match( imgRegex ) && !text.match( imgRegex2 ) ) {
                 returnable = text.replace( urlRegex, ( url ) => {
                     if ( url.includes( ".." ) ) {
                         return url;
@@ -212,6 +214,32 @@
             }
             if ( text.match( imgRegex ) ) {
                 returnable = text.replace( imgRegex, ( img ) => {
+                    if ( localStorage[ "img_cache" ] ) {
+                        var imgs = JSON.parse( localStorage[ "img_cache" ] );
+                    } else {
+                        var imgs = [];
+                        localStorage[ "img_cache" ] = JSON.stringify( imgs );
+                    }
+                    if ( isMine && imgs.includes( img ) ) {
+                        var i; for ( i=0; i<imgs.length; i++ ) {
+                            if ( imgs[ i ] == img ) {
+                                imgs.splice( i, 1 );
+                            }
+                        }
+                        imgs.unshift( img );
+                    }
+                    if ( isMine && imgs.length >= 50 && !imgs.includes( img ) ) {
+                        imgs.unshift( img );
+                        imgs.pop();
+                    } else if ( isMine && !imgs.includes( img ) ) {
+                        imgs.unshift( img );
+                    }
+                    localStorage[ "img_cache" ] = JSON.stringify( imgs );
+                    return `<a href="${img}" target="_blank" rel="nofollow noopener" onclick="event.stopPropagation()"><img src="${img}" onclick="event.stopPropagation()" /></a>`;
+                })
+            }
+            if (text.match( imgRegex2 ) ) {
+                returnable = text.replace( imgRegex2, ( img ) => {
                     if ( localStorage[ "img_cache" ] ) {
                         var imgs = JSON.parse( localStorage[ "img_cache" ] );
                     } else {
@@ -4311,6 +4339,54 @@
         }
     </script>
     <script>
+        function uploadFile() {
+            let photo = document.getElementById( "image-file" )[ "files" ][ 0 ];
+            if (photo === undefined) {
+                console.error("Please choose an image.");
+                return;
+            }
+            let formData = new FormData();
+            formData.append( "photo", photo );
+            
+            document.getElementById( "progressBar" ).value = Math.round(0);
+            let imgDiv = null;
+            let xhr = new XMLHttpRequest();
+            xhr.addEventListener("load", (r) => {
+                let statusCode = xhr.status;
+                if (statusCode >= 200 && statusCode < 300) {
+                    let cid = JSON.parse(r.target.responseText)["Hash"];
+                    let imgUrl = "https://nostr.crustapps.net/ipfs/" + cid;
+                    document.getElementById( "imgTip" ).style.display = "block";
+                    if (imgDiv !== null) imgDiv.setAttribute( "data-img", imgUrl );
+                } else {
+                    console.error(`Upload file ${photo.name} failed, please try again.`);
+                }
+            }, false);
+            xhr.addEventListener("error", (e) => {
+                alert(`Upload file ${photo.name} failed, error:${JSON.stringify(e)}, please try again.`);
+                document.getElementById( "uploadStatus" ).innerHTML = "Upload image failed, please try again.";
+            });
+            xhr.upload.addEventListener("progress", function (e) {
+                let percent = (event.loaded / event.total) * 100;
+                let uploadContent = "uploaded " + event.loaded + " bytes of " + event.total;
+                document.getElementById( "progressBar" ).value = Math.round(percent);
+                if (percent === 100) {
+                    document.getElementById( "uploadStatus" ).innerHTML = "100% " + uploadContent;
+                    imgDiv = showImage("");
+                } else {
+                    document.getElementById( "uploadStatus" ).innerHTML = Math.round(percent) + "% " + uploadContent;
+                }
+            });   
+            xhr.open("post", "https://nostr.crustapps.net/api/v0/add?pin=true");
+            xhr.setRequestHeader("Authorization","Basic Y1RIYVd3em95V1diSGVtSDdHVDJnU3UxN2g0THRpb3FiYnhxaURFQmlSNDlEdnBUTjoweDU4MjNiMmFmOTA4ZTYxYTM0Y2FhNTU3ZTU3ZGRlMWMzNTJhNGUxNTk3OTM4ZmE0YzdiNjYzN2MwMTJiYzYxNDY5Y2U0MTViNGVmZTQzNzNjYWExZWRjYTdkMGI3NDE2MDViMDYwZTBjZmNjNjNmNDVkNjIyNTBjZWVhOWQ3YTgx")
+            xhr.send(formData);
+
+            document.getElementById( "uploadStatus" ).innerHTML = "Preparing to upload, please wait...";
+            document.getElementById( "uploadDiv" ).style.visibility = "visible";
+            document.getElementById( "image-file" ).disabled = true;
+            document.getElementById( "image-file-lable" ).style.opacity = 0.65;
+            document.getElementById( "image-file-lable" ).style.cursor = "not-allowed";
+        }
         function showImgs() {
             if ( localStorage[ "img_cache" ] ) {
                 var imgs = JSON.parse( localStorage[ "img_cache" ] );
@@ -4319,30 +4395,105 @@
                 localStorage[ "img_cache" ] = JSON.stringify( imgs );
             }
             document.getElementById( "modal" ).innerHTML = "";
-            var div = document.createElement( "div" );
-            div.className = "gallery-holder";
-            document.getElementById( "modal" ).append( div );
-            imgs.forEach( function( img ) {
-                var div = document.createElement( "div" );
-                div.setAttribute( "data-img", img );
-                div.className = "gallery";
-                div.style.backgroundImage = "url(" + img + ")";
-                div.onclick = function() {
-                    document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value += this.getAttribute( "data-img" );
-                    document.getElementById( "black-bg" ).style.display = "none";
-                    document.getElementById( "modal" ).style.display = "none";
-                    document.getElementsByClassName( "note-input" )[ 0 ].focus();
-                    document.getElementsByClassName( "note-input" )[ 0 ].select();
-                }
-                document.getElementsByClassName( "gallery-holder" )[ 0 ].append( div );
-            });
-            if ( !document.getElementsByClassName( "gallery-holder" )[ 0 ].innerHTML || document.getElementsByClassName( "gallery-holder" )[ 0 ].innerHTML == "" ) {
-                document.getElementsByClassName( "gallery-holder" )[ 0 ].innerHTML = `${t('imageUploadInfo')}`;
-            }
+
+            let html = `
+                <div class="upload-title" style="height:70px">
+                <h1>IMAGE UPLOAD<a href="https://crust.network/" target="_blank">Powered by Crust Network</a></h1>
+                </div>
+                <form enctype="multipart/form-data" method="post" style="text-align:center">
+                    <input type="file" id="image-file" accept="image/*" style="display:none" onchange="uploadFile()" ><br>
+                    <label 
+                        id="image-file-lable"
+                        for="image-file" 
+                        style="display: inline-block;
+                                width: 140px; 
+                                height: 32px;
+                                padding: 4px 0px; 
+                                margin: 8px; 
+                                text-align: center; 
+                                line-height: 32px; 
+                                color: #ffffff;
+                                background: #f44336;
+                                border-radius: 5px;
+                                cursor: pointer;
+                                letter-spacing: 1px;"
+                    >
+                        select image
+                    </label>
+                    <div id="uploadDiv" style="visibility:hidden">
+                        <progress id="progressBar" value="0" max="100" style="width:300px;"></progress>
+                        <p id="uploadStatus">Preparing to upload, please wait...</p>
+                    </div>
+                    <p id="imgTip" style="font-family:baskerville, serif; font-size:14px;display:${imgs.length === 0 ? 'none' : 'block' }">
+                        images:(click to get url)</p>
+                </form>
+                <div class="gallery-holder" style="overflow-y:auto"></div>
+            `;
+            document.getElementById( "modal" ).innerHTML = html;
+            imgs.forEach(showImage);
+
             document.getElementById( "black-bg" ).style.display = "block";
             document.getElementById( "modal" ).style.display = "block";
+        }
+        function showImage(img) {
+            var loadingDiv = `
+                <div class='child-center'></div>
+                <div class='child-center'></div>
+                <div class='child-center'></div>
+                <div class='child-center'></div>
+                <div class='child-center'></div>
+                <div class='child-center'></div>
+                <div class='child-center'></div>
+                <div class='child-center'></div>
+                <div class='child-center'></div>
+                <div class='child-center'></div>
+                <div class='child-center'></div>
+                <div class='child-center'></div>
+			`;
+            var div = document.createElement( "div" );
+            div.setAttribute( "data-img", img );
+            div.className = "lds-spinner";
+            div.innerHTML = loadingDiv;
+            div.onclick = function() {
+                document.getElementsByClassName( "input" )[ 0 ].firstElementChild.value += this.getAttribute( "data-img" );
+                document.getElementById( "black-bg" ).style.display = "none";
+                document.getElementById( "modal" ).style.display = "none";
+                document.getElementsByClassName( "note-input" )[ 0 ].focus();
+                document.getElementsByClassName( "note-input" )[ 0 ].select();
+            }
+            var imgObj = new Image();
+            var tryout = 10;
+            imgObj.src = img;
+            imgObj.onload = function() {
+                for(const i of document.getElementsByClassName( "child-center" )) {
+                    i.style.display = "none";
+                }
+                div.style.backgroundImage = "url(" + div.getAttribute( "data-img" ) + ")";
+                document.getElementById( "uploadDiv" ).style.visibility = "hidden";
+                document.getElementById( "image-file" ).disabled = false;
+                document.getElementById( "image-file-lable" ).style.opacity = 1;
+                document.getElementById( "image-file-lable" ).style.cursor = "pointer";
+            }
+            imgObj.onerror = async function(e) {
+                if (--tryout >= 0) {
+                    await new Promise(r => setTimeout(r, 3000));
+                    imgObj.src = div.getAttribute( "data-img" ) + "?t=" + new Date().getTime();
+                } else {
+                    document.getElementById( "uploadDiv" ).style.visibility = "hidden";
+                    document.getElementById( "image-file" ).disabled = false;
+                    document.getElementById( "image-file-lable" ).style.opacity = 1;
+                    document.getElementById( "image-file-lable" ).style.cursor = "pointer";
+                }
+            }
+            if (imgObj.complete) imgObj.onload();
+
+            var parentDiv = document.getElementsByClassName( "gallery-holder" )[ 0 ];
+            parentDiv.insertBefore(div, parentDiv.firstChild);
+
+            return div;
         }
     </script>
       
 </body>
 </html>
+
