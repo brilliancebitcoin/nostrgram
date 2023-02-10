@@ -987,7 +987,7 @@ body {
 
 div.gallery-holder {
     position: relative;
-    text-align: left;
+    text-align: center;
     max-height: 400px;
     overflow-y: scroll;
 }
@@ -1129,4 +1129,134 @@ div.gallery:hover {
 select option {
     padding: 10px;
     font-size: larger; 
+}
+
+.lds-spinner {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 5px;
+    border: 1px solid #ccc;
+    width: 100%;
+    max-width: 225px;
+    height: 125px;
+    cursor: pointer;
+    overflow: hidden;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    color: official;
+    position: relative;
+}
+.lds-spinner div {
+    transform-origin: 40px 40px;
+    animation: lds-spinner 1.2s linear infinite;
+}
+.lds-spinner div:after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 3px;
+  left: 37px;
+  width: 6px;
+  height: 18px;
+  border-radius: 20%;
+  background: #000;
+}
+.lds-spinner div:nth-child(1) {
+  transform: rotate(0deg);
+  animation-delay: -1.1s;
+}
+.lds-spinner div:nth-child(2) {
+  transform: rotate(30deg);
+  animation-delay: -1s;
+}
+.lds-spinner div:nth-child(3) {
+  transform: rotate(60deg);
+  animation-delay: -0.9s;
+}
+.lds-spinner div:nth-child(4) {
+  transform: rotate(90deg);
+  animation-delay: -0.8s;
+}
+.lds-spinner div:nth-child(5) {
+  transform: rotate(120deg);
+  animation-delay: -0.7s;
+}
+.lds-spinner div:nth-child(6) {
+  transform: rotate(150deg);
+  animation-delay: -0.6s;
+}
+.lds-spinner div:nth-child(7) {
+  transform: rotate(180deg);
+  animation-delay: -0.5s;
+}
+.lds-spinner div:nth-child(8) {
+  transform: rotate(210deg);
+  animation-delay: -0.4s;
+}
+.lds-spinner div:nth-child(9) {
+  transform: rotate(240deg);
+  animation-delay: -0.3s;
+}
+.lds-spinner div:nth-child(10) {
+  transform: rotate(270deg);
+  animation-delay: -0.2s;
+}
+.lds-spinner div:nth-child(11) {
+  transform: rotate(300deg);
+  animation-delay: -0.1s;
+}
+.lds-spinner div:nth-child(12) {
+  transform: rotate(330deg);
+  animation-delay: 0s;
+}
+@keyframes lds-spinner {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.child-center {
+  position: absolute;
+  top: 40%;
+  left: 40%;
+  margin: -25px 0 0 -25px; /* Apply negative top and left margins to truly center the element */
+}
+
+.upload-title h1 {
+    text-align:center; 
+    font-size:30px; 
+    text-transform:uppercase; 
+    color:#222; 
+    letter-spacing:1px;
+    font-family:"Playfair Display", serif; 
+    font-weight:400;
+}
+.upload-title h1 a {
+    margin-top: 5px;
+    font-size:15px; 
+    color:#3366CC; 
+    word-spacing:1px; 
+    font-weight:normal; 
+    letter-spacing:2px;
+    text-transform: uppercase; 
+    font-family:"Raleway", sans-serif; 
+    font-weight:500;
+
+    display: grid;
+    grid-template-columns: 1fr max-content 1fr;
+    grid-template-rows: 27px 0;
+    grid-gap: 20px;
+    align-items: center;
+}
+.upload-title h1 a:after,.upload-title h1 a:before {
+    content: " ";
+    display: block;
+    border-bottom: 1px solid #ccc;
+    border-top: 1px solid #ccc;
+    height: 5px;
+    background-color:#f8f8f8;
 }
