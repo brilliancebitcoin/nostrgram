@@ -343,7 +343,8 @@
                 subscribed_channels.push( channelParam );
             }
 //            var relay = relayParam || JSON.parse( backup[ "relays" ] )[ 0 ];
-            var relay = relayParam || "wss://relay.nostr.ch";
+//            var relay = relayParam || "wss://relay.nostr.ch";
+            var relay = relayParam || "relay.snort.social";
         } else {
             var keypair = bitcoinjs.ECPair.makeRandom();
             var privKey = keypair.privateKey.toString( "hex" );
