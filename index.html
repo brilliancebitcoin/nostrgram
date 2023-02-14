@@ -285,6 +285,35 @@
         }
     </script>
     <script>
+        function addDmsToSidebar() {
+            var i; for ( i=0; i<document.getElementsByClassName( "dm-outer" ).length; i++ ) {
+                document.getElementsByClassName( "dm-outer" )[ i ].remove();
+                i = i - 1;
+            }
+            Object.keys( dms_info ).forEach( function( pubkey ) {
+                if ( sessionStorage[ pubkey + "-counter" ] ) {
+                    var messagecounter = Number( sessionStorage[ pubkey + "-counter" ] );
+                } else {
+                    var messagecounter = 0;
+                }
+                var name = DOMPurify.sanitize( dms_info[ pubkey ][ "name" ] );
+                var picture = DOMPurify.sanitize( dms_info[ pubkey ][ "picture" ] );
+                if ( namemap[ pubkey ] && namemap[ pubkey ] != "none" ) {
+                    name = DOMPurify.sanitize( namemap[ pubkey ] );
+                    dms_info[ pubkey ][ "name" ] = name;
+                }
+                if ( imagemap[ pubkey ] && imagemap[ pubkey ] != "none" ) {
+                    picture = DOMPurify.sanitize( imagemap[ pubkey ] );
+                    dms_info[ pubkey ][ "picture" ] = picture;
+                }
+                var num_of_new_messages = messagecounter;
+                if ( !document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ] ) {
+                    document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( pubkey, name, picture, messagecounter );
+                }
+            });
+        }
+    </script>
+    <script>
         function shutKeyboard() {
             if ( Number( sessionStorage[ "keyboard_is_open" ] ) && window.innerHeight > ( Number( sessionStorage[ "full-window-height" ] ) * 0.9 ) ) {
                 document.getElementsByClassName( "input" )[ 0 ].firstElementChild.blur();
@@ -342,7 +371,8 @@
                 subscribed_channels.push( channelParam );
             }
 //            var relay = relayParam || JSON.parse( backup[ "relays" ] )[ 0 ];
-            var relay = relayParam || "wss://relay.nostr.ch";
+//            var relay = relayParam || "wss://relay.nostr.ch";
+            var relay = relayParam || "wss://relay.snort.social";
         } else {
             var keypair = bitcoinjs.ECPair.makeRandom();
             var privKey = keypair.privateKey.toString( "hex" );
@@ -4090,35 +4120,6 @@
         }
     </script>
     <script>
-        function addDmsToSidebar() {
-            var i; for ( i=0; i<document.getElementsByClassName( "dm-outer" ).length; i++ ) {
-                document.getElementsByClassName( "dm-outer" )[ i ].remove();
-                i = i - 1;
-            }
-            Object.keys( dms_info ).forEach( function( pubkey ) {
-                if ( sessionStorage[ pubkey + "-counter" ] ) {
-                    var messagecounter = Number( sessionStorage[ pubkey + "-counter" ] );
-                } else {
-                    var messagecounter = 0;
-                }
-                var name = DOMPurify.sanitize( dms_info[ pubkey ][ "name" ] );
-                var picture = DOMPurify.sanitize( dms_info[ pubkey ][ "picture" ] );
-                if ( namemap[ pubkey ] && namemap[ pubkey ] != "none" ) {
-                    name = DOMPurify.sanitize( namemap[ pubkey ] );
-                    dms_info[ pubkey ][ "name" ] = name;
-                }
-                if ( imagemap[ pubkey ] && imagemap[ pubkey ] != "none" ) {
-                    picture = DOMPurify.sanitize( imagemap[ pubkey ] );
-                    dms_info[ pubkey ][ "picture" ] = picture;
-                }
-                var num_of_new_messages = messagecounter;
-                if ( !document.getElementsByClassName( pubkey.substring( 0, 20 ) )[ 0 ] ) {
-                    document.getElementsByClassName( "channels" )[ 0 ].firstElementChild.innerHTML += displayDMbox( pubkey, name, picture, messagecounter );
-                }
-            });
-        }
-    </script>
-    <script>
         function addMessageToCache( pubkey, id, event_time, parent, color, name, picture, content, replyingTo ) {
             name = DOMPurify.sanitize( name );
             picture = DOMPurify.sanitize( picture );
@@ -4398,7 +4399,7 @@
 
             let html = `
                 <div class="upload-title" style="height:70px">
-                <h1>IMAGE UPLOAD<a href="https://crust.network/" target="_blank">Powered by Crust Network</a></h1>
+                <h1>IMAGE UPLOAD</h1>
                 </div>
                 <form enctype="multipart/form-data" method="post" style="text-align:center">
                     <input type="file" id="image-file" accept="image/*" style="display:none" onchange="uploadFile()" ><br>
